@@ -9,6 +9,7 @@ $user = getCurrentUser();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Groups - Cash Book</title>
+    <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
@@ -433,9 +434,27 @@ $user = getCurrentUser();
 
     <div id="toast" class="toast"></div>
 
+    <!-- PWA Install Prompt Banner -->
+    <div id="pwaInstallBanner" class="pwa-install-banner" style="display: none;">
+        <button class="pwa-banner-close" id="closePWABanner">&times;</button>
+        <div class="pwa-banner-content">
+            <div class="pwa-banner-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="pwa-banner-text">
+                <h4>Install Cash Book App</h4>
+                <p>Add to your home screen for quick access and offline use!</p>
+            </div>
+            <button class="pwa-banner-install" id="installPWABanner">
+                <i class="fas fa-download"></i> Install
+            </button>
+        </div>
+    </div>
+
     <script>
         const CURRENT_USER = <?php echo json_encode($user); ?>;
     </script>
+    <script src="pwa.js"></script>
     <script src="groups.js"></script>
 </body>
 </html>

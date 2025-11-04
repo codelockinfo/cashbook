@@ -1051,3 +1051,240 @@ body {
     border-radius: 8px;
 }
 
+/* PWA Install Button */
+.pwa-install-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+
+.pwa-install-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4);
+}
+
+.pwa-install-btn i {
+    font-size: 1rem;
+}
+
+/* PWA Update Button */
+.pwa-update-btn {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 9998;
+    box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.pwa-update-btn:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+/* PWA Mode Adjustments */
+.pwa-mode {
+    /* Additional padding for status bar on mobile */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* PWA Install Banner (Bottom Popup) */
+.pwa-install-banner {
+    position: fixed;
+    bottom: -200px;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 9997;
+    transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.pwa-install-banner.show {
+    bottom: 0;
+}
+
+.pwa-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.pwa-banner-icon {
+    font-size: 2.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pwa-banner-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.pwa-banner-text h4 {
+    font-size: 1.1rem;
+    margin: 0 0 5px 0;
+    font-weight: 700;
+}
+
+.pwa-banner-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.95;
+}
+
+.pwa-banner-text i {
+    font-size: 0.85rem;
+}
+
+.pwa-banner-install {
+    padding: 12px 28px;
+    background: white;
+    color: #667eea;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pwa-banner-install:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.pwa-banner-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.pwa-banner-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* iOS Install Prompt */
+.ios-install-prompt {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 9997;
+    display: none;
+}
+
+.ios-install-prompt.show {
+    display: block;
+}
+
+.ios-install-content {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.ios-install-content p {
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.ios-install-content strong {
+    color: #1f2937;
+}
+
+.ios-install-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #9ca3af;
+}
+
+/* Responsive PWA Banner */
+@media (max-width: 768px) {
+    .pwa-banner-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .pwa-banner-icon {
+        font-size: 2rem;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .pwa-banner-text h4 {
+        font-size: 1rem;
+    }
+    
+    .pwa-banner-text p {
+        font-size: 0.85rem;
+    }
+    
+    .pwa-banner-install {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
