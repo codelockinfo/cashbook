@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+// Redirect to dashboard if already logged in
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    header('Location: dashboard.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,22 +50,14 @@
                 <button type="submit" class="btn btn-primary" id="loginBtn">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
+
+                <div class="forgot-password-link">
+                    <a href="forgot-password.php"><i class="fas fa-question-circle"></i> Forgot Password?</a>
+                </div>
             </form>
 
             <div class="auth-footer">
-                <p>Don't have an account? <a href="register.html">Register here</a></p>
-            </div>
-
-            <div class="demo-credentials">
-                <h3><i class="fas fa-info-circle"></i> Demo Credentials</h3>
-                <div class="demo-list">
-                    <div class="demo-item">
-                        <strong>Admin:</strong> admin@cashbook.com / demo123
-                    </div>
-                    <div class="demo-item">
-                        <strong>User:</strong> tushar@example.com / demo123
-                    </div>
-                </div>
+                <p>Don't have an account? <a href="register.php">Register here</a></p>
             </div>
         </div>
     </div>

@@ -26,6 +26,9 @@ switch ($action) {
     case 'getUserGroups':
         getUserGroups($conn, $user_id);
         break;
+    case 'getGroupMembers':
+        getGroupMembers($conn, $user_id);
+        break;
     case 'addEntry':
         addEntry($conn, $user_id);
         break;
@@ -59,6 +62,51 @@ function getUserGroups($conn, $user_id) {
         }
         
         echo json_encode(['success' => true, 'groups' => $groups]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Get members of a specific group
+function getGroupMembers($conn, $user_id) {
+    try {
+        $group_id = $_GET['group_id'] ?? '';
+        
+        if (empty($group_id)) {
+            echo json_encode(['success' => false, 'message' => 'Group ID is required']);
+            return;
+        }
+        
+        // Check if user is member of this group
+        $checkStmt = $conn->prepare("SELECT id FROM group_members WHERE group_id = ? AND user_id = ?");
+        $checkStmt->bind_param("ii", $group_id, $user_id);
+        $checkStmt->execute();
+        
+        if ($checkStmt->get_result()->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'You are not a member of this group']);
+            return;
+        }
+        
+        // Get all members of the group
+        $sql = "SELECT u.id, u.name 
+                FROM users u
+                INNER JOIN group_members gm ON u.id = gm.user_id
+                WHERE gm.group_id = ?
+                ORDER BY u.name ASC";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $group_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $members = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $members[] = $row;
+            }
+        }
+        
+        echo json_encode(['success' => true, 'members' => $members]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
@@ -100,9 +148,21 @@ function addEntry($conn, $user_id) {
             return;
         }
         
+        // Handle attachment upload
+        $attachment = null;
+        if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
+            $uploadResult = uploadEntryAttachment($_FILES['attachment']);
+            if ($uploadResult['success']) {
+                $attachment = $uploadResult['filename'];
+            } else {
+                echo json_encode(['success' => false, 'message' => $uploadResult['message']]);
+                return;
+            }
+        }
+        
         // Insert entry
-        $stmt = $conn->prepare("INSERT INTO entries (user_id, group_id, type, amount, datetime, message, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("iisdssi", $user_id, $group_id, $type, $amount, $datetime, $message, $user_id);
+        $stmt = $conn->prepare("INSERT INTO entries (user_id, group_id, type, amount, datetime, message, attachment, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("iisdsssi", $user_id, $group_id, $type, $amount, $datetime, $message, $attachment, $user_id);
         
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Entry added successfully', 'id' => $conn->insert_id]);
@@ -113,6 +173,40 @@ function addEntry($conn, $user_id) {
         $stmt->close();
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Upload entry attachment
+function uploadEntryAttachment($file) {
+    $uploadDir = __DIR__ . '/uploads/entry_attachments/';
+    
+    // Create directory if it doesn't exist
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    
+    // Validate file type
+    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!in_array($file['type'], $allowedTypes)) {
+        return ['success' => false, 'message' => 'Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed.'];
+    }
+    
+    // Validate file size (max 10MB)
+    $maxSize = 10 * 1024 * 1024; // 10MB
+    if ($file['size'] > $maxSize) {
+        return ['success' => false, 'message' => 'File size too large. Maximum 10MB allowed.'];
+    }
+    
+    // Generate unique filename
+    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = 'entry_' . uniqid() . '_' . time() . '.' . $extension;
+    $filepath = $uploadDir . $filename;
+    
+    // Move uploaded file
+    if (move_uploaded_file($file['tmp_name'], $filepath)) {
+        return ['success' => true, 'filename' => 'uploads/entry_attachments/' . $filename];
+    } else {
+        return ['success' => false, 'message' => 'Failed to upload file'];
     }
 }
 
@@ -127,8 +221,8 @@ function getEntries($conn, $user_id) {
         $sort = $_GET['sort'] ?? 'date_desc';
         
         // Build query - only show entries from user's groups
-        $sql = "SELECT e.id, e.user_id, e.group_id, e.type, e.amount, e.datetime, e.message, 
-                g.name as group_name, u.name as user_name
+        $sql = "SELECT e.id, e.user_id, e.group_id, e.type, e.amount, e.datetime, e.message, e.attachment,
+                g.name as group_name, u.name as user_name, u.profile_picture
                 FROM entries e 
                 INNER JOIN groups g ON e.group_id = g.id
                 INNER JOIN users u ON e.user_id = u.id
@@ -165,6 +259,14 @@ function getEntries($conn, $user_id) {
         if (!empty($group_id)) {
             $sql .= " AND e.group_id = ?";
             $params[] = $group_id;
+            $types .= 'i';
+        }
+        
+        // Add member filter (user who created the entry)
+        $member_id = $_GET['member_id'] ?? '';
+        if (!empty($member_id)) {
+            $sql .= " AND e.user_id = ?";
+            $params[] = $member_id;
             $types .= 'i';
         }
         
@@ -247,6 +349,12 @@ function getEntries($conn, $user_id) {
         if (!empty($group_id)) {
             $stats_sql .= " AND e.group_id = ?";
             $stats_params[] = $group_id;
+            $stats_types .= 'i';
+        }
+        
+        if (!empty($member_id)) {
+            $stats_sql .= " AND e.user_id = ?";
+            $stats_params[] = $member_id;
             $stats_types .= 'i';
         }
         

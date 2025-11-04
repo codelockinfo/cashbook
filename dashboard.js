@@ -26,14 +26,111 @@ function setupEventListeners() {
     // Logout button
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     
+    // File upload handlers
+    const attachmentInput = document.getElementById('entryAttachment');
+    const removeAttachmentBtn = document.getElementById('removeAttachment');
+    
+    if (attachmentInput) {
+        attachmentInput.addEventListener('change', handleAttachmentChange);
+    }
+    
+    if (removeAttachmentBtn) {
+        removeAttachmentBtn.addEventListener('click', removeAttachment);
+    }
+    
+    // Photo modal close
+    const photoModalClose = document.querySelector('.photo-modal-close');
+    const photoModal = document.getElementById('photoModal');
+    
+    if (photoModalClose) {
+        photoModalClose.addEventListener('click', closePhotoModal);
+    }
+    
+    if (photoModal) {
+        photoModal.addEventListener('click', function(e) {
+            if (e.target === photoModal) {
+                closePhotoModal();
+            }
+        });
+    }
+    
     // Search and filters
     document.getElementById('searchInput').addEventListener('input', debounce(handleSearch, 500));
     document.getElementById('filterDateFrom').addEventListener('change', loadTransactions);
     document.getElementById('filterDateTo').addEventListener('change', loadTransactions);
-    document.getElementById('filterGroup').addEventListener('change', loadTransactions);
+    document.getElementById('filterGroup').addEventListener('change', handleGroupChange);
+    document.getElementById('filterMember').addEventListener('change', loadTransactions);
     document.getElementById('filterType').addEventListener('change', loadTransactions);
     document.getElementById('sortBy').addEventListener('change', loadTransactions);
     document.getElementById('clearFilters').addEventListener('click', clearFilters);
+}
+
+// Handle attachment file selection
+function handleAttachmentChange(e) {
+    const file = e.target.files[0];
+    const fileNameSpan = document.getElementById('attachmentFileName');
+    const removeBtn = document.getElementById('removeAttachment');
+    const preview = document.getElementById('attachmentPreview');
+    const previewImg = document.getElementById('attachmentPreviewImg');
+    
+    if (file) {
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            showToast('Invalid file type. Only images are allowed.', 'error');
+            e.target.value = '';
+            return;
+        }
+        
+        // Validate file size (10MB max)
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+            showToast('File size too large. Maximum 10MB allowed.', 'error');
+            e.target.value = '';
+            return;
+        }
+        
+        fileNameSpan.textContent = file.name;
+        removeBtn.style.display = 'inline-block';
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Remove attachment
+function removeAttachment() {
+    const attachmentInput = document.getElementById('entryAttachment');
+    const fileNameSpan = document.getElementById('attachmentFileName');
+    const removeBtn = document.getElementById('removeAttachment');
+    const preview = document.getElementById('attachmentPreview');
+    
+    attachmentInput.value = '';
+    fileNameSpan.textContent = 'No file chosen';
+    removeBtn.style.display = 'none';
+    preview.style.display = 'none';
+}
+
+// Open photo modal
+function openPhotoModal(imageSrc, caption) {
+    const modal = document.getElementById('photoModal');
+    const modalImg = document.getElementById('photoModalImg');
+    const modalCaption = document.getElementById('photoModalCaption');
+    
+    modal.style.display = 'flex';
+    modalImg.src = imageSrc;
+    modalCaption.textContent = caption;
+}
+
+// Close photo modal
+function closePhotoModal() {
+    const modal = document.getElementById('photoModal');
+    modal.style.display = 'none';
 }
 
 // Handle Logout
@@ -58,7 +155,7 @@ async function handleLogout() {
         if (data.success) {
             showToast('Logged out successfully', 'success');
             setTimeout(() => {
-                window.location.href = 'login.html';
+                window.location.href = 'login.php';
             }, 500);
         } else {
             showToast('Error logging out', 'error');
@@ -98,6 +195,52 @@ async function loadGroups() {
     }
 }
 
+// Handle group filter change
+async function handleGroupChange() {
+    const groupId = document.getElementById('filterGroup').value;
+    const memberFilterContainer = document.getElementById('memberFilterContainer');
+    const memberSelect = document.getElementById('filterMember');
+    
+    if (groupId) {
+        // Show member filter and load members
+        memberFilterContainer.style.display = 'block';
+        await loadGroupMembers(groupId);
+    } else {
+        // Hide member filter
+        memberFilterContainer.style.display = 'none';
+        memberSelect.innerHTML = '<option value="">All Members</option>';
+    }
+    
+    // Reload transactions
+    loadTransactions();
+}
+
+// Load members of selected group
+async function loadGroupMembers(groupId) {
+    try {
+        const response = await fetch(`${API_URL}?action=getGroupMembers&group_id=${groupId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const memberSelect = document.getElementById('filterMember');
+            
+            // Clear existing options
+            memberSelect.innerHTML = '<option value="">All Members</option>';
+            
+            // Add member options
+            data.members.forEach(member => {
+                const option = new Option(member.name, member.id);
+                memberSelect.add(option);
+            });
+        } else {
+            showToast(data.message || 'Error loading members', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading group members:', error);
+        showToast('Error loading members', 'error');
+    }
+}
+
 // Handle entry submission (unified for Cash In and Cash Out)
 async function handleEntry(type) {
     const form = document.getElementById('entryForm');
@@ -115,14 +258,20 @@ async function handleEntry(type) {
         return;
     }
     
-    const formData = {
-        action: 'addEntry',
-        type: type,
-        group_id: groupId,
-        amount: document.getElementById('entryAmount').value,
-        datetime: document.getElementById('entryDate').value,
-        message: document.getElementById('entryMessage').value
-    };
+    // Use FormData to handle file uploads
+    const formData = new FormData();
+    formData.append('action', 'addEntry');
+    formData.append('type', type);
+    formData.append('group_id', groupId);
+    formData.append('amount', document.getElementById('entryAmount').value);
+    formData.append('datetime', document.getElementById('entryDate').value);
+    formData.append('message', document.getElementById('entryMessage').value);
+    
+    // Add attachment if selected
+    const attachmentFile = document.getElementById('entryAttachment').files[0];
+    if (attachmentFile) {
+        formData.append('attachment', attachmentFile);
+    }
     
     await submitEntry(formData, form);
 }
@@ -132,22 +281,20 @@ async function submitEntry(formData, form) {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(formData)
+            body: formData  // FormData automatically sets correct Content-Type with boundary
         });
         
         const data = await response.json();
         
         if (data.success) {
-            const typeText = formData.type === 'in' ? 'In' : 'Out';
+            const typeText = formData.get('type') === 'in' ? 'In' : 'Out';
             showToast(`Cash ${typeText} entry added successfully!`, 'success');
             
             // Reset only input fields, not the entire form
             document.getElementById('entryAmount').value = '';
             document.getElementById('entryGroup').value = '';
             document.getElementById('entryMessage').value = '';
+            removeAttachment(); // Clear attachment
             initializeDateTimeInputs();
             
             loadTransactions();
@@ -167,6 +314,7 @@ async function loadTransactions() {
         const dateFrom = document.getElementById('filterDateFrom').value;
         const dateTo = document.getElementById('filterDateTo').value;
         const groupId = document.getElementById('filterGroup').value;
+        const memberId = document.getElementById('filterMember').value;
         const type = document.getElementById('filterType').value;
         const sortBy = document.getElementById('sortBy').value;
         
@@ -176,6 +324,7 @@ async function loadTransactions() {
             date_from: dateFrom,
             date_to: dateTo,
             group_id: groupId,
+            member_id: memberId,
             type: type,
             sort: sortBy
         });
@@ -227,13 +376,30 @@ function displayTransactions(entries) {
             minute: '2-digit'
         });
         
+        // User profile picture or icon
+        const userAvatar = entry.profile_picture 
+            ? `<img src="${escapeHtml(entry.profile_picture)}" alt="Profile" class="transaction-user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+               <i class="fas fa-user" style="display:none;"></i>`
+            : `<i class="fas fa-user"></i>`;
+        
+        // Attachment photo icon
+        const attachmentIcon = entry.attachment 
+            ? `<button class="attachment-icon" onclick="openPhotoModal('${escapeHtml(entry.attachment)}', '${escapeHtml(entry.group_name || 'Transaction')} - ${formattedDate}')" title="View payment proof">
+                   <i class="fas fa-image"></i>
+               </button>`
+            : '';
+        
         return `
             <div class="transaction-item ${typeClass}">
                 <div class="transaction-icon">
                     <i class="fas ${icon}"></i>
                 </div>
                 <div class="transaction-details">
-                    <div class="transaction-user">${escapeHtml(entry.group_name || 'No Group')}</div>
+                    <div class="transaction-group">${escapeHtml(entry.group_name || 'No Group')}</div>
+                    <div class="transaction-user">
+                        ${userAvatar} ${escapeHtml(entry.user_name || 'Unknown User')}
+                        ${attachmentIcon}
+                    </div>
                     <div class="transaction-date">
                         <i class="fas fa-calendar"></i> ${formattedDate}
                         <i class="fas fa-clock"></i> ${formattedTime}
@@ -275,8 +441,13 @@ function clearFilters() {
     document.getElementById('filterDateFrom').value = '';
     document.getElementById('filterDateTo').value = '';
     document.getElementById('filterGroup').value = '';
+    document.getElementById('filterMember').value = '';
     document.getElementById('filterType').value = '';
     document.getElementById('sortBy').value = 'date_desc';
+    
+    // Hide member filter
+    document.getElementById('memberFilterContainer').style.display = 'none';
+    
     loadTransactions();
 }
 

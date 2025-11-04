@@ -1,9 +1,26 @@
+<?php
+session_start();
+
+// Redirect to dashboard if already logged in
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    header('Location: dashboard.php');
+    exit;
+}
+
+// Check if token is provided
+if (!isset($_GET['token']) || empty($_GET['token'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$token = htmlspecialchars($_GET['token']);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Cash Book</title>
+    <title>Reset Password - Cash Book</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="auth-style.css">
 </head>
@@ -15,30 +32,23 @@
                     <i class="fas fa-book"></i>
                     <h1>Cash Book</h1>
                 </div>
-                <p class="subtitle">Create your account</p>
+                <p class="subtitle">Create a new password</p>
             </div>
 
-            <form id="registerForm" class="auth-form">
-                <div class="form-group">
-                    <label for="name">
-                        <i class="fas fa-user"></i> Full Name
-                    </label>
-                    <input type="text" id="name" placeholder="Enter your full name" required autofocus>
-                </div>
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>Enter your new password below. Make sure it's at least 6 characters long.</p>
+            </div>
 
-                <div class="form-group">
-                    <label for="email">
-                        <i class="fas fa-envelope"></i> Email Address
-                    </label>
-                    <input type="email" id="email" placeholder="Enter your email" required>
-                </div>
+            <form id="resetPasswordForm" class="auth-form">
+                <input type="hidden" id="token" value="<?php echo $token; ?>">
 
                 <div class="form-group">
                     <label for="password">
-                        <i class="fas fa-lock"></i> Password
+                        <i class="fas fa-lock"></i> New Password
                     </label>
                     <div class="password-input">
-                        <input type="password" id="password" placeholder="Enter your password (min 6 characters)" required>
+                        <input type="password" id="password" placeholder="Enter new password" required autofocus>
                         <button type="button" class="toggle-password" id="togglePassword">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -50,20 +60,20 @@
                         <i class="fas fa-lock"></i> Confirm Password
                     </label>
                     <div class="password-input">
-                        <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password" required>
                         <button type="button" class="toggle-password" id="toggleConfirmPassword">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" id="registerBtn">
-                    <i class="fas fa-user-plus"></i> Register
+                <button type="submit" class="btn btn-primary" id="resetBtn">
+                    <i class="fas fa-key"></i> Reset Password
                 </button>
             </form>
 
             <div class="auth-footer">
-                <p>Already have an account? <a href="login.html">Login here</a></p>
+                <p>Remember your password? <a href="login.php">Login here</a></p>
             </div>
         </div>
     </div>

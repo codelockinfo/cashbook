@@ -324,9 +324,20 @@ $user = getCurrentUser();
                 </div>
                 <div class="header-actions">
                     <div class="user-info">
-                        <i class="fas fa-user-circle"></i>
+                        <?php if (!empty($user['profile_picture'])): ?>
+                            <img src="<?php echo htmlspecialchars($user['profile_picture']); ?>" 
+                                 alt="Profile" 
+                                 class="user-avatar"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                            <i class="fas fa-user-circle" style="display:none;"></i>
+                        <?php else: ?>
+                            <i class="fas fa-user-circle"></i>
+                        <?php endif; ?>
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
                     </div>
+                    <a href="profile.php" class="manage-users-link">
+                        <i class="fas fa-user-edit"></i> My Profile
+                    </a>
                     <a href="dashboard.php" class="manage-users-link">
                         <i class="fas fa-arrow-left"></i> Back to Dashboard
                     </a>

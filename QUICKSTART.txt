@@ -38,8 +38,8 @@
 📂 FILES OVERVIEW:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-index.html          → Main dashboard page
-manage-users.html   → User management page
+index.php          → Main dashboard page
+manage-users.php   → User management page
 setup.php          → Database setup wizard (USE THIS FIRST!)
 style.css          → All styling
 script.js          → Main functionality

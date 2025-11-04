@@ -11,7 +11,7 @@ Options -Indexes
 </FilesMatch>
 
 # Set default page
-DirectoryIndex index.php login.html
+DirectoryIndex index.php login.php
 
 # Set default charset
 AddDefaultCharset UTF-8

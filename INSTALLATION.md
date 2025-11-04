@@ -158,7 +158,7 @@ Only do this if you have custom MySQL settings!
 **Solution:**
 1. Verify files are in the correct directory
 2. Check the URL: `http://localhost/Cashbook/` (capital C)
-3. Make sure `index.html` exists in the folder
+3. Make sure `index.php` exists in the folder
 
 ### Problem: Transactions not loading
 
@@ -197,8 +197,8 @@ If all above work, **congratulations! Your installation is successful!** 🎉
 
 ```
 Cashbook/
-├── index.html              # Main dashboard page
-├── manage-users.html       # User management page
+├── index.php              # Main dashboard page
+├── manage-users.php       # User management page
 ├── setup.php              # Database setup wizard
 ├── style.css              # Styling
 ├── script.js              # Main JavaScript

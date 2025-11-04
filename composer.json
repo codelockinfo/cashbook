@@ -1,0 +1,8 @@
+{
+    "name": "cashbook/password-reset",
+    "description": "Cash Book Application with Password Reset",
+    "require": {
+        "phpmailer/phpmailer": "^6.8"
+    }
+}
+

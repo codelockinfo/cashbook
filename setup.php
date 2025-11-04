@@ -511,7 +511,7 @@
             $conn->close();
             
             echo '<div class="status success">✅ Database setup completed successfully!</div>';
-            echo '<a href="login.html" class="link">→ Go to Login Page</a>';
+            echo '<a href="login.php" class="link">→ Go to Login Page</a>';
         } else {
             ?>
             <div class="status info">

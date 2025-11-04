@@ -23,9 +23,20 @@ $user = getCurrentUser();
                 </div>
                 <div class="header-actions">
                     <div class="user-info">
-                        <i class="fas fa-user-circle"></i>
+                        <?php if (!empty($user['profile_picture'])): ?>
+                            <img src="<?php echo htmlspecialchars($user['profile_picture']); ?>" 
+                                 alt="Profile" 
+                                 class="user-avatar"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                            <i class="fas fa-user-circle" style="display:none;"></i>
+                        <?php else: ?>
+                            <i class="fas fa-user-circle"></i>
+                        <?php endif; ?>
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
                     </div>
+                    <a href="profile.php" class="manage-users-link">
+                        <i class="fas fa-user-edit"></i> My Profile
+                    </a>
                     <a href="groups.php" class="manage-users-link">
                         <i class="fas fa-users"></i> My Groups
                     </a>
@@ -47,7 +58,7 @@ $user = getCurrentUser();
                     <i class="fas fa-exchange-alt"></i>
                     <h2>Add Entry</h2>
                 </div>
-                <form id="entryForm" class="entry-form">
+                <form id="entryForm" class="entry-form" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="entryDate">
                             <i class="fas fa-calendar"></i> Date & Time
@@ -73,6 +84,24 @@ $user = getCurrentUser();
                             <i class="fas fa-message"></i> Message
                         </label>
                         <textarea id="entryMessage" placeholder="Enter description or message" rows="3"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="entryAttachment">
+                            <i class="fas fa-paperclip"></i> Payment Proof (Optional)
+                        </label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="entryAttachment" name="entryAttachment" accept="image/*" class="file-input">
+                            <label for="entryAttachment" class="file-upload-label">
+                                <i class="fas fa-camera"></i> Choose Photo
+                            </label>
+                            <span class="file-upload-name" id="attachmentFileName">No file chosen</span>
+                            <button type="button" class="btn-remove-file" id="removeAttachment" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="attachmentPreview" class="attachment-preview" style="display: none;">
+                            <img id="attachmentPreviewImg" src="" alt="Preview">
+                        </div>
                     </div>
                     <div class="button-group">
                         <button type="button" id="btnCashIn" class="btn btn-cash-in">
@@ -144,6 +173,12 @@ $user = getCurrentUser();
                             <option value="">All Groups</option>
                         </select>
                     </div>
+                    <div class="filter-item" id="memberFilterContainer" style="display: none;">
+                        <label><i class="fas fa-user"></i> Member</label>
+                        <select id="filterMember">
+                            <option value="">All Members</option>
+                        </select>
+                    </div>
                     <div class="filter-item">
                         <label><i class="fas fa-exchange-alt"></i> Type</label>
                         <select id="filterType">
@@ -185,6 +220,15 @@ $user = getCurrentUser();
 
     <!-- Notification Toast -->
     <div id="toast" class="toast"></div>
+
+    <!-- Photo Viewer Modal -->
+    <div id="photoModal" class="photo-modal" style="display: none;">
+        <div class="photo-modal-content">
+            <span class="photo-modal-close">&times;</span>
+            <img id="photoModalImg" src="" alt="Payment Proof">
+            <div class="photo-modal-caption" id="photoModalCaption"></div>
+        </div>
+    </div>
 
     <script>
         // Pass PHP user data to JavaScript

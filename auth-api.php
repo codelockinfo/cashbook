@@ -3,6 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 require_once 'config.php';
+require_once 'email-helper.php';
 
 $conn = getDBConnection();
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
@@ -19,6 +20,15 @@ switch ($action) {
         break;
     case 'check':
         checkSession();
+        break;
+    case 'forgot_password':
+        forgotPassword($conn);
+        break;
+    case 'verify_reset_token':
+        verifyResetToken($conn);
+        break;
+    case 'reset_password':
+        resetPassword($conn);
         break;
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
@@ -59,17 +69,30 @@ function register($conn) {
             return;
         }
         
+        // Handle profile picture upload
+        $profilePicture = null;
+        if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] === UPLOAD_ERR_OK) {
+            $uploadResult = uploadProfilePicture($_FILES['profilePicture']);
+            if ($uploadResult['success']) {
+                $profilePicture = $uploadResult['filename'];
+            } else {
+                echo json_encode(['success' => false, 'message' => $uploadResult['message']]);
+                return;
+            }
+        }
+        
         // Hash password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
         // Insert user
-        $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $name, $email, $hashedPassword);
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password, profile_picture) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $name, $email, $hashedPassword, $profilePicture);
         
         if ($stmt->execute()) {
             echo json_encode([
                 'success' => true,
-                'message' => 'Registration successful'
+                'message' => 'Registration successful',
+                'profile_picture' => $profilePicture
             ]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Registration failed: ' . $conn->error]);
@@ -78,6 +101,40 @@ function register($conn) {
         $stmt->close();
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Upload profile picture
+function uploadProfilePicture($file) {
+    $uploadDir = __DIR__ . '/uploads/profile_pictures/';
+    
+    // Create directory if it doesn't exist
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    
+    // Validate file type
+    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!in_array($file['type'], $allowedTypes)) {
+        return ['success' => false, 'message' => 'Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed.'];
+    }
+    
+    // Validate file size (max 5MB)
+    $maxSize = 5 * 1024 * 1024; // 5MB
+    if ($file['size'] > $maxSize) {
+        return ['success' => false, 'message' => 'File size too large. Maximum 5MB allowed.'];
+    }
+    
+    // Generate unique filename
+    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = 'profile_' . uniqid() . '_' . time() . '.' . $extension;
+    $filepath = $uploadDir . $filename;
+    
+    // Move uploaded file
+    if (move_uploaded_file($file['tmp_name'], $filepath)) {
+        return ['success' => true, 'filename' => 'uploads/profile_pictures/' . $filename];
+    } else {
+        return ['success' => false, 'message' => 'Failed to upload file'];
     }
 }
 
@@ -94,7 +151,7 @@ function login($conn) {
         }
         
         // Get user
-        $stmt = $conn->prepare("SELECT id, name, email, password FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT id, name, email, password, profile_picture FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -116,6 +173,7 @@ function login($conn) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['user_email'] = $user['email'];
+        $_SESSION['user_profile_picture'] = $user['profile_picture'];
         $_SESSION['logged_in'] = true;
         
         echo json_encode([
@@ -124,7 +182,8 @@ function login($conn) {
             'user' => [
                 'id' => $user['id'],
                 'name' => $user['name'],
-                'email' => $user['email']
+                'email' => $user['email'],
+                'profile_picture' => $user['profile_picture']
             ]
         ]);
         
@@ -157,6 +216,206 @@ function checkSession() {
             'success' => true,
             'logged_in' => false
         ]);
+    }
+}
+
+// Forgot Password - Generate reset token
+function forgotPassword($conn) {
+    try {
+        $email = trim($_POST['email'] ?? '');
+        
+        // Validation
+        if (empty($email)) {
+            echo json_encode(['success' => false, 'message' => 'Email is required']);
+            return;
+        }
+        
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid email address']);
+            return;
+        }
+        
+        // Check if user exists
+        $stmt = $conn->prepare("SELECT id, name FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'No account found with this email address']);
+            return;
+        }
+        
+        $user = $result->fetch_assoc();
+        $userId = $user['id'];
+        
+        // Generate unique reset token
+        $token = bin2hex(random_bytes(32));
+        
+        // Token expires in 1 hour
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        
+        // Delete any existing unused tokens for this user
+        $stmt = $conn->prepare("DELETE FROM password_reset_tokens WHERE user_id = ? AND used = 0");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        
+        // Insert new token
+        $stmt = $conn->prepare("INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?, ?, ?)");
+        $stmt->bind_param("iss", $userId, $token, $expiresAt);
+        
+        if ($stmt->execute()) {
+            // Generate reset link
+            $resetLink = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset-password.php?token=" . $token;
+            
+            // Send password reset email
+            $emailResult = sendPasswordResetEmail($email, $user['name'], $resetLink);
+            
+            if ($emailResult['success']) {
+                $response = [
+                    'success' => true,
+                    'message' => 'Password reset link has been sent to your email'
+                ];
+                
+                // Include reset link in development mode for testing
+                if (isset($emailResult['dev_mode']) && $emailResult['dev_mode']) {
+                    $response['reset_link'] = $emailResult['reset_link'];
+                    $response['dev_mode'] = true;
+                }
+                
+                echo json_encode($response);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => $emailResult['message']
+                ]);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to generate reset token']);
+        }
+        
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Verify Reset Token
+function verifyResetToken($conn) {
+    try {
+        $token = trim($_GET['token'] ?? $_POST['token'] ?? '');
+        
+        if (empty($token)) {
+            echo json_encode(['success' => false, 'message' => 'Token is required']);
+            return;
+        }
+        
+        // Check if token exists and is valid
+        $stmt = $conn->prepare("SELECT user_id, expires_at, used FROM password_reset_tokens WHERE token = ?");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'Invalid reset token']);
+            return;
+        }
+        
+        $resetToken = $result->fetch_assoc();
+        
+        // Check if token is already used
+        if ($resetToken['used'] == 1) {
+            echo json_encode(['success' => false, 'message' => 'This reset link has already been used']);
+            return;
+        }
+        
+        // Check if token is expired
+        if (strtotime($resetToken['expires_at']) < time()) {
+            echo json_encode(['success' => false, 'message' => 'This reset link has expired']);
+            return;
+        }
+        
+        echo json_encode(['success' => true, 'message' => 'Token is valid']);
+        
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Reset Password
+function resetPassword($conn) {
+    try {
+        $token = trim($_POST['token'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+        
+        // Validation
+        if (empty($token) || empty($password) || empty($confirmPassword)) {
+            echo json_encode(['success' => false, 'message' => 'All fields are required']);
+            return;
+        }
+        
+        if ($password !== $confirmPassword) {
+            echo json_encode(['success' => false, 'message' => 'Passwords do not match']);
+            return;
+        }
+        
+        if (strlen($password) < 6) {
+            echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters']);
+            return;
+        }
+        
+        // Verify token
+        $stmt = $conn->prepare("SELECT user_id, expires_at, used FROM password_reset_tokens WHERE token = ?");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'Invalid reset token']);
+            return;
+        }
+        
+        $resetToken = $result->fetch_assoc();
+        
+        // Check if token is already used
+        if ($resetToken['used'] == 1) {
+            echo json_encode(['success' => false, 'message' => 'This reset link has already been used']);
+            return;
+        }
+        
+        // Check if token is expired
+        if (strtotime($resetToken['expires_at']) < time()) {
+            echo json_encode(['success' => false, 'message' => 'This reset link has expired']);
+            return;
+        }
+        
+        // Hash the new password
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        
+        // Update user's password
+        $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+        $stmt->bind_param("si", $hashedPassword, $resetToken['user_id']);
+        
+        if (!$stmt->execute()) {
+            echo json_encode(['success' => false, 'message' => 'Failed to update password']);
+            return;
+        }
+        
+        // Mark token as used
+        $stmt = $conn->prepare("UPDATE password_reset_tokens SET used = 1 WHERE token = ?");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Password has been reset successfully'
+        ]);
+        
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
 

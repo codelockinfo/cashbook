@@ -7,7 +7,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     header('Location: dashboard.php');
 } else {
     // Redirect to login if not logged in
-    header('Location: login.html');
+    header('Location: login.php');
 }
 exit;
 ?>

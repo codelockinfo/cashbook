@@ -67,8 +67,8 @@ A complete, production-ready **single-page cashbook application** with a modern,
 Cashbook/
 │
 ├── 🌐 FRONTEND FILES
-│   ├── index.html              Main dashboard page
-│   ├── manage-users.html       User management interface
+│   ├── index.php              Main dashboard page
+│   ├── manage-users.php       User management interface
 │   ├── style.css               Complete styling (650+ lines)
 │   └── script.js               Frontend logic & API calls
 │
@@ -279,18 +279,18 @@ Edit `style.css` (lines 1-15):
 ### Add Database Fields
 1. Alter table in MySQL
 2. Update `api.php` to handle new field
-3. Add input field in `index.html`
+3. Add input field in `index.php`
 4. Update JavaScript in `script.js`
 
 ### Change Currency
 Replace `₹` with your currency symbol:
-- In `index.html` (search for ₹)
+- In `index.php` (search for ₹)
 - In `script.js` (search for ₹)
 
 ### Add Features
 The codebase is modular and well-commented.
 Key files to modify:
-- **UI**: `index.html` + `style.css`
+- **UI**: `index.php` + `style.css`
 - **Logic**: `script.js`
 - **Backend**: `api.php`
 

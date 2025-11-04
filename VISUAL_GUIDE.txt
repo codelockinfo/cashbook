@@ -95,7 +95,7 @@
 
     Click: [Manage Users] button in header
 
-    URL: http://localhost/Cashbook/manage-users.html
+    URL: http://localhost/Cashbook/manage-users.php
 
     ╔════════════════════════════════════════════════════════════════════════╗
     ║  👥 Manage Users & Groups                    [← Back to Dashboard]    ║
@@ -300,7 +300,7 @@
 
     📍 Main URL:          http://localhost/Cashbook/
     📍 Setup URL:         http://localhost/Cashbook/setup.php
-    📍 Manage Users:      http://localhost/Cashbook/manage-users.html
+    📍 Manage Users:      http://localhost/Cashbook/manage-users.php
     📍 phpMyAdmin:        http://localhost/phpmyadmin
 
     📂 Files Location:    C:\wamp\www\Cashbook\

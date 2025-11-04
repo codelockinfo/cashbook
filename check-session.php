@@ -4,7 +4,7 @@ session_start();
 
 function checkAuth() {
     if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-        header('Location: login.html');
+        header('Location: login.php');
         exit;
     }
 }
@@ -14,7 +14,8 @@ function getCurrentUser() {
         return [
             'id' => $_SESSION['user_id'],
             'name' => $_SESSION['user_name'],
-            'email' => $_SESSION['user_email']
+            'email' => $_SESSION['user_email'],
+            'profile_picture' => $_SESSION['user_profile_picture'] ?? null
         ];
     }
     return null;

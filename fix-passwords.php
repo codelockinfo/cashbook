@@ -25,7 +25,7 @@ try {
         echo "<li><strong>amit@example.com</strong> / demo123</li>";
         echo "<li><strong>priya@example.com</strong> / demo123</li>";
         echo "</ul>";
-        echo "<br><a href='login.html' style='display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;'>→ Go to Login Page</a>";
+        echo "<br><a href='login.php' style='display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;'>→ Go to Login Page</a>";
     } else {
         echo "❌ Error updating passwords: " . $conn->error;
     }
