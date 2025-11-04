@@ -1,0 +1,196 @@
+<?php
+require_once 'check-session.php';
+checkAuth();
+$user = getCurrentUser();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Book Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-book"></i>
+                    <h1>Cash Book</h1>
+                </div>
+                <div class="header-actions">
+                    <div class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                        <span><?php echo htmlspecialchars($user['name']); ?></span>
+                    </div>
+                    <a href="groups.php" class="manage-users-link">
+                        <i class="fas fa-users"></i> My Groups
+                    </a>
+                    <button id="logoutBtn" class="manage-users-link logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                    <div class="total-balance">
+                        <span class="balance-label">Total Balance</span>
+                        <span class="balance-amount" id="totalBalance">₹ 0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Entry Input Section -->
+        <section class="entry-section">
+            <div class="entry-card unified-entry-card">
+                <div class="card-header">
+                    <i class="fas fa-exchange-alt"></i>
+                    <h2>Add Entry</h2>
+                </div>
+                <form id="entryForm" class="entry-form">
+                    <div class="form-group">
+                        <label for="entryDate">
+                            <i class="fas fa-calendar"></i> Date & Time
+                        </label>
+                        <input type="datetime-local" id="entryDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="entryAmount">
+                            <i class="fas fa-rupee-sign"></i> Amount
+                        </label>
+                        <input type="number" id="entryAmount" placeholder="Enter amount" required min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="entryGroup">
+                            <i class="fas fa-users"></i> Group
+                        </label>
+                        <select id="entryGroup" required>
+                            <option value="">Select Group</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="entryMessage">
+                            <i class="fas fa-message"></i> Message
+                        </label>
+                        <textarea id="entryMessage" placeholder="Enter description or message" rows="3"></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" id="btnCashIn" class="btn btn-cash-in">
+                            <i class="fas fa-arrow-down"></i> Cash In
+                        </button>
+                        <button type="button" id="btnCashOut" class="btn btn-cash-out">
+                            <i class="fas fa-arrow-up"></i> Cash Out
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section class="dashboard-section">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-chart-line"></i> Transaction Dashboard</h2>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-in">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrow-trend-up"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Total Cash In</span>
+                        <span class="stat-value" id="totalCashIn">₹ 0</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-out">
+                    <div class="stat-icon">
+                        <i class="fas fa-arrow-trend-down"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Total Cash Out</span>
+                        <span class="stat-value" id="totalCashOut">₹ 0</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-count">
+                    <div class="stat-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Total Entries</span>
+                        <span class="stat-value" id="totalEntries">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search transactions (min 3 characters)...">
+                </div>
+                <div class="filter-group">
+                    <div class="filter-item date-range">
+                        <label><i class="fas fa-calendar"></i> Date Range</label>
+                        <div class="date-inputs">
+                            <input type="date" id="filterDateFrom" placeholder="From">
+                            <span class="to-label">to</span>
+                            <input type="date" id="filterDateTo" placeholder="To">
+                        </div>
+                    </div>
+                    <div class="filter-item">
+                        <label><i class="fas fa-users"></i> Group</label>
+                        <select id="filterGroup">
+                            <option value="">All Groups</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label><i class="fas fa-exchange-alt"></i> Type</label>
+                        <select id="filterType">
+                            <option value="">All Types</option>
+                            <option value="in">Cash In</option>
+                            <option value="out">Cash Out</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-clear" id="clearFilters">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transactions List -->
+            <div class="transactions-section">
+                <div class="transactions-header">
+                    <h3>Recent Transactions</h3>
+                    <div class="sort-options">
+                        <label>Sort by:</label>
+                        <select id="sortBy">
+                            <option value="date_desc">Date (Newest First)</option>
+                            <option value="date_asc">Date (Oldest First)</option>
+                            <option value="amount_desc">Amount (High to Low)</option>
+                            <option value="amount_asc">Amount (Low to High)</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="transactionsList" class="transactions-list">
+                    <!-- Transactions will be loaded here dynamically -->
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No transactions yet. Add your first entry!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Pass PHP user data to JavaScript
+        const CURRENT_USER = <?php echo json_encode($user); ?>;
+    </script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
+
