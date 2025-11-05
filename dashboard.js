@@ -391,24 +391,44 @@ function displayTransactions(entries) {
         
         return `
             <div class="transaction-item ${typeClass}">
-                <div class="transaction-icon">
-                    <i class="fas ${icon}"></i>
+                <!-- Row 1: Icon, Empty Space, Amount -->
+                <div class="transaction-top-row">
+                    <div class="transaction-icon">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div class="transaction-amount">
+                        ${sign} ₹ ${parseFloat(entry.amount).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
                 </div>
-                <div class="transaction-details">
-                    <div class="transaction-group">${escapeHtml(entry.group_name || 'No Group')}</div>
-                    <div class="transaction-user">
-                        ${userAvatar} ${escapeHtml(entry.user_name || 'Unknown User')}
-                        ${attachmentIcon}
+                
+                <!-- Row 2: Group/User Info and Edit Button -->
+                <div class="transaction-middle-row">
+                    <div class="transaction-group-section">
+                        <div class="transaction-group">${escapeHtml(entry.group_name || 'No Group')}</div>
+                        <div class="transaction-user">
+                            ${userAvatar} ${escapeHtml(entry.user_name || 'Unknown User')}
+                            ${attachmentIcon}
+                        </div>
                     </div>
-                    <div class="transaction-date">
-                        <i class="fas fa-calendar"></i> ${formattedDate}
-                        <i class="fas fa-clock"></i> ${formattedTime}
+                    <div class="transaction-actions">
+                        <button class="btn-edit-entry" onclick="openEditModal(${entry.id})" title="Edit entry">
+                            <i class="fas fa-edit"></i>
+                        </button>
                     </div>
-                    ${entry.message ? `<div class="transaction-message">${escapeHtml(entry.message)}</div>` : ''}
+                </div>
+                
+                <!-- Row 3: Date and Time -->
+                <div class="transaction-date">
+                    <span><i class="fas fa-calendar"></i> ${formattedDate}</span>
+                    <span><i class="fas fa-clock"></i> ${formattedTime}</span>
+                </div>
+                
+                <!-- Row 4: Message -->
+                ${entry.message ? `<div class="transaction-message">${escapeHtml(entry.message)}</div>` : ''}
+                
+                <!-- Row 5: Transaction Type Badge -->
+                <div>
                     <span class="transaction-type">${typeText}</span>
-                </div>
-                <div class="transaction-amount">
-                    ${sign} ₹ ${parseFloat(entry.amount).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </div>
             </div>
         `;
@@ -488,4 +508,257 @@ function escapeHtml(text) {
     };
     return text.replace(/[&<>"']/g, m => map[m]);
 }
+
+// ============================================
+// Edit Entry Functions
+// ============================================
+
+let currentEntryData = null;
+let shouldRemoveCurrentAttachment = false;
+
+// Open edit modal and load entry data
+async function openEditModal(entryId) {
+    try {
+        const response = await fetch(`${API_URL}?action=getEntry&id=${entryId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            currentEntryData = data.entry;
+            populateEditForm(data.entry);
+            
+            // Show modal
+            document.getElementById('editEntryModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        } else {
+            showToast(data.message || 'Failed to load entry', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading entry:', error);
+        showToast('Error loading entry. Please try again.', 'error');
+    }
+}
+
+// Populate edit form with entry data
+function populateEditForm(entry) {
+    // Reset form
+    shouldRemoveCurrentAttachment = false;
+    document.getElementById('editEntryForm').reset();
+    document.getElementById('editAttachmentPreview').style.display = 'none';
+    document.getElementById('editAttachmentFileName').textContent = 'No file chosen';
+    document.getElementById('removeEditAttachment').style.display = 'none';
+    
+    // Set values
+    document.getElementById('editEntryId').value = entry.id;
+    document.getElementById('editEntryAmount').value = entry.amount;
+    document.getElementById('editEntryType').value = entry.type;
+    document.getElementById('editEntryMessage').value = entry.message || '';
+    
+    // Format datetime for datetime-local input
+    const date = new Date(entry.datetime);
+    const localDateTime = new Date(date - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('editEntryDate').value = localDateTime;
+    
+    // Load groups and set current group
+    loadGroupsForEdit(entry.group_id);
+    
+    // Show current attachment if exists
+    if (entry.attachment) {
+        document.getElementById('currentAttachmentImg').src = entry.attachment;
+        document.getElementById('currentAttachmentPreview').style.display = 'block';
+    } else {
+        document.getElementById('currentAttachmentPreview').style.display = 'none';
+    }
+    
+    // Setup event listeners for edit form
+    setupEditFormListeners();
+}
+
+// Load groups into edit dropdown
+async function loadGroupsForEdit(selectedGroupId) {
+    try {
+        const response = await fetch(`${API_URL}?action=getUserGroups`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const select = document.getElementById('editEntryGroup');
+            select.innerHTML = '<option value="">Select Group</option>';
+            
+            data.groups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.id;
+                option.textContent = group.name;
+                if (group.id == selectedGroupId) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading groups:', error);
+    }
+}
+
+// Setup event listeners for edit form
+function setupEditFormListeners() {
+    // Form submit
+    const editForm = document.getElementById('editEntryForm');
+    editForm.removeEventListener('submit', handleEditSubmit); // Remove old listener
+    editForm.addEventListener('submit', handleEditSubmit);
+    
+    // File input change
+    const fileInput = document.getElementById('editEntryAttachment');
+    fileInput.removeEventListener('change', handleEditAttachmentChange);
+    fileInput.addEventListener('change', handleEditAttachmentChange);
+    
+    // Remove new attachment button
+    const removeNewBtn = document.getElementById('removeEditAttachment');
+    removeNewBtn.removeEventListener('click', removeEditAttachment);
+    removeNewBtn.addEventListener('click', removeEditAttachment);
+    
+    // Remove current attachment button
+    const removeCurrentBtn = document.getElementById('removeCurrentAttachment');
+    removeCurrentBtn.removeEventListener('click', removeCurrentAttachment);
+    removeCurrentBtn.addEventListener('click', removeCurrentAttachment);
+}
+
+// Handle edit attachment file selection
+function handleEditAttachmentChange(e) {
+    const file = e.target.files[0];
+    const fileNameSpan = document.getElementById('editAttachmentFileName');
+    const removeBtn = document.getElementById('removeEditAttachment');
+    const preview = document.getElementById('editAttachmentPreview');
+    const previewImg = document.getElementById('editAttachmentPreviewImg');
+    
+    if (file) {
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            showToast('Invalid file type. Only images are allowed.', 'error');
+            e.target.value = '';
+            return;
+        }
+        
+        // Validate file size (10MB max)
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+            showToast('File size too large. Maximum 10MB allowed.', 'error');
+            e.target.value = '';
+            return;
+        }
+        
+        fileNameSpan.textContent = file.name;
+        removeBtn.style.display = 'inline-block';
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Remove new attachment from edit form
+function removeEditAttachment() {
+    document.getElementById('editEntryAttachment').value = '';
+    document.getElementById('editAttachmentFileName').textContent = 'No file chosen';
+    document.getElementById('removeEditAttachment').style.display = 'none';
+    document.getElementById('editAttachmentPreview').style.display = 'none';
+}
+
+// Remove current attachment
+function removeCurrentAttachment() {
+    shouldRemoveCurrentAttachment = true;
+    document.getElementById('currentAttachmentPreview').style.display = 'none';
+    showToast('Current attachment will be removed when you save', 'info');
+}
+
+// Handle edit form submission
+async function handleEditSubmit(e) {
+    e.preventDefault();
+    
+    const entryId = document.getElementById('editEntryId').value;
+    const amount = document.getElementById('editEntryAmount').value;
+    const type = document.getElementById('editEntryType').value;
+    const groupId = document.getElementById('editEntryGroup').value;
+    const datetime = document.getElementById('editEntryDate').value;
+    const message = document.getElementById('editEntryMessage').value;
+    const attachmentInput = document.getElementById('editEntryAttachment');
+    
+    // Validate
+    if (!entryId || !amount || !type || !groupId || !datetime) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    if (parseFloat(amount) <= 0) {
+        showToast('Amount must be greater than 0', 'error');
+        return;
+    }
+    
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('action', 'updateEntry');
+    formData.append('id', entryId);
+    formData.append('amount', amount);
+    formData.append('type', type);
+    formData.append('group_id', groupId);
+    formData.append('datetime', datetime);
+    formData.append('message', message);
+    formData.append('remove_attachment', shouldRemoveCurrentAttachment ? 'true' : 'false');
+    
+    // Add new attachment if selected
+    if (attachmentInput.files.length > 0) {
+        formData.append('attachment', attachmentInput.files[0]);
+    }
+    
+    // Disable submit button
+    const submitBtn = document.getElementById('saveEditBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(data.message || 'Entry updated successfully!', 'success');
+            closeEditModal();
+            loadTransactions(); // Reload transactions
+        } else {
+            showToast(data.message || 'Failed to update entry', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating entry:', error);
+        showToast('Error updating entry. Please try again.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
+
+// Close edit modal
+function closeEditModal() {
+    document.getElementById('editEntryModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    document.getElementById('editEntryForm').reset();
+    currentEntryData = null;
+    shouldRemoveCurrentAttachment = false;
+    document.getElementById('currentAttachmentPreview').style.display = 'none';
+    document.getElementById('editAttachmentPreview').style.display = 'none';
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('editEntryModal');
+    if (e.target === modal) {
+        closeEditModal();
+    }
+});
 

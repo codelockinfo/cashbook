@@ -32,6 +32,12 @@ switch ($action) {
     case 'addEntry':
         addEntry($conn, $user_id);
         break;
+    case 'updateEntry':
+        updateEntry($conn, $user_id);
+        break;
+    case 'getEntry':
+        getEntry($conn, $user_id);
+        break;
     case 'getEntries':
         getEntries($conn, $user_id);
         break;
@@ -207,6 +213,141 @@ function uploadEntryAttachment($file) {
         return ['success' => true, 'filename' => 'uploads/entry_attachments/' . $filename];
     } else {
         return ['success' => false, 'message' => 'Failed to upload file'];
+    }
+}
+
+// Get single entry by ID
+function getEntry($conn, $user_id) {
+    try {
+        $entry_id = $_GET['id'] ?? '';
+        
+        if (empty($entry_id)) {
+            echo json_encode(['success' => false, 'message' => 'Entry ID is required']);
+            return;
+        }
+        
+        // Get entry with permission check (user must be member of the group)
+        $sql = "SELECT e.* FROM entries e 
+                INNER JOIN `groups` g ON e.group_id = g.id
+                INNER JOIN group_members gm ON g.id = gm.group_id
+                WHERE e.id = ? AND gm.user_id = ?";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $entry_id, $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'Entry not found or access denied']);
+            return;
+        }
+        
+        $entry = $result->fetch_assoc();
+        echo json_encode(['success' => true, 'entry' => $entry]);
+        
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Update existing entry
+function updateEntry($conn, $user_id) {
+    try {
+        $entry_id = $_POST['id'] ?? '';
+        $type = $_POST['type'] ?? '';
+        $group_id = $_POST['group_id'] ?? '';
+        $amount = $_POST['amount'] ?? 0;
+        $datetime = $_POST['datetime'] ?? '';
+        $message = $_POST['message'] ?? '';
+        $remove_attachment = $_POST['remove_attachment'] ?? '';
+        
+        // Validate inputs
+        if (empty($entry_id) || empty($type) || empty($group_id) || empty($amount) || empty($datetime)) {
+            echo json_encode(['success' => false, 'message' => 'All required fields must be filled']);
+            return;
+        }
+        
+        if (!in_array($type, ['in', 'out'])) {
+            echo json_encode(['success' => false, 'message' => 'Invalid transaction type']);
+            return;
+        }
+        
+        if ($amount <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Amount must be greater than 0']);
+            return;
+        }
+        
+        // Check if entry exists and user has permission (must be member of the group)
+        $checkStmt = $conn->prepare("SELECT e.id, e.attachment FROM entries e 
+                                      INNER JOIN group_members gm ON e.group_id = gm.group_id
+                                      WHERE e.id = ? AND gm.user_id = ?");
+        $checkStmt->bind_param("ii", $entry_id, $user_id);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        
+        if ($checkResult->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'Entry not found or access denied']);
+            return;
+        }
+        
+        $currentEntry = $checkResult->fetch_assoc();
+        $currentAttachment = $currentEntry['attachment'];
+        
+        // Check if user is member of the new group
+        $groupCheckStmt = $conn->prepare("SELECT id FROM group_members WHERE group_id = ? AND user_id = ?");
+        $groupCheckStmt->bind_param("ii", $group_id, $user_id);
+        $groupCheckStmt->execute();
+        
+        if ($groupCheckStmt->get_result()->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'You are not a member of the selected group']);
+            return;
+        }
+        
+        // Handle attachment
+        $attachment = $currentAttachment; // Keep current by default
+        
+        // Remove current attachment if requested
+        if ($remove_attachment === 'true' && !empty($currentAttachment)) {
+            $filePath = __DIR__ . '/' . $currentAttachment;
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+            $attachment = null;
+        }
+        
+        // Upload new attachment if provided
+        if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
+            // Delete old attachment if exists
+            if (!empty($currentAttachment)) {
+                $filePath = __DIR__ . '/' . $currentAttachment;
+                if (file_exists($filePath)) {
+                    @unlink($filePath);
+                }
+            }
+            
+            $uploadResult = uploadEntryAttachment($_FILES['attachment']);
+            if ($uploadResult['success']) {
+                $attachment = $uploadResult['filename'];
+            } else {
+                echo json_encode(['success' => false, 'message' => $uploadResult['message']]);
+                return;
+            }
+        }
+        
+        // Update entry
+        $stmt = $conn->prepare("UPDATE entries SET group_id = ?, type = ?, amount = ?, datetime = ?, message = ?, attachment = ? WHERE id = ?");
+        $stmt->bind_param("isdsssi", $group_id, $type, $amount, $datetime, $message, $attachment, $entry_id);
+        
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Entry updated successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error updating entry: ' . $conn->error]);
+        }
+        
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
 

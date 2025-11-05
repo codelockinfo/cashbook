@@ -119,7 +119,7 @@ $user = getCurrentUser();
         <!-- Dashboard Section -->
         <section class="dashboard-section">
             <div class="dashboard-header">
-                <h2><i class="fas fa-chart-line"></i> Transaction Dashboard</h2>
+                <h2><i class="fas fa-chart-line"></i> Transactions</h2>
             </div>
 
             <!-- Statistics Cards -->
@@ -228,6 +228,91 @@ $user = getCurrentUser();
             <span class="photo-modal-close">&times;</span>
             <img id="photoModalImg" src="" alt="Payment Proof">
             <div class="photo-modal-caption" id="photoModalCaption"></div>
+        </div>
+    </div>
+
+    <!-- Edit Entry Modal -->
+    <div id="editEntryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Edit Entry</h2>
+                <span class="modal-close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <form id="editEntryForm" class="entry-form" enctype="multipart/form-data">
+                <input type="hidden" id="editEntryId">
+                
+                <div class="form-group">
+                    <label for="editEntryDate">
+                        <i class="fas fa-calendar"></i> Date & Time
+                    </label>
+                    <input type="datetime-local" id="editEntryDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEntryAmount">
+                        <i class="fas fa-rupee-sign"></i> Amount
+                    </label>
+                    <input type="number" id="editEntryAmount" placeholder="Enter amount" required min="0" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEntryType">
+                        <i class="fas fa-exchange-alt"></i> Type
+                    </label>
+                    <select id="editEntryType" required>
+                        <option value="in">Cash In</option>
+                        <option value="out">Cash Out</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEntryGroup">
+                        <i class="fas fa-users"></i> Group
+                    </label>
+                    <select id="editEntryGroup" required>
+                        <option value="">Select Group</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEntryMessage">
+                        <i class="fas fa-message"></i> Message
+                    </label>
+                    <textarea id="editEntryMessage" placeholder="Enter description or message" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="editEntryAttachment">
+                        <i class="fas fa-paperclip"></i> Payment Proof (Optional)
+                    </label>
+                    <div id="currentAttachmentPreview" style="display: none; margin-bottom: 10px;">
+                        <p style="font-size: 13px; color: #666;">Current attachment:</p>
+                        <img id="currentAttachmentImg" src="" alt="Current" style="max-width: 150px; border-radius: 5px; cursor: pointer;" onclick="openPhotoModal(this.src, 'Current Attachment')">
+                        <button type="button" class="btn-remove-file" id="removeCurrentAttachment" style="margin-left: 10px;">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="editEntryAttachment" name="editEntryAttachment" accept="image/*" class="file-input">
+                        <label for="editEntryAttachment" class="file-upload-label">
+                            <i class="fas fa-camera"></i> Choose New Photo
+                        </label>
+                        <span class="file-upload-name" id="editAttachmentFileName">No file chosen</span>
+                        <button type="button" class="btn-remove-file" id="removeEditAttachment" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="editAttachmentPreview" class="attachment-preview" style="display: none;">
+                        <img id="editAttachmentPreviewImg" src="" alt="Preview">
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary" id="saveEditBtn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
