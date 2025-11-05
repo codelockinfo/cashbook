@@ -407,11 +407,11 @@
             
             // Step 9: Insert Sample Groups
             echo '<div class="step">';
-            $check = $conn->query("SELECT COUNT(*) as count FROM groups");
+            $check = $conn->query("SELECT COUNT(*) as count FROM `groups`");
             $row = $check->fetch_assoc();
             
             if ($row['count'] == 0) {
-                $sql = "INSERT INTO groups (name, description, created_by) VALUES
+                $sql = "INSERT INTO `groups` (name, description, created_by) VALUES
                 ('Office Team', 'Main office team for daily operations', 1),
                 ('Project Alpha', 'Project Alpha development team', 2),
                 ('Marketing', 'Marketing and sales team', 1)";

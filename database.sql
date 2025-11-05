@@ -1,139 +1,739 @@
--- Create database
-CREATE DATABASE IF NOT EXISTS cash_book CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3306
+-- Generation Time: Nov 05, 2025 at 12:03 PM
+-- Server version: 9.1.0
+-- PHP Version: 8.3.14
 
-USE cash_book;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- Create users table (updated for authentication)
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    profile_picture VARCHAR(255) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_email (email(191)),
-    INDEX idx_name (name(191))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Create groups table
-CREATE TABLE IF NOT EXISTS groups (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    created_by INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_created_by (created_by),
-    INDEX idx_name (name(191))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
--- Create group_members table
-CREATE TABLE IF NOT EXISTS group_members (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    group_id INT NOT NULL,
-    user_id INT NOT NULL,
-    role ENUM('admin', 'member') DEFAULT 'member',
-    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_group_user (group_id, user_id),
-    INDEX idx_group_id (group_id),
-    INDEX idx_user_id (user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+--
+-- Database: `cash_book`
+--
 
--- Create group_requests table
-CREATE TABLE IF NOT EXISTS group_requests (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    group_id INT NOT NULL,
-    user_id INT NOT NULL,
-    invited_by INT NOT NULL,
-    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-    message TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_group_id (group_id),
-    INDEX idx_user_id (user_id),
-    INDEX idx_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- --------------------------------------------------------
 
--- Create password_reset_tokens table
-CREATE TABLE IF NOT EXISTS password_reset_tokens (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    token VARCHAR(255) NOT NULL,
-    expires_at DATETIME NOT NULL,
-    used TINYINT(1) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_token (token(191)),
-    INDEX idx_user_id (user_id),
-    INDEX idx_expires_at (expires_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+--
+-- Table structure for table `entries`
+--
 
--- Create entries table (updated for group support)
-CREATE TABLE IF NOT EXISTS entries (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    group_id INT NULL,
-    type ENUM('in', 'out') NOT NULL,
-    amount DECIMAL(15, 2) NOT NULL,
-    datetime DATETIME NOT NULL,
-    message TEXT,
-    attachment VARCHAR(255) DEFAULT NULL,
-    created_by INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_user_id (user_id),
-    INDEX idx_group_id (group_id),
-    INDEX idx_created_by (created_by),
-    INDEX idx_type (type),
-    INDEX idx_datetime (datetime),
-    INDEX idx_created_at (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TABLE IF EXISTS `entries`;
+CREATE TABLE IF NOT EXISTS `entries` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `group_id` int DEFAULT NULL,
+  `type` enum('in','out') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(15,2) NOT NULL,
+  `datetime` datetime NOT NULL,
+  `message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `attachment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_by` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_group_id` (`group_id`),
+  KEY `idx_created_by` (`created_by`),
+  KEY `idx_type` (`type`),
+  KEY `idx_datetime` (`datetime`),
+  KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=507 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert demo users with authentication (password: demo123)
-INSERT INTO users (name, email, password) VALUES
-('Admin User', 'admin@cashbook.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-('Tushar Rathod', 'tushar@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-('Rajan Zala', 'rajan@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-('Amit Shah', 'amit@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-('Priya Patel', 'priya@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+--
+-- Dumping data for table `entries`
+--
 
--- Insert demo groups
-INSERT INTO groups (name, description, created_by) VALUES
-('Office Team', 'Main office team for daily operations', 1),
-('Project Alpha', 'Project Alpha development team', 2),
-('Marketing', 'Marketing and sales team', 1);
+INSERT INTO `entries` (`id`, `user_id`, `group_id`, `type`, `amount`, `datetime`, `message`, `attachment`, `created_by`, `created_at`) VALUES
+(11, 8, NULL, 'out', 32000.00, '2025-01-01 11:07:00', 'Bike old Unicorn | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(12, 8, NULL, 'in', 5000.00, '2025-01-01 22:38:00', '20250024 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(13, 8, NULL, 'in', 2000.00, '2025-01-08 20:05:00', '20250008 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(14, 8, NULL, 'in', 2000.00, '2025-01-08 20:05:00', '20250005 cash mukeshbhai pase thi leva na | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(15, 8, NULL, 'out', 250.00, '2025-01-12 11:13:00', 'Board repair | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(16, 8, NULL, 'in', 3000.00, '2025-01-13 18:32:00', '20250011 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(17, 8, NULL, 'in', 4400.00, '2025-01-13 18:32:00', '20250010 | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(18, 8, NULL, 'out', 100.00, '2025-01-13 18:32:00', 'Petrol | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(19, 8, NULL, 'out', 30.00, '2025-01-16 06:34:00', 'Chai pani | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(20, 8, NULL, 'out', 660.00, '2025-01-16 18:41:00', 'Kathiyavadi-2 print with attached 3mm sheet | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(21, 8, NULL, 'in', 2000.00, '2025-01-17 18:31:00', '20250012 from 2500 (500 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(22, 8, NULL, 'out', 3500.00, '2025-01-18 19:41:00', 'Dj na | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(23, 8, NULL, 'in', 21500.00, '2025-01-19 10:53:00', '20250006 from 23000 +2800+500+200 (advacne 5000) | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(24, 8, NULL, 'in', 3000.00, '2025-01-19 10:55:00', 'Gun rent | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(25, 8, NULL, 'in', 1000.00, '2025-01-19 10:55:00', 'Item rent | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(26, 8, NULL, 'out', 9000.00, '2025-01-19 15:18:00', 'Mukeshbhai salary 1 to 18 January 2025 | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(27, 8, NULL, 'out', 4540.00, '2025-01-19 18:11:00', 'Di-shreeji balloon double tap selo tap | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(28, 8, NULL, 'out', 200.00, '2025-01-19 18:11:00', 'Flower | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(29, 8, NULL, 'in', 1550.00, '2025-01-19 18:57:00', '20250016 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(30, 8, NULL, 'in', 2500.00, '2025-01-20 02:29:00', '20250015 | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(31, 8, NULL, 'in', 1550.00, '2025-01-20 20:24:00', '20250016 from 3100(1550 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(32, 8, NULL, 'in', 6000.00, '2025-01-20 20:25:00', '20250017 | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(33, 8, NULL, 'in', 5000.00, '2025-01-20 20:26:00', '20250011 from 8000(3000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(34, 8, NULL, 'in', 3000.00, '2025-01-21 21:18:00', '20250018 | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(35, 8, NULL, 'in', 2000.00, '2025-01-21 22:10:00', '20250019 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(36, 8, NULL, 'in', 1800.00, '2025-01-21 22:24:00', '20250020 | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(37, 8, NULL, 'in', 4000.00, '2025-01-22 20:10:00', '20250022 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(38, 8, NULL, 'out', 10000.00, '2025-01-23 09:38:00', 'Paid to Tushar | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(39, 7, NULL, 'in', 10000.00, '2025-01-23 10:02:00', 'Received from lalu as Upad 22-2-25 | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(40, 8, NULL, 'out', 1280.00, '2025-01-23 19:11:00', '3D dry ice payment | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(41, 8, NULL, 'in', 2500.00, '2025-01-25 21:05:00', '20250026 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(42, 8, NULL, 'out', 2400.00, '2025-01-25 21:52:00', 'Mukeshbhai tempo rent Roman dine and gokul vadi | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(43, 8, NULL, 'out', 1100.00, '2025-01-26 15:18:00', 'Di-shreeji balloon green ribbin white | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(44, 8, NULL, 'out', 330.00, '2025-01-30 07:02:00', 'Vinyale stick with 3mm sheet | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(45, 8, NULL, 'in', 1000.00, '2025-01-30 18:19:00', '20250028 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(46, 8, NULL, 'in', 1500.00, '2025-01-30 18:20:00', '20250027 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(47, 8, NULL, 'in', 200.00, '2025-01-31 06:27:00', 'Order comission | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(48, 8, NULL, 'in', 4500.00, '2025-02-01 19:50:00', '20250028 from 4500+1000 extra stand (1000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(49, 8, NULL, 'out', 1740.00, '2025-02-01 19:52:00', 'Welcome stand 2 quantity flower nasto c_kit lolipop | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(50, 8, NULL, 'in', 2300.00, '2025-02-02 01:07:00', '20250030 | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(51, 8, NULL, 'in', 5500.00, '2025-02-02 01:08:00', '20250022 from 9500 (4000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(52, 8, NULL, 'in', 1000.00, '2025-02-03 20:30:00', 'Payro | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(53, 8, NULL, 'out', 1300.00, '2025-02-05 09:26:00', 'Lal rixa payment-sahara murgakendra yogichok | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(54, 8, NULL, 'out', 6000.00, '2025-02-05 09:35:00', 'Sip 6th installment | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(55, 8, NULL, 'in', 3500.00, '2025-02-06 11:06:00', '20250023 | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(56, 8, NULL, 'in', 12000.00, '2025-02-06 22:38:00', '20250024 from 17000 (5000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(57, 8, NULL, 'out', 30.00, '2025-02-07 06:38:00', 'Chai pani | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(58, 8, NULL, 'in', 500.00, '2025-02-07 22:16:00', '20250031 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(59, 8, NULL, 'in', 1000.00, '2025-02-08 05:06:00', '20250032 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(60, 8, NULL, 'in', 3000.00, '2025-02-08 17:58:00', '20250033 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(61, 8, NULL, 'in', 1000.00, '2025-02-08 17:58:00', '20250034 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(62, 8, NULL, 'in', 1000.00, '2025-02-08 17:58:00', '20250035 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(63, 8, NULL, 'in', 7200.00, '2025-02-08 22:26:00', '20250008 from 9200(2000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:31'),
+(64, 8, NULL, 'out', 4300.00, '2025-02-08 22:27:00', 'Di-shree ji 3 box payro 10 gun 10 paper shot | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(65, 8, NULL, 'out', 6800.00, '2025-02-09 09:10:00', 'Vasim ne payment  20250008 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(66, 8, NULL, 'out', 80.00, '2025-02-09 16:36:00', 'Nasta pani | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(67, 8, NULL, 'in', 400.00, '2025-02-10 21:11:00', 'Order commission 2 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(68, 8, NULL, 'out', 500.00, '2025-02-11 07:18:00', 'Lal rixa dr world payment | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(69, 8, NULL, 'in', 4500.00, '2025-02-11 23:08:00', '20250033 from 7500 (3000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(70, 8, NULL, 'in', 200.00, '2025-02-15 18:03:00', 'Order commission | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(71, 8, NULL, 'out', 6000.00, '2025-02-16 13:25:00', 'Room rent-January 2025 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(72, 8, NULL, 'in', 6000.00, '2025-02-16 13:54:00', '20250036 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(73, 8, NULL, 'out', 1200.00, '2025-02-17 18:42:00', 'Di-shreeji 10 gun | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(74, 8, NULL, 'in', 2000.00, '2025-02-19 05:46:00', '20250032 from 3500(1000 advance)(500 deduct) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(75, 8, NULL, 'in', 250.00, '2025-02-20 18:23:00', '6thi board +foil | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(76, 8, NULL, 'out', 1620.00, '2025-02-23 11:25:00', 'Saman na | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(77, 8, NULL, 'out', 300.00, '2025-02-24 23:08:00', '6 kg dry ice | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(78, 8, NULL, 'in', 2500.00, '2025-02-25 21:20:00', '20250039 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(79, 8, NULL, 'in', 4000.00, '2025-02-28 06:06:00', '20250040 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(80, 8, NULL, 'in', 6500.00, '2025-03-01 22:21:00', '20250041 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(81, 8, NULL, 'in', 2500.00, '2025-03-01 22:24:00', '20250038 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(82, 8, NULL, 'out', 1400.00, '2025-03-01 22:24:00', 'RR event 20250038 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(83, 8, NULL, 'out', 1610.00, '2025-03-01 22:27:00', 'Mukeshbhai salary-3 day February (23-26) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(84, 8, NULL, 'out', 1540.00, '2025-03-01 22:28:00', 'Mukeshbhai flower petrol bulb | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(85, 8, NULL, 'out', 500.00, '2025-03-02 12:21:00', '10 kg dry ice | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(86, 8, NULL, 'out', 100.00, '2025-03-02 16:52:00', 'Juice | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(87, 8, NULL, 'in', 2000.00, '2025-03-02 16:53:00', '20250027 from 3500(1500 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(88, 8, NULL, 'out', 2000.00, '2025-03-03 08:40:00', 'Triangle majuri | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(89, 8, NULL, 'out', 1200.00, '2025-03-04 19:45:00', 'RR event payment | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(90, 8, NULL, 'in', 200.00, '2025-03-04 19:46:00', 'RR ring rent | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(91, 8, NULL, 'in', 7500.00, '2025-03-05 07:23:00', '20250037 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(92, 8, NULL, 'out', 330.00, '2025-03-05 07:23:00', 'Kathiyavad-Vinayle stiker with sheet | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(93, 8, NULL, 'in', 400.00, '2025-03-09 15:21:00', '4 gun rent | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(94, 8, NULL, 'in', 1000.00, '2025-03-10 17:32:00', '5 gun na tarun jain | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(95, 8, NULL, 'in', 2800.00, '2025-03-10 23:59:00', '20250042 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(96, 8, NULL, 'in', 5500.00, '2025-03-14 14:09:00', '20250044 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(97, 8, NULL, 'in', 3500.00, '2025-03-15 19:48:00', '20250046 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(98, 8, NULL, 'out', 800.00, '2025-03-16 10:40:00', 'RR event 20250045 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(99, 8, NULL, 'out', 1000.00, '2025-03-16 10:42:00', 'RR event 20250044 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(100, 8, NULL, 'out', 400.00, '2025-03-16 10:43:00', 'Cutout na paid | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(101, 8, NULL, 'out', 7000.00, '2025-03-16 12:14:00', 'Room rent:February 2025 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(102, 8, NULL, 'in', 4500.00, '2025-03-16 14:31:00', '20250045 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(103, 8, NULL, 'in', 3200.00, '2025-03-17 18:27:00', '20250047 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(104, 8, NULL, 'in', 1500.00, '2025-03-18 06:08:00', 'Commission +2 order | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(105, 8, NULL, 'in', 1500.00, '2025-03-19 18:08:00', '20250049 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(106, 8, NULL, 'in', 3000.00, '2025-03-19 18:09:00', '20250048 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(107, 8, NULL, 'in', 5000.00, '2025-03-19 19:44:00', '20250051 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(108, 8, NULL, 'in', 500.00, '2025-03-19 22:39:00', '20250052 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(109, 8, NULL, 'out', 3500.00, '2025-03-22 10:42:00', 'R R event paid | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(110, 8, NULL, 'out', 500.00, '2025-03-22 10:44:00', '3D dry ice 10kg 16/3 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(111, 8, NULL, 'in', 1000.00, '2025-03-22 17:32:00', '20250053 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(112, 8, NULL, 'in', 2000.00, '2025-03-22 17:39:00', '20250054 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(113, 8, NULL, 'in', 2600.00, '2025-03-23 18:25:00', '20250053 from 3600(1000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(114, 8, NULL, 'in', 2000.00, '2025-03-23 21:37:00', '20250049 from 3500(1500 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(115, 8, NULL, 'out', 2000.00, '2025-03-23 21:37:00', 'R R event order payment 20250049 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(116, 8, NULL, 'in', 3000.00, '2025-03-25 18:29:00', '20250057 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(117, 8, NULL, 'in', 7500.00, '2025-03-25 18:31:00', '20250043 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(118, 8, NULL, 'out', 2000.00, '2025-03-25 18:35:00', 'RR event 20250057 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(119, 8, NULL, 'in', 2500.00, '2025-03-25 19:49:00', '20250056 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(120, 8, NULL, 'out', 160.00, '2025-03-25 19:49:00', 'Nasto petrol montu | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(121, 8, NULL, 'in', 2500.00, '2025-03-26 18:40:00', '20250058 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(122, 8, NULL, 'out', 1800.00, '2025-03-27 21:32:00', 'Lal rixa rent dabholi entry vadvla circle entry ishverkrupa | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(123, 8, NULL, 'in', 3600.00, '2025-03-27 21:32:00', '20250051 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(124, 8, NULL, 'in', 4000.00, '2025-03-30 16:06:00', '20250048 from 7000 (3000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(125, 8, NULL, 'out', 15000.00, '2025-03-30 17:43:00', 'Mukeshbhai salary-March 2025 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(126, 8, NULL, 'in', 3000.00, '2025-03-30 17:43:00', '20250054 from 5000 (2000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(127, 8, NULL, 'out', 100.00, '2025-03-30 17:43:00', 'Nasto pani | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(128, 8, NULL, 'out', 550.00, '2025-03-30 17:44:00', 'Tempo rent | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(129, 8, NULL, 'out', 250.00, '2025-03-30 17:44:00', 'Rixa rent | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(130, 8, NULL, 'out', 100.00, '2025-03-30 17:44:00', 'Sofo utarvana | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(131, 8, NULL, 'out', 700.00, '2025-04-01 20:00:00', 'RR event 20250054 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(132, 8, NULL, 'in', 2200.00, '2025-04-02 18:44:00', '20250059 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(133, 8, NULL, 'in', 2500.00, '2025-04-03 18:05:00', '20250060 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(134, 8, NULL, 'out', 2040.00, '2025-04-06 16:36:00', 'Di-shreeji decoration white blue balloon ribbon | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(135, 8, NULL, 'in', 4500.00, '2025-04-06 21:02:00', '20250058 from 7000 (2500 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(136, 8, NULL, 'out', 4400.00, '2025-04-07 17:28:00', 'Mukeshbhai rixa tempo payment (i mata road,2 canal road,jagatnaka,adajan) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(137, 8, NULL, 'in', 2500.00, '2025-04-08 20:33:00', '20250052 from 3000(500 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(138, 8, NULL, 'in', 1800.00, '2025-04-09 19:33:00', '20250061 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(139, 8, NULL, 'in', 1000.00, '2025-04-10 17:50:00', '20250062 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(140, 8, NULL, 'in', 3000.00, '2025-04-12 18:45:00', '20250063 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(141, 8, NULL, 'out', 60.00, '2025-04-13 10:00:00', 'Nasta pani | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(142, 8, NULL, 'out', 1130.00, '2025-04-13 10:12:00', 'Mukeshbhai petrol | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(143, 8, NULL, 'out', 160.00, '2025-04-13 11:25:00', 'Watermelon shake | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(144, 8, NULL, 'in', 3500.00, '2025-04-13 19:52:00', '20250065 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(145, 8, NULL, 'in', 4500.00, '2025-04-14 09:59:00', '20250066 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(146, 8, NULL, 'in', 2000.00, '2025-04-14 21:09:00', '20250067 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(147, 8, NULL, 'in', 1900.00, '2025-04-16 18:22:00', '20250062 from 3000(1000 advance) (100 cut light na) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(148, 8, NULL, 'out', 3600.00, '2025-04-16 18:25:00', 'RR event payment 20250066 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(149, 8, NULL, 'in', 200.00, '2025-04-16 18:26:00', '4 Matka rent RR event | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(150, 8, NULL, 'in', 5000.00, '2025-04-17 18:16:00', '20250070 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(151, 8, NULL, 'out', 300.00, '2025-04-18 07:05:00', 'Rixa rent | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(152, 8, NULL, 'out', 5500.00, '2025-04-18 07:05:00', 'Montu payment clear till now | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(153, 8, NULL, 'in', 2500.00, '2025-04-18 19:33:00', '20250071 Advance (from 7500) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(154, 8, NULL, 'in', 500.00, '2025-04-19 13:37:00', '20250072 Advance from(1500) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(155, 8, NULL, 'out', 300.00, '2025-04-19 13:38:00', 'Lal rixa payment AR mall | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(156, 8, NULL, 'out', 370.00, '2025-04-19 19:56:00', 'Flower petrol items | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(157, 8, NULL, 'in', 7500.00, '2025-04-21 18:27:00', '20250068 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(158, 8, NULL, 'out', 4000.00, '2025-04-21 18:27:00', 'RR event payment 20250068 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(159, 8, NULL, 'out', 14000.00, '2025-04-21 18:56:00', 'Room rent: March and April 2025 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(160, 8, NULL, 'out', 2500.00, '2025-04-21 18:56:00', 'Ads BPL tournament | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(161, 8, NULL, 'in', 1000.00, '2025-04-22 21:31:00', '20250072 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(162, 8, NULL, 'out', 325.00, '2025-04-24 06:30:00', 'Balloon petrol nasto | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(163, 8, NULL, 'in', 7000.00, '2025-04-24 20:52:00', '20250076 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(164, 8, NULL, 'out', 800.00, '2025-04-24 20:52:00', 'Balloon etc mukeshbhai | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(165, 8, NULL, 'in', 7000.00, '2025-04-25 07:30:00', '20250077 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(166, 8, NULL, 'out', 1120.00, '2025-04-25 17:56:00', 'Shreeji | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(167, 8, NULL, 'in', 3300.00, '2025-04-27 12:10:00', '20250080 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(168, 8, NULL, 'in', 4000.00, '2025-04-28 19:33:00', '20250081 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(169, 8, NULL, 'out', 6000.00, '2025-04-29 09:37:00', 'SIP month April | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(170, 8, NULL, 'out', 4151.00, '2025-04-29 14:00:00', 'Shreeji 20 payro 10 packet gold chrome 1000 purple balloon 11 battery | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(171, 8, NULL, 'in', 2000.00, '2025-05-03 09:22:00', '20250085 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(172, 8, NULL, 'in', 3500.00, '2025-05-04 18:39:00', '20250084 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(173, 8, NULL, 'in', 2300.00, '2025-05-05 18:55:00', '20250086 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(174, 8, NULL, 'in', 2000.00, '2025-05-08 22:27:00', '20250089 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(175, 8, NULL, 'in', 800.00, '2025-05-09 19:03:00', 'Samn commision | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(176, 8, NULL, 'in', 600.00, '2025-05-09 22:18:00', '20250090 advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(177, 8, NULL, 'out', 1560.00, '2025-05-11 08:49:00', '3D dry ice 24kg | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(178, 8, NULL, 'in', 7000.00, '2025-05-11 14:48:00', '20250081 from 11000(4000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(179, 8, NULL, 'in', 7500.00, '2025-05-11 19:27:00', '20250092 from 7700(200 deduct) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(180, 8, NULL, 'out', 450.00, '2025-05-11 19:27:00', 'Shreeji-Balloon blast balloon circuit | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(181, 8, NULL, 'in', 2000.00, '2025-05-12 18:40:00', '20250090 from 2600(600 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(182, 8, NULL, 'out', 1800.00, '2025-05-12 18:43:00', 'RR event payment 20250090 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(183, 8, NULL, 'out', 670.00, '2025-05-12 18:43:00', '3d dry ice 9.5 kg | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(184, 8, NULL, 'in', 2000.00, '2025-05-13 18:49:00', '20250093 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(185, 8, NULL, 'in', 1000.00, '2025-05-14 18:14:00', '20250091 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(186, 8, NULL, 'in', 600.00, '2025-05-14 18:14:00', 'Welcome stnad rent | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(187, 8, NULL, 'out', 660.00, '2025-05-14 19:34:00', 'Kathiyavadi 2 print | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(188, 8, NULL, 'in', 3100.00, '2025-05-15 18:58:00', '20250095 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(189, 8, NULL, 'out', 2200.00, '2025-05-15 18:58:00', 'RR Event payment 20250095 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(190, 8, NULL, 'in', 6500.00, '2025-05-17 21:34:00', '20250093 from 8500(2000 Advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(191, 8, NULL, 'in', 3000.00, '2025-05-18 17:34:00', '20250096 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(192, 8, NULL, 'out', 700.00, '2025-05-19 18:19:00', '3D dry ice | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(193, 8, NULL, 'in', 4500.00, '2025-05-19 19:52:00', '20250094 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(194, 8, NULL, 'out', 778.00, '2025-05-22 19:22:00', 'Kathiyavadi | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(195, 8, NULL, 'out', 50.00, '2025-05-22 21:34:00', 'Feviquick | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(196, 8, NULL, 'in', 7200.00, '2025-05-23 18:04:00', '20250097 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(197, 8, NULL, 'out', 100.00, '2025-05-25 13:00:00', 'Snatra | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(198, 8, NULL, 'out', 6000.00, '2025-05-28 19:19:00', 'Sip month May | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(199, 8, NULL, 'out', 2500.00, '2025-05-28 19:22:00', 'Tempo rent vesu | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(200, 8, NULL, 'in', 4500.00, '2025-06-03 15:19:00', '20250099 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(201, 8, NULL, 'out', 4000.00, '2025-06-03 15:19:00', 'RR event 20250099 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(202, 8, NULL, 'out', 330.00, '2025-06-04 20:26:00', 'Print | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(203, 8, NULL, 'in', 8500.00, '2025-06-05 18:36:00', '20250089 from 10500(2000 Advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(204, 8, NULL, 'out', 880.00, '2025-06-05 19:19:00', '3D dry ice | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(205, 8, NULL, 'out', 2700.00, '2025-06-05 19:44:00', 'Temp rent mukeshbhai | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(206, 8, NULL, 'in', 8500.00, '2025-06-09 19:51:00', '20250101 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(207, 8, NULL, 'out', 190.00, '2025-06-27 19:24:00', 'Nasta pani | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(208, 8, NULL, 'out', 2000.00, '2025-06-27 21:17:00', 'Montu payment | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(209, 8, NULL, 'out', 4128.00, '2025-06-29 11:14:00', 'Amazia | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(210, 8, NULL, 'out', 900.00, '2025-06-29 11:14:00', 'Harekrushan restaurant | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(211, 8, NULL, 'in', 4500.00, '2025-06-29 11:16:00', '20250103 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(212, 8, NULL, 'out', 520.00, '2025-07-03 12:58:00', 'Tar spery spark plug | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(213, 8, NULL, 'in', 12500.00, '2025-07-04 18:45:00', '20250104 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(214, 8, NULL, 'out', 3100.00, '2025-07-06 16:53:00', 'Lalbhai rixa rent | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(215, 8, NULL, 'out', 282.00, '2025-07-07 08:58:00', 'Nasta pani | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(216, 8, NULL, 'out', 430.00, '2025-07-08 19:07:00', 'Petrol neon light repair | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(217, 8, NULL, 'out', 1100.00, '2025-07-08 19:07:00', 'Mukeshbhai payment | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(218, 8, NULL, 'in', 4800.00, '2025-07-08 19:13:00', '20250107 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(219, 8, NULL, 'out', 14000.00, '2025-07-11 20:39:00', 'Room rent: May & June 2025 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(220, 8, NULL, 'out', 235.00, '2025-07-20 16:57:00', 'Nasta pani | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(221, 8, NULL, 'out', 700.00, '2025-08-08 13:24:00', 'Montu order payment | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(222, 8, NULL, 'in', 2500.00, '2025-08-12 20:05:00', '20250113 (500 extra) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(223, 8, NULL, 'in', 500.00, '2025-08-14 05:46:00', '20250118 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(224, 8, NULL, 'in', 2400.00, '2025-08-15 17:46:00', '20250119 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(225, 8, NULL, 'in', 3000.00, '2025-08-20 19:05:00', '20250121 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(226, 8, NULL, 'in', 500.00, '2025-08-22 20:37:00', 'Item rent galgota | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(227, 8, NULL, 'out', 4140.00, '2025-08-24 17:41:00', 'Shreeji gnpti frame Foil | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(228, 8, NULL, 'out', 6000.00, '2025-08-27 20:34:00', 'Sip Aug 2025 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(229, 8, NULL, 'in', 3600.00, '2025-08-27 20:43:00', '20250124 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(230, 8, NULL, 'out', 400.00, '2025-09-01 13:06:00', 'Tempo rent tenjdra vadi | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(231, 8, NULL, 'in', 4000.00, '2025-09-02 18:56:00', '20250131 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(232, 8, NULL, 'in', 2500.00, '2025-09-07 08:59:00', '20250132 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(233, 7, NULL, 'in', 3800.00, '2025-09-07 17:07:00', '20250123 | Party: Ashwin bhai makan malik | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(234, 8, NULL, 'out', 300.00, '2025-09-07 18:23:00', 'Nasto | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(235, 8, NULL, 'in', 800.00, '2025-09-07 18:45:00', 'Comission na | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(236, 8, NULL, 'in', 3000.00, '2025-09-07 18:56:00', '20250121 from 6000  (3000advance ) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(237, 8, NULL, 'out', 275.00, '2025-09-21 15:40:00', 'Shreeji-yellow balloon | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(238, 8, NULL, 'in', 4500.00, '2025-09-23 20:37:00', '20250136 from 5500(1000 advance) | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(239, 8, NULL, 'out', 660.00, '2025-09-28 20:29:00', 'Flower | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(240, 8, NULL, 'out', 500.00, '2025-10-03 16:38:00', 'Jula na | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(241, 8, NULL, 'out', 400.00, '2025-10-03 16:38:00', 'Petrol | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(242, 8, NULL, 'in', 8000.00, '2025-10-03 20:49:00', '20250140 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(243, 8, NULL, 'out', 1620.00, '2025-10-10 19:46:00', 'Decoration itmes Rajan paid | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(244, 8, NULL, 'in', 1600.00, '2025-10-11 18:11:00', '20250142 | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(245, 8, NULL, 'in', 500.00, '2025-10-11 18:59:00', '20250146 Advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(246, 8, NULL, 'in', 2800.00, '2025-10-26 12:00:00', '20250134 cash V | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(247, 8, NULL, 'in', 3500.00, '2025-10-26 12:01:00', '20250139 Cash V | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(248, 8, NULL, 'in', 7200.00, '2025-10-26 12:02:00', '20250138 Cash V  5200 + 2000 online advance | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(249, 8, NULL, 'in', 3200.00, '2025-10-26 12:04:00', '20250142 Cash V | Mode: Cash', NULL, 8, '2025-11-04 06:48:32'),
+(250, 8, NULL, 'in', 2000.00, '2025-10-26 12:05:00', 'R R event saman na Cash V | Mode: Cash', NULL, 8, '2025-11-04 06:48:33'),
+(251, 8, NULL, 'in', 1500.00, '2025-10-26 12:07:00', '20250141 Cash V 1000 +500 online | Mode: Cash', NULL, 8, '2025-11-04 06:48:33'),
+(252, 8, NULL, 'in', 4000.00, '2025-10-26 12:08:00', '20250145 Cash V | Mode: Cash', NULL, 8, '2025-11-04 06:48:33'),
+(253, 8, NULL, 'in', 5000.00, '2025-10-26 12:08:00', '20250147 cash V | Mode: Cash', NULL, 8, '2025-11-04 06:48:33'),
+(254, 8, NULL, 'in', 7000.00, '2025-10-26 12:09:00', '20250155 Cash V | Mode: Cash', NULL, 8, '2025-11-04 06:48:33'),
+(255, 8, NULL, 'in', 2100.00, '2025-10-26 12:10:00', '20250153 cash V | Mode: Cash', NULL, 8, '2025-11-04 06:48:33'),
+(256, 8, NULL, 'in', 5600.00, '2025-10-26 12:11:00', '20250152 cash V 1600+4000 online | Mode: Cash', NULL, 8, '2025-11-04 06:48:33'),
+(257, 8, 8, 'out', 32000.00, '2025-01-01 11:07:00', 'Bike old Unicorn | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(258, 8, 8, 'in', 5000.00, '2025-01-01 22:38:00', '20250024 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(259, 8, 8, 'in', 2000.00, '2025-01-08 20:05:00', '20250008 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(260, 8, 8, 'in', 2000.00, '2025-01-08 20:05:00', '20250005 cash mukeshbhai pase thi leva na | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(261, 8, 8, 'out', 250.00, '2025-01-12 11:13:00', 'Board repair | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(262, 8, 8, 'in', 3000.00, '2025-01-13 18:32:00', '20250011 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(263, 8, 8, 'in', 4400.00, '2025-01-13 18:32:00', '20250010 | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(264, 8, 8, 'out', 100.00, '2025-01-13 18:32:00', 'Petrol | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(265, 8, 8, 'out', 30.00, '2025-01-16 06:34:00', 'Chai pani | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(266, 8, 8, 'out', 660.00, '2025-01-16 18:41:00', 'Kathiyavadi-2 print with attached 3mm sheet | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(267, 8, 8, 'in', 2000.00, '2025-01-17 18:31:00', '20250012 from 2500 (500 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(268, 8, 8, 'out', 3500.00, '2025-01-18 19:41:00', 'Dj na | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(269, 8, 8, 'in', 21500.00, '2025-01-19 10:53:00', '20250006 from 23000 +2800+500+200 (advacne 5000) | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(270, 8, 8, 'in', 3000.00, '2025-01-19 10:55:00', 'Gun rent | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(271, 8, 8, 'in', 1000.00, '2025-01-19 10:55:00', 'Item rent | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(272, 8, 8, 'out', 9000.00, '2025-01-19 15:18:00', 'Mukeshbhai salary 1 to 18 January 2025 | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(273, 8, 8, 'out', 4540.00, '2025-01-19 18:11:00', 'Di-shreeji balloon double tap selo tap | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(274, 8, 8, 'out', 200.00, '2025-01-19 18:11:00', 'Flower | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(275, 8, 8, 'in', 1550.00, '2025-01-19 18:57:00', '20250016 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(276, 8, 8, 'in', 2500.00, '2025-01-20 02:29:00', '20250015 | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(277, 8, 8, 'in', 1550.00, '2025-01-20 20:24:00', '20250016 from 3100(1550 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(278, 8, 8, 'in', 6000.00, '2025-01-20 20:25:00', '20250017 | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(279, 8, 8, 'in', 5000.00, '2025-01-20 20:26:00', '20250011 from 8000(3000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(280, 8, 8, 'in', 3000.00, '2025-01-21 21:18:00', '20250018 | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(281, 8, 8, 'in', 2000.00, '2025-01-21 22:10:00', '20250019 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(282, 8, 8, 'in', 1800.00, '2025-01-21 22:24:00', '20250020 | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(283, 8, 8, 'in', 4000.00, '2025-01-22 20:10:00', '20250022 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(284, 8, 8, 'out', 10000.00, '2025-01-23 09:38:00', 'Paid to Tushar | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(285, 7, 8, 'in', 10000.00, '2025-01-23 10:02:00', 'Received from lalu as Upad 22-2-25 | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(286, 8, 8, 'out', 1280.00, '2025-01-23 19:11:00', '3D dry ice payment | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(287, 8, 8, 'in', 2500.00, '2025-01-25 21:05:00', '20250026 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(288, 8, 8, 'out', 2400.00, '2025-01-25 21:52:00', 'Mukeshbhai tempo rent Roman dine and gokul vadi | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(289, 8, 8, 'out', 1100.00, '2025-01-26 15:18:00', 'Di-shreeji balloon green ribbin white | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(290, 8, 8, 'out', 330.00, '2025-01-30 07:02:00', 'Vinyale stick with 3mm sheet | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(291, 8, 8, 'in', 1000.00, '2025-01-30 18:19:00', '20250028 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(292, 8, 8, 'in', 1500.00, '2025-01-30 18:20:00', '20250027 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(293, 8, 8, 'in', 200.00, '2025-01-31 06:27:00', 'Order comission | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(294, 8, 8, 'in', 4500.00, '2025-02-01 19:50:00', '20250028 from 4500+1000 extra stand (1000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(295, 8, 8, 'out', 1740.00, '2025-02-01 19:52:00', 'Welcome stand 2 quantity flower nasto c_kit lolipop | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(296, 8, 8, 'in', 2300.00, '2025-02-02 01:07:00', '20250030 | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(297, 8, 8, 'in', 5500.00, '2025-02-02 01:08:00', '20250022 from 9500 (4000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(298, 8, 8, 'in', 1000.00, '2025-02-03 20:30:00', 'Payro | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(299, 8, 8, 'out', 1300.00, '2025-02-05 09:26:00', 'Lal rixa payment-sahara murgakendra yogichok | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(300, 8, 8, 'out', 6000.00, '2025-02-05 09:35:00', 'Sip 6th installment | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(301, 8, 8, 'in', 3500.00, '2025-02-06 11:06:00', '20250023 | Mode: Cash', NULL, 7, '2025-11-04 06:58:32'),
+(302, 8, 8, 'in', 12000.00, '2025-02-06 22:38:00', '20250024 from 17000 (5000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(303, 8, 8, 'out', 30.00, '2025-02-07 06:38:00', 'Chai pani | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(304, 8, 8, 'in', 500.00, '2025-02-07 22:16:00', '20250031 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(305, 8, 8, 'in', 1000.00, '2025-02-08 05:06:00', '20250032 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(306, 8, 8, 'in', 3000.00, '2025-02-08 17:58:00', '20250033 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(307, 8, 8, 'in', 1000.00, '2025-02-08 17:58:00', '20250034 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(308, 8, 8, 'in', 1000.00, '2025-02-08 17:58:00', '20250035 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(309, 8, 8, 'in', 7200.00, '2025-02-08 22:26:00', '20250008 from 9200(2000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(310, 8, 8, 'out', 4300.00, '2025-02-08 22:27:00', 'Di-shree ji 3 box payro 10 gun 10 paper shot | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(311, 8, 8, 'out', 6800.00, '2025-02-09 09:10:00', 'Vasim ne payment  20250008 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(312, 8, 8, 'out', 80.00, '2025-02-09 16:36:00', 'Nasta pani | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(313, 8, 8, 'in', 400.00, '2025-02-10 21:11:00', 'Order commission 2 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(314, 8, 8, 'out', 500.00, '2025-02-11 07:18:00', 'Lal rixa dr world payment | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(315, 8, 8, 'in', 4500.00, '2025-02-11 23:08:00', '20250033 from 7500 (3000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(316, 8, 8, 'in', 200.00, '2025-02-15 18:03:00', 'Order commission | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(317, 8, 8, 'out', 6000.00, '2025-02-16 13:25:00', 'Room rent-January 2025 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(318, 8, 8, 'in', 6000.00, '2025-02-16 13:54:00', '20250036 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(319, 8, 8, 'out', 1200.00, '2025-02-17 18:42:00', 'Di-shreeji 10 gun | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(320, 8, 8, 'in', 2000.00, '2025-02-19 05:46:00', '20250032 from 3500(1000 advance)(500 deduct) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(321, 8, 8, 'in', 250.00, '2025-02-20 18:23:00', '6thi board +foil | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(322, 8, 8, 'out', 1620.00, '2025-02-23 11:25:00', 'Saman na | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(323, 8, 8, 'out', 300.00, '2025-02-24 23:08:00', '6 kg dry ice | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(324, 8, 8, 'in', 2500.00, '2025-02-25 21:20:00', '20250039 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(325, 8, 8, 'in', 4000.00, '2025-02-28 06:06:00', '20250040 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(326, 8, 8, 'in', 6500.00, '2025-03-01 22:21:00', '20250041 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(327, 8, 8, 'in', 2500.00, '2025-03-01 22:24:00', '20250038 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(328, 8, 8, 'out', 1400.00, '2025-03-01 22:24:00', 'RR event 20250038 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(329, 8, 8, 'out', 1610.00, '2025-03-01 22:27:00', 'Mukeshbhai salary-3 day February (23-26) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(330, 8, 8, 'out', 1540.00, '2025-03-01 22:28:00', 'Mukeshbhai flower petrol bulb | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(331, 8, 8, 'out', 500.00, '2025-03-02 12:21:00', '10 kg dry ice | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(332, 8, 8, 'out', 100.00, '2025-03-02 16:52:00', 'Juice | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(333, 8, 8, 'in', 2000.00, '2025-03-02 16:53:00', '20250027 from 3500(1500 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(334, 8, 8, 'out', 2000.00, '2025-03-03 08:40:00', 'Triangle majuri | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(335, 8, 8, 'out', 1200.00, '2025-03-04 19:45:00', 'RR event payment | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(336, 8, 8, 'in', 200.00, '2025-03-04 19:46:00', 'RR ring rent | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(337, 8, 8, 'in', 7500.00, '2025-03-05 07:23:00', '20250037 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(338, 8, 8, 'out', 330.00, '2025-03-05 07:23:00', 'Kathiyavad-Vinayle stiker with sheet | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(339, 8, 8, 'in', 400.00, '2025-03-09 15:21:00', '4 gun rent | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(340, 8, 8, 'in', 1000.00, '2025-03-10 17:32:00', '5 gun na tarun jain | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(341, 8, 8, 'in', 2800.00, '2025-03-10 23:59:00', '20250042 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(342, 8, 8, 'in', 5500.00, '2025-03-14 14:09:00', '20250044 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(343, 8, 8, 'in', 3500.00, '2025-03-15 19:48:00', '20250046 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(344, 8, 8, 'out', 800.00, '2025-03-16 10:40:00', 'RR event 20250045 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(345, 8, 8, 'out', 1000.00, '2025-03-16 10:42:00', 'RR event 20250044 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(346, 8, 8, 'out', 400.00, '2025-03-16 10:43:00', 'Cutout na paid | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(347, 8, 8, 'out', 7000.00, '2025-03-16 12:14:00', 'Room rent:February 2025 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(348, 8, 8, 'in', 4500.00, '2025-03-16 14:31:00', '20250045 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(349, 8, 8, 'in', 3200.00, '2025-03-17 18:27:00', '20250047 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(350, 8, 8, 'in', 1500.00, '2025-03-18 06:08:00', 'Commission +2 order | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(351, 8, 8, 'in', 1500.00, '2025-03-19 18:08:00', '20250049 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(352, 8, 8, 'in', 3000.00, '2025-03-19 18:09:00', '20250048 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(353, 8, 8, 'in', 5000.00, '2025-03-19 19:44:00', '20250051 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(354, 8, 8, 'in', 500.00, '2025-03-19 22:39:00', '20250052 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(355, 8, 8, 'out', 3500.00, '2025-03-22 10:42:00', 'R R event paid | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(356, 8, 8, 'out', 500.00, '2025-03-22 10:44:00', '3D dry ice 10kg 16/3 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(357, 8, 8, 'in', 1000.00, '2025-03-22 17:32:00', '20250053 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(358, 8, 8, 'in', 2000.00, '2025-03-22 17:39:00', '20250054 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(359, 8, 8, 'in', 2600.00, '2025-03-23 18:25:00', '20250053 from 3600(1000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(360, 8, 8, 'in', 2000.00, '2025-03-23 21:37:00', '20250049 from 3500(1500 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(361, 8, 8, 'out', 2000.00, '2025-03-23 21:37:00', 'R R event order payment 20250049 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(362, 8, 8, 'in', 3000.00, '2025-03-25 18:29:00', '20250057 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(363, 8, 8, 'in', 7500.00, '2025-03-25 18:31:00', '20250043 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(364, 8, 8, 'out', 2000.00, '2025-03-25 18:35:00', 'RR event 20250057 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(365, 8, 8, 'in', 2500.00, '2025-03-25 19:49:00', '20250056 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(366, 8, 8, 'out', 160.00, '2025-03-25 19:49:00', 'Nasto petrol montu | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(367, 8, 8, 'in', 2500.00, '2025-03-26 18:40:00', '20250058 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(368, 8, 8, 'out', 1800.00, '2025-03-27 21:32:00', 'Lal rixa rent dabholi entry vadvla circle entry ishverkrupa | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(369, 8, 8, 'in', 3600.00, '2025-03-27 21:32:00', '20250051 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(370, 8, 8, 'in', 4000.00, '2025-03-30 16:06:00', '20250048 from 7000 (3000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(371, 8, 8, 'out', 15000.00, '2025-03-30 17:43:00', 'Mukeshbhai salary-March 2025 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(372, 8, 8, 'in', 3000.00, '2025-03-30 17:43:00', '20250054 from 5000 (2000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(373, 8, 8, 'out', 100.00, '2025-03-30 17:43:00', 'Nasto pani | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(374, 8, 8, 'out', 550.00, '2025-03-30 17:44:00', 'Tempo rent | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(375, 8, 8, 'out', 250.00, '2025-03-30 17:44:00', 'Rixa rent | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(376, 8, 8, 'out', 100.00, '2025-03-30 17:44:00', 'Sofo utarvana | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(377, 8, 8, 'out', 700.00, '2025-04-01 20:00:00', 'RR event 20250054 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(378, 8, 8, 'in', 2200.00, '2025-04-02 18:44:00', '20250059 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(379, 8, 8, 'in', 2500.00, '2025-04-03 18:05:00', '20250060 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(380, 8, 8, 'out', 2040.00, '2025-04-06 16:36:00', 'Di-shreeji decoration white blue balloon ribbon | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(381, 8, 8, 'in', 4500.00, '2025-04-06 21:02:00', '20250058 from 7000 (2500 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(382, 8, 8, 'out', 4400.00, '2025-04-07 17:28:00', 'Mukeshbhai rixa tempo payment (i mata road,2 canal road,jagatnaka,adajan) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(383, 8, 8, 'in', 2500.00, '2025-04-08 20:33:00', '20250052 from 3000(500 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(384, 8, 8, 'in', 1800.00, '2025-04-09 19:33:00', '20250061 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(385, 8, 8, 'in', 1000.00, '2025-04-10 17:50:00', '20250062 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(386, 8, 8, 'in', 3000.00, '2025-04-12 18:45:00', '20250063 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(387, 8, 8, 'out', 60.00, '2025-04-13 10:00:00', 'Nasta pani | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(388, 8, 8, 'out', 1130.00, '2025-04-13 10:12:00', 'Mukeshbhai petrol | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(389, 8, 8, 'out', 160.00, '2025-04-13 11:25:00', 'Watermelon shake | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(390, 8, 8, 'in', 3500.00, '2025-04-13 19:52:00', '20250065 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(391, 8, 8, 'in', 4500.00, '2025-04-14 09:59:00', '20250066 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(392, 8, 8, 'in', 2000.00, '2025-04-14 21:09:00', '20250067 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(393, 8, 8, 'in', 1900.00, '2025-04-16 18:22:00', '20250062 from 3000(1000 advance) (100 cut light na) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(394, 8, 8, 'out', 3600.00, '2025-04-16 18:25:00', 'RR event payment 20250066 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(395, 8, 8, 'in', 200.00, '2025-04-16 18:26:00', '4 Matka rent RR event | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(396, 8, 8, 'in', 5000.00, '2025-04-17 18:16:00', '20250070 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(397, 8, 8, 'out', 300.00, '2025-04-18 07:05:00', 'Rixa rent | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(398, 8, 8, 'out', 5500.00, '2025-04-18 07:05:00', 'Montu payment clear till now | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(399, 8, 8, 'in', 2500.00, '2025-04-18 19:33:00', '20250071 Advance (from 7500) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(400, 8, 8, 'in', 500.00, '2025-04-19 13:37:00', '20250072 Advance from(1500) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(401, 8, 8, 'out', 300.00, '2025-04-19 13:38:00', 'Lal rixa payment AR mall | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(402, 8, 8, 'out', 370.00, '2025-04-19 19:56:00', 'Flower petrol items | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(403, 8, 8, 'in', 7500.00, '2025-04-21 18:27:00', '20250068 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(404, 8, 8, 'out', 4000.00, '2025-04-21 18:27:00', 'RR event payment 20250068 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(405, 8, 8, 'out', 14000.00, '2025-04-21 18:56:00', 'Room rent: March and April 2025 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(406, 8, 8, 'out', 2500.00, '2025-04-21 18:56:00', 'Ads BPL tournament | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(407, 8, 8, 'in', 1000.00, '2025-04-22 21:31:00', '20250072 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(408, 8, 8, 'out', 325.00, '2025-04-24 06:30:00', 'Balloon petrol nasto | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(409, 8, 8, 'in', 7000.00, '2025-04-24 20:52:00', '20250076 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(410, 8, 8, 'out', 800.00, '2025-04-24 20:52:00', 'Balloon etc mukeshbhai | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(411, 8, 8, 'in', 7000.00, '2025-04-25 07:30:00', '20250077 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(412, 8, 8, 'out', 1120.00, '2025-04-25 17:56:00', 'Shreeji | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(413, 8, 8, 'in', 3300.00, '2025-04-27 12:10:00', '20250080 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(414, 8, 8, 'in', 4000.00, '2025-04-28 19:33:00', '20250081 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(415, 8, 8, 'out', 6000.00, '2025-04-29 09:37:00', 'SIP month April | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(416, 8, 8, 'out', 4151.00, '2025-04-29 14:00:00', 'Shreeji 20 payro 10 packet gold chrome 1000 purple balloon 11 battery | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(417, 8, 8, 'in', 2000.00, '2025-05-03 09:22:00', '20250085 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(418, 8, 8, 'in', 3500.00, '2025-05-04 18:39:00', '20250084 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(419, 8, 8, 'in', 2300.00, '2025-05-05 18:55:00', '20250086 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(420, 8, 8, 'in', 2000.00, '2025-05-08 22:27:00', '20250089 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(421, 8, 8, 'in', 800.00, '2025-05-09 19:03:00', 'Samn commision | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(422, 8, 8, 'in', 600.00, '2025-05-09 22:18:00', '20250090 advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(423, 8, 8, 'out', 1560.00, '2025-05-11 08:49:00', '3D dry ice 24kg | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(424, 8, 8, 'in', 7000.00, '2025-05-11 14:48:00', '20250081 from 11000(4000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(425, 8, 8, 'in', 7500.00, '2025-05-11 19:27:00', '20250092 from 7700(200 deduct) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(426, 8, 8, 'out', 450.00, '2025-05-11 19:27:00', 'Shreeji-Balloon blast balloon circuit | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(427, 8, 8, 'in', 2000.00, '2025-05-12 18:40:00', '20250090 from 2600(600 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(428, 8, 8, 'out', 1800.00, '2025-05-12 18:43:00', 'RR event payment 20250090 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(429, 8, 8, 'out', 670.00, '2025-05-12 18:43:00', '3d dry ice 9.5 kg | Mode: Cash', NULL, 7, '2025-11-04 06:58:33');
+INSERT INTO `entries` (`id`, `user_id`, `group_id`, `type`, `amount`, `datetime`, `message`, `attachment`, `created_by`, `created_at`) VALUES
+(430, 8, 8, 'in', 2000.00, '2025-05-13 18:49:00', '20250093 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(431, 8, 8, 'in', 1000.00, '2025-05-14 18:14:00', '20250091 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(432, 8, 8, 'in', 600.00, '2025-05-14 18:14:00', 'Welcome stnad rent | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(433, 8, 8, 'out', 660.00, '2025-05-14 19:34:00', 'Kathiyavadi 2 print | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(434, 8, 8, 'in', 3100.00, '2025-05-15 18:58:00', '20250095 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(435, 8, 8, 'out', 2200.00, '2025-05-15 18:58:00', 'RR Event payment 20250095 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(436, 8, 8, 'in', 6500.00, '2025-05-17 21:34:00', '20250093 from 8500(2000 Advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(437, 8, 8, 'in', 3000.00, '2025-05-18 17:34:00', '20250096 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(438, 8, 8, 'out', 700.00, '2025-05-19 18:19:00', '3D dry ice | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(439, 8, 8, 'in', 4500.00, '2025-05-19 19:52:00', '20250094 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(440, 8, 8, 'out', 778.00, '2025-05-22 19:22:00', 'Kathiyavadi | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(441, 8, 8, 'out', 50.00, '2025-05-22 21:34:00', 'Feviquick | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(442, 8, 8, 'in', 7200.00, '2025-05-23 18:04:00', '20250097 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(443, 8, 8, 'out', 100.00, '2025-05-25 13:00:00', 'Snatra | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(444, 8, 8, 'out', 6000.00, '2025-05-28 19:19:00', 'Sip month May | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(445, 8, 8, 'out', 2500.00, '2025-05-28 19:22:00', 'Tempo rent vesu | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(446, 8, 8, 'in', 4500.00, '2025-06-03 15:19:00', '20250099 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(447, 8, 8, 'out', 4000.00, '2025-06-03 15:19:00', 'RR event 20250099 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(448, 8, 8, 'out', 330.00, '2025-06-04 20:26:00', 'Print | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(449, 8, 8, 'in', 8500.00, '2025-06-05 18:36:00', '20250089 from 10500(2000 Advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(450, 8, 8, 'out', 880.00, '2025-06-05 19:19:00', '3D dry ice | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(451, 8, 8, 'out', 2700.00, '2025-06-05 19:44:00', 'Temp rent mukeshbhai | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(452, 8, 8, 'in', 8500.00, '2025-06-09 19:51:00', '20250101 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(453, 8, 8, 'out', 190.00, '2025-06-27 19:24:00', 'Nasta pani | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(454, 8, 8, 'out', 2000.00, '2025-06-27 21:17:00', 'Montu payment | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(455, 8, 8, 'out', 4128.00, '2025-06-29 11:14:00', 'Amazia | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(456, 8, 8, 'out', 900.00, '2025-06-29 11:14:00', 'Harekrushan restaurant | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(457, 8, 8, 'in', 4500.00, '2025-06-29 11:16:00', '20250103 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(458, 8, 8, 'out', 520.00, '2025-07-03 12:58:00', 'Tar spery spark plug | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(459, 8, 8, 'in', 12500.00, '2025-07-04 18:45:00', '20250104 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(460, 8, 8, 'out', 3100.00, '2025-07-06 16:53:00', 'Lalbhai rixa rent | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(461, 8, 8, 'out', 282.00, '2025-07-07 08:58:00', 'Nasta pani | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(462, 8, 8, 'out', 430.00, '2025-07-08 19:07:00', 'Petrol neon light repair | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(463, 8, 8, 'out', 1100.00, '2025-07-08 19:07:00', 'Mukeshbhai payment | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(464, 8, 8, 'in', 4800.00, '2025-07-08 19:13:00', '20250107 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(465, 8, 8, 'out', 14000.00, '2025-07-11 20:39:00', 'Room rent: May & June 2025 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(466, 8, 8, 'out', 235.00, '2025-07-20 16:57:00', 'Nasta pani | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(467, 8, 8, 'out', 700.00, '2025-08-08 13:24:00', 'Montu order payment | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(468, 8, 8, 'in', 2500.00, '2025-08-12 20:05:00', '20250113 (500 extra) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(469, 8, 8, 'in', 500.00, '2025-08-14 05:46:00', '20250118 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(470, 8, 8, 'in', 2400.00, '2025-08-15 17:46:00', '20250119 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(471, 8, 8, 'in', 3000.00, '2025-08-20 19:05:00', '20250121 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(472, 8, 8, 'in', 500.00, '2025-08-22 20:37:00', 'Item rent galgota | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(473, 8, 8, 'out', 4140.00, '2025-08-24 17:41:00', 'Shreeji gnpti frame Foil | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(474, 8, 8, 'out', 6000.00, '2025-08-27 20:34:00', 'Sip Aug 2025 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(475, 8, 8, 'in', 3600.00, '2025-08-27 20:43:00', '20250124 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(476, 8, 8, 'out', 400.00, '2025-09-01 13:06:00', 'Tempo rent tenjdra vadi | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(477, 8, 8, 'in', 4000.00, '2025-09-02 18:56:00', '20250131 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(478, 8, 8, 'in', 2500.00, '2025-09-07 08:59:00', '20250132 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(479, 7, 8, 'in', 3800.00, '2025-09-07 17:07:00', '20250123 | Party: Ashwin bhai makan malik | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(480, 8, 8, 'out', 300.00, '2025-09-07 18:23:00', 'Nasto | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(481, 8, 8, 'in', 800.00, '2025-09-07 18:45:00', 'Comission na | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(482, 8, 8, 'in', 3000.00, '2025-09-07 18:56:00', '20250121 from 6000  (3000advance ) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(483, 8, 8, 'out', 275.00, '2025-09-21 15:40:00', 'Shreeji-yellow balloon | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(484, 8, 8, 'in', 4500.00, '2025-09-23 20:37:00', '20250136 from 5500(1000 advance) | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(485, 8, 8, 'out', 660.00, '2025-09-28 20:29:00', 'Flower | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(486, 8, 8, 'out', 500.00, '2025-10-03 16:38:00', 'Jula na | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(487, 8, 8, 'out', 400.00, '2025-10-03 16:38:00', 'Petrol | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(488, 8, 8, 'in', 8000.00, '2025-10-03 20:49:00', '20250140 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(489, 8, 8, 'out', 1620.00, '2025-10-10 19:46:00', 'Decoration itmes Rajan paid | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(490, 8, 8, 'in', 1600.00, '2025-10-11 18:11:00', '20250142 | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(491, 8, 8, 'in', 500.00, '2025-10-11 18:59:00', '20250146 Advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(492, 8, 8, 'in', 2800.00, '2025-10-26 12:00:00', '20250134 cash V | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(493, 8, 8, 'in', 3500.00, '2025-10-26 12:01:00', '20250139 Cash V | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(494, 8, 8, 'in', 7200.00, '2025-10-26 12:02:00', '20250138 Cash V  5200 + 2000 online advance | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(495, 8, 8, 'in', 3200.00, '2025-10-26 12:04:00', '20250142 Cash V | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(496, 8, 8, 'in', 2000.00, '2025-10-26 12:05:00', 'R R event saman na Cash V | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(497, 8, 8, 'in', 1500.00, '2025-10-26 12:07:00', '20250141 Cash V 1000 +500 online | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(498, 8, 8, 'in', 4000.00, '2025-10-26 12:08:00', '20250145 Cash V | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(499, 8, 8, 'in', 5000.00, '2025-10-26 12:08:00', '20250147 cash V | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(500, 8, 8, 'in', 7000.00, '2025-10-26 12:09:00', '20250155 Cash V | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(501, 8, 8, 'in', 2100.00, '2025-10-26 12:10:00', '20250153 cash V | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(502, 8, 8, 'in', 5600.00, '2025-10-26 12:11:00', '20250152 cash V 1600+4000 online | Mode: Cash', NULL, 7, '2025-11-04 06:58:33'),
+(503, 7, 9, 'in', 10000.00, '2025-11-04 12:44:00', 'rent', NULL, 7, '2025-11-04 07:15:22'),
+(504, 8, 9, 'out', 8500.00, '2025-11-04 12:46:00', 'deposit', NULL, 8, '2025-11-04 07:16:47'),
+(505, 8, 9, 'in', 15000.00, '2025-11-04 12:46:00', 'upad', NULL, 8, '2025-11-04 07:25:49'),
+(506, 7, 9, 'in', 5000.00, '2025-11-04 14:11:00', 'payment ', 'uploads/entry_attachments/entry_6909bc768001f_1762245750.png', 7, '2025-11-04 08:42:30');
 
--- Insert group members
-INSERT INTO group_members (group_id, user_id, role) VALUES
-(1, 1, 'admin'),
-(1, 2, 'member'),
-(1, 3, 'member'),
-(2, 2, 'admin'),
-(2, 4, 'member'),
-(3, 1, 'admin'),
-(3, 5, 'member');
+-- --------------------------------------------------------
 
--- Insert sample entries for demonstration
-INSERT INTO entries (user_id, group_id, type, amount, datetime, message, created_by) VALUES
-(2, 1, 'in', 5000.00, '2025-11-05 10:30:00', 'Payment received for Order 001', 2),
-(2, 1, 'out', 2500.00, '2025-11-05 14:15:00', 'Office supplies purchase', 2),
-(3, 1, 'in', 10000.00, '2025-11-04 09:00:00', 'Client advance payment', 3),
-(4, 2, 'out', 3500.00, '2025-11-04 16:45:00', 'Vendor payment for materials', 4),
-(4, 2, 'in', 7500.00, '2025-11-03 11:20:00', 'Project milestone payment', 4),
-(5, 3, 'out', 1500.00, '2025-11-03 13:30:00', 'Travel expenses reimbursement', 5),
-(2, 1, 'out', 4000.00, '2025-11-02 10:00:00', 'Monthly rent payment', 2),
-(3, 1, 'in', 15000.00, '2025-11-02 15:00:00', 'Final project payment from client', 3),
-(5, 3, 'out', 2000.00, '2025-11-01 09:30:00', 'Marketing expenses', 5),
-(4, 2, 'in', 8000.00, '2025-11-01 14:00:00', 'Consulting service payment', 4);
+--
+-- Table structure for table `groups`
+--
 
--- Note: All demo users have password: demo123
+DROP TABLE IF EXISTS `groups`;
+CREATE TABLE IF NOT EXISTS `groups` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_by` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_created_by` (`created_by`),
+  KEY `idx_name` (`name`(191))
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `groups`
+--
+
+INSERT INTO `groups` (`id`, `name`, `description`, `created_by`, `created_at`, `updated_at`) VALUES
+(8, 'From 01-01-2025 Hisab', 'Cashbook entries from January 2025 onwards', 7, '2025-11-04 06:58:32', '2025-11-04 06:58:32'),
+(9, 'Demo', '', 7, '2025-11-04 07:13:26', '2025-11-04 07:13:26');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `group_members`
+--
+
+DROP TABLE IF EXISTS `group_members`;
+CREATE TABLE IF NOT EXISTS `group_members` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `group_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `role` enum('admin','member') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'member',
+  `joined_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_group_user` (`group_id`,`user_id`),
+  KEY `idx_group_id` (`group_id`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `group_members`
+--
+
+INSERT INTO `group_members` (`id`, `group_id`, `user_id`, `role`, `joined_at`) VALUES
+(16, 8, 7, 'admin', '2025-11-04 06:58:32'),
+(17, 8, 8, 'member', '2025-11-04 06:58:32'),
+(18, 9, 7, 'admin', '2025-11-04 07:13:26'),
+(19, 9, 8, 'member', '2025-11-04 07:14:03');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `group_requests`
+--
+
+DROP TABLE IF EXISTS `group_requests`;
+CREATE TABLE IF NOT EXISTS `group_requests` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `group_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `invited_by` int NOT NULL,
+  `status` enum('pending','approved','rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `invited_by` (`invited_by`),
+  KEY `idx_group_id` (`group_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `group_requests`
+--
+
+INSERT INTO `group_requests` (`id`, `group_id`, `user_id`, `invited_by`, `status`, `message`, `created_at`, `updated_at`) VALUES
+(4, 9, 8, 7, 'approved', NULL, '2025-11-04 07:13:30', '2025-11-04 07:14:03');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_reset_tokens`
+--
+
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used` tinyint(1) DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_token` (`token`(191)),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_expires_at` (`expires_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `password_reset_tokens`
+--
+
+INSERT INTO `password_reset_tokens` (`id`, `user_id`, `token`, `expires_at`, `used`, `created_at`) VALUES
+(1, 9, '0036ddebe0951d037e0b5230254677861ba7cf3f1b534ac99e589d8304785908', '2025-11-04 08:49:03', 1, '2025-11-04 07:49:03'),
+(3, 9, 'ce0171007ad55410f01ee5db3b2800a58eceed015a81b5e84abcef4026c75202', '2025-11-04 09:02:29', 0, '2025-11-04 08:02:29');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `profile_picture` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_email` (`email`(191)),
+  KEY `idx_name` (`name`(191))
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `profile_picture`, `created_at`, `updated_at`) VALUES
+(7, 'Roy Rathod', 'roy@cashbook.com', '$2y$10$oLvNTRbezCb3MLFL.zd0gea5bwYi.tPnFTe3QEPoB4rKtP5mq66ie', 'uploads/profile_pictures/profile_6909b914e5362_1762244884.png', '2025-11-04 05:33:10', '2025-11-04 08:28:04'),
+(8, 'Night & Day Events', 'night&day@cashbook.com', '$2y$10$lIr7nXtvRQavKLssrm/zW.0v.DGM.XqwZzyK.JFbNSXRGF2wejYwm', NULL, '2025-11-04 05:35:19', '2025-11-04 05:35:19'),
+(9, 'Gunjan Koladiya', 'gunjan.codelock@gmail.com', '$2y$10$GnV.Y.kf7eKay.97W/CvZuj9aC7sDyd0rV/s/FoJoIJmPDld84U..', 'uploads/profile_pictures/profile_6909b8db84225_1762244827.png', '2025-11-04 07:44:28', '2025-11-04 08:27:07');
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `entries`
+--
+ALTER TABLE `entries`
+  ADD CONSTRAINT `entries_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `entries_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `entries_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `groups`
+--
+ALTER TABLE `groups`
+  ADD CONSTRAINT `groups_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `group_members`
+--
+ALTER TABLE `group_members`
+  ADD CONSTRAINT `group_members_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `group_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `group_requests`
+--
+ALTER TABLE `group_requests`
+  ADD CONSTRAINT `group_requests_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `group_requests_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `group_requests_ibfk_3` FOREIGN KEY (`invited_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD CONSTRAINT `password_reset_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -44,7 +44,7 @@ switch ($action) {
 function getUserGroups($conn, $user_id) {
     try {
         $sql = "SELECT g.id, g.name 
-                FROM groups g
+                FROM `groups` g
                 INNER JOIN group_members gm ON g.id = gm.group_id
                 WHERE gm.user_id = ?
                 ORDER BY g.name ASC";
@@ -224,7 +224,7 @@ function getEntries($conn, $user_id) {
         $sql = "SELECT e.id, e.user_id, e.group_id, e.type, e.amount, e.datetime, e.message, e.attachment,
                 g.name as group_name, u.name as user_name, u.profile_picture
                 FROM entries e 
-                INNER JOIN groups g ON e.group_id = g.id
+                INNER JOIN `groups` g ON e.group_id = g.id
                 INNER JOIN users u ON e.user_id = u.id
                 INNER JOIN group_members gm ON g.id = gm.group_id
                 WHERE gm.user_id = ?";
@@ -324,7 +324,7 @@ function getEntries($conn, $user_id) {
         $stats_types = 'i';
         
         if (!empty($search) && strlen($search) >= 3) {
-            $stats_sql .= " AND (EXISTS (SELECT 1 FROM groups g WHERE g.id = e.group_id AND g.name LIKE ?) 
+            $stats_sql .= " AND (EXISTS (SELECT 1 FROM `groups` g WHERE g.id = e.group_id AND g.name LIKE ?) 
                             OR e.message LIKE ? 
                             OR EXISTS (SELECT 1 FROM users u WHERE u.id = e.user_id AND u.name LIKE ?))";
             $searchParam = "%$search%";

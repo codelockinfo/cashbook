@@ -4,6 +4,5 @@ AddType text/plain .php .php3 .php4 .php5 .phtml .phps
 
 # Allow only images
 <FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
-    Order Allow,Deny
-    Allow from all
+    Require all granted
 </FilesMatch>

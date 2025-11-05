@@ -56,7 +56,7 @@ function createGroup($conn, $user_id) {
         }
         
         // Insert group
-        $stmt = $conn->prepare("INSERT INTO groups (name, description, created_by) VALUES (?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO `groups` (name, description, created_by) VALUES (?, ?, ?)");
         $stmt->bind_param("ssi", $name, $description, $user_id);
         
         if ($stmt->execute()) {
@@ -88,7 +88,7 @@ function getMyGroups($conn, $user_id) {
         $sql = "SELECT g.id, g.name, g.description, g.created_by, gm.role,
                 (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count,
                 (SELECT COUNT(*) FROM group_requests WHERE group_id = g.id AND status = 'pending') as pending_count
-                FROM groups g
+                FROM `groups` g
                 INNER JOIN group_members gm ON g.id = gm.group_id
                 WHERE gm.user_id = ?
                 ORDER BY g.created_at DESC";
@@ -216,7 +216,7 @@ function getPendingInvitations($conn, $user_id) {
         $sql = "SELECT gr.id, gr.group_id, gr.message, g.name as group_name, 
                 u.name as invited_by_name, gr.created_at
                 FROM group_requests gr
-                INNER JOIN groups g ON gr.group_id = g.id
+                INNER JOIN `groups` g ON gr.group_id = g.id
                 INNER JOIN users u ON gr.invited_by = u.id
                 WHERE gr.user_id = ? AND gr.status = 'pending'
                 ORDER BY gr.created_at DESC";
@@ -308,7 +308,7 @@ function getGroupDetails($conn, $user_id) {
         }
         
         // Get group info
-        $stmt2 = $conn->prepare("SELECT g.*, u.name as created_by_name FROM groups g INNER JOIN users u ON g.created_by = u.id WHERE g.id = ?");
+        $stmt2 = $conn->prepare("SELECT g.*, u.name as created_by_name FROM `groups` g INNER JOIN users u ON g.created_by = u.id WHERE g.id = ?");
         $stmt2->bind_param("i", $group_id);
         $stmt2->execute();
         $group = $stmt2->get_result()->fetch_assoc();
@@ -370,7 +370,7 @@ function deleteGroup($conn, $user_id) {
         }
         
         // Delete group (cascade will delete members and requests)
-        $stmt2 = $conn->prepare("DELETE FROM groups WHERE id = ?");
+        $stmt2 = $conn->prepare("DELETE FROM `groups` WHERE id = ?");
         $stmt2->bind_param("i", $group_id);
         
         if ($stmt2->execute()) {
