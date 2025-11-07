@@ -826,7 +826,9 @@ body {
     body {
         padding: 10px;
     }
-
+    .dashboard-section {
+        padding: 9px;
+    }
     .entry-card {
         max-width: 100%;
     }
@@ -1221,7 +1223,7 @@ body {
 
 /* PWA Install Button */
 .pwa-install-btn {
-    display: inline-flex;
+    display: none; /* Hidden by default on desktop */
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
@@ -1243,6 +1245,13 @@ body {
 
 .pwa-install-btn i {
     font-size: 1rem;
+}
+
+/* Show install button only on mobile */
+@media (max-width: 768px) {
+    .pwa-install-btn {
+        display: inline-flex;
+    }
 }
 
 /* PWA Update Button */
@@ -1282,7 +1291,7 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* PWA Install Banner (Bottom Popup) */
+/* PWA Install Banner (Bottom Popup) - Hidden on desktop */
 .pwa-install-banner {
     position: fixed;
     bottom: -200px;
@@ -1294,10 +1303,18 @@ body {
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
     z-index: 9997;
     transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: none; /* Hidden on desktop */
 }
 
 .pwa-install-banner.show {
     bottom: 0;
+}
+
+/* Show install banner only on mobile */
+@media (max-width: 768px) {
+    .pwa-install-banner {
+        display: block;
+    }
 }
 
 .pwa-banner-content {
