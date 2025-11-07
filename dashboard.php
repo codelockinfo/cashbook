@@ -44,10 +44,6 @@ $user = getCurrentUser();
                     <button id="logoutBtn" class="manage-users-link logout-btn">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
-                    <div class="total-balance">
-                        <span class="balance-label">Total Balance</span>
-                        <span class="balance-amount" id="totalBalance">₹ 0</span>
-                    </div>
                 </div>
             </div>
         </header>
@@ -56,8 +52,15 @@ $user = getCurrentUser();
         <section class="entry-section">
             <div class="entry-card unified-entry-card">
                 <div class="card-header">
-                    <i class="fas fa-exchange-alt"></i>
-                    <h2>Add Entry</h2>
+                    <div class="card-header-left">
+                        <i class="fas fa-exchange-alt"></i>
+                        <h2>Add Entry</h2>
+                    </div>
+                    <div class="card-header-right">
+                        <select id="defaultGroupSelector" class="default-group-selector">
+                            <option value="">All Groups</option>
+                        </select>
+                    </div>
                 </div>
                 <form id="entryForm" class="entry-form" enctype="multipart/form-data">
                     <div class="form-group">
@@ -72,7 +75,7 @@ $user = getCurrentUser();
                         </label>
                         <input type="number" id="entryAmount" placeholder="Enter amount" required min="0" step="0.01">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="entryGroupContainer">
                         <label for="entryGroup">
                             <i class="fas fa-users"></i> Group
                         </label>
@@ -142,13 +145,13 @@ $user = getCurrentUser();
                         <span class="stat-value" id="totalCashOut">₹ 0</span>
                     </div>
                 </div>
-                <div class="stat-card stat-count">
+                <div class="stat-card stat-balance">
                     <div class="stat-icon">
-                        <i class="fas fa-list"></i>
+                        <i class="fas fa-wallet"></i>
                     </div>
                     <div class="stat-content">
-                        <span class="stat-label">Total Entries</span>
-                        <span class="stat-value" id="totalEntries">0</span>
+                        <span class="stat-label">Total Balance</span>
+                        <span class="stat-value" id="totalBalance">₹ 0</span>
                     </div>
                 </div>
             </div>
@@ -168,7 +171,7 @@ $user = getCurrentUser();
                             <input type="date" id="filterDateTo" placeholder="To">
                         </div>
                     </div>
-                    <div class="filter-item">
+                    <div class="filter-item" id="filterGroupContainer">
                         <label><i class="fas fa-users"></i> Group</label>
                         <select id="filterGroup">
                             <option value="">All Groups</option>

@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Setup Event Listeners
 function setupEventListeners() {
-    document.getElementById('createGroupBtn').addEventListener('click', () => openModal('createGroupModal'));
+    document.getElementById('createGroupBtnHeader').addEventListener('click', () => openModal('createGroupModal'));
     document.getElementById('createGroupForm').addEventListener('submit', handleCreateGroup);
     document.getElementById('sendInvitesBtn').addEventListener('click', handleSendInvites);
     document.getElementById('searchUsers').addEventListener('input', handleSearchUsers);
@@ -45,7 +45,7 @@ function displayMyGroups(groups) {
             <div class="empty-groups">
                 <i class="fas fa-users"></i>
                 <p>You haven't joined any groups yet.</p>
-                <p style="font-size: 0.875rem; margin-top: 10px;">Click the + button to create your first group!</p>
+                <p style="font-size: 0.875rem; margin-top: 10px;">Click the "Create Group" button in the header to get started!</p>
             </div>
         `;
         return;

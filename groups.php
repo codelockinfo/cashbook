@@ -28,7 +28,7 @@ $user = getCurrentUser();
         .group-card {
             background: white;
             border-radius: 16px;
-            padding: 25px;
+            padding: 18px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             border: 2px solid var(--border-color);
@@ -44,13 +44,13 @@ $user = getCurrentUser();
             display: flex;
             justify-content: space-between;
             align-items: start;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .group-info h3 {
             font-size: 1.25rem;
             color: var(--text-primary);
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -78,7 +78,7 @@ $user = getCurrentUser();
         .group-description {
             color: var(--text-secondary);
             font-size: 0.875rem;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             line-height: 1.5;
         }
 
@@ -86,8 +86,8 @@ $user = getCurrentUser();
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 15px;
-            padding: 10px;
+            margin-bottom: 10px;
+            padding: 8px;
             background: var(--light-color);
             border-radius: 8px;
         }
@@ -98,12 +98,12 @@ $user = getCurrentUser();
 
         .group-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .btn-small {
-            padding: 8px 16px;
+            padding: 8px 14px;
             font-size: 0.875rem;
             border-radius: 8px;
             border: none;
@@ -129,28 +129,6 @@ $user = getCurrentUser();
         .btn-delete {
             background: var(--danger-color);
             color: white;
-        }
-
-        .create-group-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s ease;
-            z-index: 100;
-        }
-
-        .create-group-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
         }
 
         /* Modal Styles */
@@ -313,6 +291,150 @@ $user = getCurrentUser();
             background: var(--danger-color);
             color: white;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .dashboard-section {
+                padding: 20px;
+            }
+            .groups-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 0px;
+            }
+
+            .group-card {
+                padding: 15px;
+                margin-bottom: 0;
+            }
+
+            .group-info h3 {
+                font-size: 1.1rem;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .group-role {
+                font-size: 0.7rem;
+                padding: 3px 8px;
+            }
+
+            .group-description {
+                font-size: 0.8rem;
+            }
+
+            .group-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .btn-small {
+                width: 100%;
+                justify-content: center;
+                padding: 9px 14px;
+                font-size: 0.875rem;
+            }
+
+            .btn-invite,
+            .btn-view,
+            .btn-delete {
+                width: 100%;
+            }
+
+            /* Header mobile adjustments */
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+                align-items: stretch !important;
+            }
+
+            .manage-users-link {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+
+            /* Modal adjustments */
+            .modal-content {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .modal-header h2 {
+                font-size: 1.25rem;
+            }
+
+            /* Empty state */
+            .empty-groups {
+                padding: 40px 20px;
+            }
+
+            .empty-groups i {
+                font-size: 3rem;
+            }
+
+            /* User list in modal */
+            .user-item {
+                padding: 10px;
+            }
+
+            .user-avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 0.875rem;
+            }
+
+            .request-actions {
+                flex-direction: column;
+                width: 100%;
+                gap: 8px;
+            }
+
+            .btn-accept,
+            .btn-reject {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .group-card {
+                padding: 12px;
+                border-radius: 12px;
+            }
+
+            .group-info h3 {
+                font-size: 1rem;
+            }
+
+            .group-description {
+                font-size: 0.75rem;
+            }
+
+            .group-members {
+                font-size: 0.875rem;
+                padding: 6px;
+            }
+
+            .btn-small {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                padding: 15px;
+            }
+
+            .user-item-info {
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -336,6 +458,9 @@ $user = getCurrentUser();
                         <?php endif; ?>
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
                     </div>
+                    <button id="createGroupBtnHeader" class="manage-users-link">
+                        <i class="fas fa-plus-circle"></i> Create Group
+                    </button>
                     <a href="profile.php" class="manage-users-link">
                         <i class="fas fa-user-edit"></i> My Profile
                     </a>
@@ -366,10 +491,6 @@ $user = getCurrentUser();
             </div>
         </section>
 
-        <!-- Create Group Button -->
-        <button class="create-group-btn" id="createGroupBtn" title="Create New Group">
-            <i class="fas fa-plus"></i>
-        </button>
     </div>
 
     <!-- Create Group Modal -->

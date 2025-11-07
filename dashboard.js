@@ -63,6 +63,9 @@ function setupEventListeners() {
     document.getElementById('filterType').addEventListener('change', loadTransactions);
     document.getElementById('sortBy').addEventListener('change', loadTransactions);
     document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    
+    // Default group selector
+    document.getElementById('defaultGroupSelector').addEventListener('change', handleDefaultGroupChange);
 }
 
 // Handle attachment file selection
@@ -175,23 +178,77 @@ async function loadGroups() {
         if (data.success) {
             const entrySelect = document.getElementById('entryGroup');
             const filterSelect = document.getElementById('filterGroup');
+            const defaultSelect = document.getElementById('defaultGroupSelector');
             
             // Clear existing options (except first)
             entrySelect.innerHTML = '<option value="">Select Group</option>';
             filterSelect.innerHTML = '<option value="">All Groups</option>';
+            defaultSelect.innerHTML = '<option value="">All Groups</option>';
             
             // Add group options
             data.groups.forEach(group => {
                 const option1 = new Option(group.name, group.id);
                 const option2 = new Option(group.name, group.id);
+                const option3 = new Option(group.name, group.id);
                 
                 entrySelect.add(option1);
                 filterSelect.add(option2);
+                defaultSelect.add(option3);
             });
+            
+            // Auto-select first group by default
+            if (data.groups.length > 0) {
+                defaultSelect.value = data.groups[0].id;
+                // Trigger the change event to hide/show appropriate fields
+                handleDefaultGroupChange();
+            }
         }
     } catch (error) {
         console.error('Error loading groups:', error);
         showToast('Error loading groups', 'error');
+    }
+}
+
+// Handle default group selector change
+function handleDefaultGroupChange() {
+    const defaultGroupId = document.getElementById('defaultGroupSelector').value;
+    const entryGroupContainer = document.getElementById('entryGroupContainer');
+    const filterGroupContainer = document.getElementById('filterGroupContainer');
+    const entryGroupSelect = document.getElementById('entryGroup');
+    const filterGroupSelect = document.getElementById('filterGroup');
+    
+    if (defaultGroupId) {
+        // A specific group is selected
+        // Hide the group selectors
+        entryGroupContainer.style.display = 'none';
+        filterGroupContainer.style.display = 'none';
+        
+        // Set the entry group to the selected default group
+        entryGroupSelect.value = defaultGroupId;
+        
+        // Set the filter group to the selected default group
+        filterGroupSelect.value = defaultGroupId;
+        
+        // Remove required attribute from entry group when hidden
+        entryGroupSelect.removeAttribute('required');
+        
+        // Trigger filter change to load filtered transactions
+        handleGroupChange();
+    } else {
+        // "All Groups" is selected
+        // Show the group selectors
+        entryGroupContainer.style.display = 'block';
+        filterGroupContainer.style.display = 'block';
+        
+        // Reset selections
+        entryGroupSelect.value = '';
+        filterGroupSelect.value = '';
+        
+        // Add back required attribute
+        entryGroupSelect.setAttribute('required', 'required');
+        
+        // Reload transactions without filter
+        loadTransactions();
     }
 }
 
@@ -439,12 +496,18 @@ function displayTransactions(entries) {
 function updateStatistics(stats) {
     const totalBalance = stats.total_in - stats.total_out;
     
-    document.getElementById('totalBalance').textContent = `₹ ${totalBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    document.getElementById('totalBalance').className = `balance-amount ${totalBalance < 0 ? 'negative' : ''}`;
-    
+    // Update stat cards
     document.getElementById('totalCashIn').textContent = `₹ ${parseFloat(stats.total_in).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     document.getElementById('totalCashOut').textContent = `₹ ${parseFloat(stats.total_out).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    document.getElementById('totalEntries').textContent = stats.total_entries;
+    
+    // Update balance in stats grid
+    const statBalanceElements = document.querySelectorAll('.stat-balance .stat-value');
+    if (statBalanceElements.length > 0) {
+        statBalanceElements.forEach(element => {
+            element.textContent = `₹ ${totalBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            element.className = `stat-value ${totalBalance < 0 ? 'negative' : ''}`;
+        });
+    }
 }
 
 // Handle search
