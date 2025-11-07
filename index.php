@@ -19,10 +19,10 @@ if (session_status() === PHP_SESSION_NONE) {
 // Check if user is logged in
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     // Redirect to dashboard if logged in
-    header('Location: dashboard.php');
+    header('Location: dashboard');
 } else {
     // Redirect to login if not logged in
-    header('Location: login.php');
+    header('Location: login');
 }
 exit;
 ?>

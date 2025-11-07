@@ -21,7 +21,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 function checkAuth() {
     if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-        header('Location: login.php');
+        header('Location: login');
         exit;
     }
 }

@@ -35,10 +35,10 @@ $user = getCurrentUser();
                         <?php endif; ?>
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
                     </div>
-                    <a href="profile.php" class="manage-users-link">
+                    <a href="profile" class="manage-users-link">
                         <i class="fas fa-user-edit"></i> My Profile
                     </a>
-                    <a href="groups.php" class="manage-users-link">
+                    <a href="groups" class="manage-users-link">
                         <i class="fas fa-users"></i> My Groups
                     </a>
                     <button id="logoutBtn" class="manage-users-link logout-btn">

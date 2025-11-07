@@ -18,7 +18,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Redirect to dashboard if already logged in
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 ?>
@@ -71,12 +71,12 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
                 </button>
 
                 <div class="forgot-password-link">
-                    <a href="forgot-password.php"><i class="fas fa-question-circle"></i> Forgot Password?</a>
+                    <a href="forgot-password"><i class="fas fa-question-circle"></i> Forgot Password?</a>
                 </div>
             </form>
 
             <div class="auth-footer">
-                <p>Don't have an account? <a href="register.php">Register here</a></p>
+                <p>Don't have an account? <a href="register">Register here</a></p>
             </div>
         </div>
     </div>

@@ -37,13 +37,13 @@ $user = getCurrentUser();
                         <?php endif; ?>
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
                     </div>
-                    <a href="dashboard.php" class="manage-users-link">
+                    <a href="dashboard" class="manage-users-link">
                         <i class="fas fa-home"></i> Dashboard
                     </a>
-                    <a href="groups.php" class="manage-users-link">
+                    <a href="groups" class="manage-users-link">
                         <i class="fas fa-users"></i> My Groups
                     </a>
-                    <a href="profile.php" class="manage-users-link" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                    <a href="profile" class="manage-users-link" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
                         <i class="fas fa-user-edit"></i> My Profile
                     </a>
                     <button id="logoutBtn" class="manage-users-link logout-btn">

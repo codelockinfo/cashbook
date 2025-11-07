@@ -461,10 +461,10 @@ $user = getCurrentUser();
                     <button id="createGroupBtnHeader" class="manage-users-link">
                         <i class="fas fa-plus-circle"></i> Create Group
                     </button>
-                    <a href="profile.php" class="manage-users-link">
+                    <a href="profile" class="manage-users-link">
                         <i class="fas fa-user-edit"></i> My Profile
                     </a>
-                    <a href="dashboard.php" class="manage-users-link">
+                    <a href="dashboard" class="manage-users-link">
                         <i class="fas fa-arrow-left"></i> Back to Dashboard
                     </a>
                 </div>

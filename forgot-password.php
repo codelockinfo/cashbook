@@ -18,7 +18,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Redirect to dashboard if already logged in
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 ?>
@@ -65,7 +65,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
             </form>
 
             <div class="auth-footer">
-                <p>Remember your password? <a href="login.php">Login here</a></p>
+                <p>Remember your password? <a href="login">Login here</a></p>
             </div>
         </div>
     </div>

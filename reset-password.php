@@ -18,13 +18,13 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Redirect to dashboard if already logged in
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: dashboard.php');
+    header('Location: dashboard');
     exit;
 }
 
 // Check if token is provided
 if (!isset($_GET['token']) || empty($_GET['token'])) {
-    header('Location: login.php');
+    header('Location: login');
     exit;
 }
 
@@ -92,7 +92,7 @@ $token = htmlspecialchars($_GET['token']);
             </form>
 
             <div class="auth-footer">
-                <p>Remember your password? <a href="login.php">Login here</a></p>
+                <p>Remember your password? <a href="login">Login here</a></p>
             </div>
         </div>
     </div>

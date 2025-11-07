@@ -1,42 +1,89 @@
-# Enable rewrite engine
+# Enable URL Rewriting
 RewriteEngine On
 
-# Prevent directory browsing
-Options -Indexes
+# Set base directory (for subdirectory support)
+RewriteBase /cashbook/
 
-# Protect sensitive files
-<FilesMatch "^(config\.php|database\.sql)$">
-    Require all denied
+# Force HTTPS (optional - uncomment if you want to force SSL)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Remove .php extension from URLs
+# If file with .php exists, rewrite URL
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# Redirect .php URLs to extension-less URLs
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.php [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# Prevent direct access to certain files
+<FilesMatch "^(config|database|email-config|email-helper)\.php$">
+    Order allow,deny
+    Deny from all
 </FilesMatch>
 
-# Set default page
-DirectoryIndex index.php login.php
+# Protect uploads directory from script execution
+<Directory "uploads">
+    php_flag engine off
+    Options -ExecCGI
+    AddHandler cgi-script .php .php3 .php4 .php5 .phtml .pl .py .jsp .asp .sh .cgi
+</Directory>
 
-# Set default charset
-AddDefaultCharset UTF-8
+# Prevent directory listing
+Options -Indexes
 
-# Enable compression
+# Set default pages
+DirectoryIndex index.php index.html
+
+# Security Headers
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+    
+    # XSS Protection
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # Prevent MIME sniffing
+    Header set X-Content-Type-Options "nosniff"
+    
+    # Referrer Policy
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Compression
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
 </IfModule>
 
-# Browser caching
+# Browser Caching
 <IfModule mod_expires.c>
     ExpiresActive On
-    ExpiresByType image/jpg "access plus 1 year"
+    
+    # Images
     ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
     ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # CSS and JavaScript
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType application/x-javascript "access plus 1 month"
     ExpiresByType text/javascript "access plus 1 month"
+    
+    # Fonts
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/eot "access plus 1 year"
+    
+    # Default
+    ExpiresDefault "access plus 1 month"
 </IfModule>
 
-# Security headers
-<IfModule mod_headers.c>
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set X-XSS-Protection "1; mode=block"
-</IfModule>
-
+# Custom Error Pages (optional)
+# ErrorDocument 404 /cashbook/404.php
+# ErrorDocument 403 /cashbook/403.php
+# ErrorDocument 500 /cashbook/500.php
