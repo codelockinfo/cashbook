@@ -1,0 +1,18 @@
+# Simple .htaccess for clean URLs
+# Use this if the main .htaccess doesn't work
+
+RewriteEngine On
+
+# Don't rewrite if file or directory exists
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Add .php to requests
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# Prevent directory listing
+Options -Indexes
+
+# Set default pages
+DirectoryIndex index.php index.html
+
