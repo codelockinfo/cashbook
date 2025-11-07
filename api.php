@@ -1,5 +1,21 @@
 <?php
-session_start();
+// Configure session for subdirectory support
+if (session_status() === PHP_SESSION_NONE) {
+    $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+    $cookiePath = $basePath ? $basePath : '/';
+    
+    session_set_cookie_params([
+        'lifetime' => 86400,
+        'path' => $cookiePath,
+        'domain' => '',
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    
+    session_start();
+}
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
