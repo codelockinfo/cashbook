@@ -3,11 +3,17 @@
 let deferredPrompt;
 let installButton;
 
+// Get base path from window or default to current directory
+const BASE_PATH = window.BASE_PATH || '';
+
 // Register Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/cashbook/service-worker.js', {
-            scope: '/cashbook/'
+        const swPath = BASE_PATH ? `${BASE_PATH}/service-worker.js` : '/service-worker.js';
+        const swScope = BASE_PATH ? `${BASE_PATH}/` : '/';
+        
+        navigator.serviceWorker.register(swPath, {
+            scope: swScope
         })
         .then((registration) => {
             console.log('✅ Service Worker registered successfully:', registration.scope);

@@ -14,6 +14,15 @@ function isLocalEnvironment() {
     return false;
 }
 
+// Get base path for URLs (auto-detect subdirectory)
+function getBasePath() {
+    $script_name = dirname($_SERVER['SCRIPT_NAME']);
+    return rtrim($script_name, '/');
+}
+
+// Define base path constant
+define('BASE_PATH', getBasePath());
+
 // Set database configuration based on environment
 if (isLocalEnvironment()) {
     // Local development credentials

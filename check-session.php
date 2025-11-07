@@ -1,6 +1,23 @@
 <?php
 // Session protection - include this file on all protected pages
-session_start();
+
+// Configure session for subdirectory support
+if (session_status() === PHP_SESSION_NONE) {
+    // Set session cookie parameters for better security and subdirectory support
+    $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+    $cookiePath = $basePath ? $basePath : '/';
+    
+    session_set_cookie_params([
+        'lifetime' => 86400, // 24 hours
+        'path' => $cookiePath,
+        'domain' => '',
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    
+    session_start();
+}
 
 function checkAuth() {
     if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
