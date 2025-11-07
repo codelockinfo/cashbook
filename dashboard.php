@@ -10,7 +10,7 @@ $user = getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cash Book Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -340,8 +340,8 @@ $user = getCurrentUser();
         // Pass PHP user data to JavaScript
         const CURRENT_USER = <?php echo json_encode($user); ?>;
     </script>
-    <script src="pwa.js"></script>
-    <script src="dashboard.js"></script>
+    <script src="pwa.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="dashboard.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 

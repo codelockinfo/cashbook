@@ -28,9 +28,12 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Cash Book</title>
-    <?php include 'pwa-meta.php'; ?>
+    <?php 
+    require_once 'config.php';
+    include 'pwa-meta.php'; 
+    ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="auth-style.css">
+    <link rel="stylesheet" href="auth-style.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body>
     <div class="auth-container">
@@ -80,8 +83,8 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 
     <div id="toast" class="toast"></div>
 
-    <script src="pwa.js"></script>
-    <script src="auth.js"></script>
+    <script src="pwa.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="auth.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>
 
