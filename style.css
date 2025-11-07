@@ -827,7 +827,7 @@ body {
         padding: 10px;
     }
     .dashboard-section {
-        padding: 9px;
+        padding: 20px 9px 9px 9px;
     }
     .entry-card {
         max-width: 100%;
