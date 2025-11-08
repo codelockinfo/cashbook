@@ -12,8 +12,8 @@ $user = getCurrentUser();
     <title>My Profile - Cash Book</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
-    <link rel="stylesheet" href="auth-style.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
 </head>
 <body>
     <div class="container" style="max-width: 1200px;">
@@ -160,9 +160,13 @@ $user = getCurrentUser();
 
     <div id="toast" class="toast"></div>
     
-    <script src="pwa.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="auth.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="dashboard.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script>
+        // Pass PHP BASE_PATH to JavaScript
+        const BASE_PATH = '<?php echo BASE_PATH; ?>';
+    </script>
+    <script src="<?php echo BASE_PATH; ?>/pwa.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/auth.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
     <script>
         // Initialize profile page
         const profilePictureInput = document.getElementById('profilePicture');
@@ -206,7 +210,7 @@ $user = getCurrentUser();
                 }
 
                 try {
-                    const response = await fetch('profile-api.php', {
+                    const response = await fetch(BASE_PATH + '/profile-api.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -300,7 +304,7 @@ $user = getCurrentUser();
                 if (newPassword) formData.append('new_password', newPassword);
                 if (profilePicture) formData.append('profilePicture', profilePicture);
 
-                const response = await fetch('profile-api.php', {
+                const response = await fetch(BASE_PATH + '/profile-api.php', {
                     method: 'POST',
                     body: formData
                 });

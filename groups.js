@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'group-api.php';
+const API_URL = (typeof BASE_PATH !== 'undefined' ? BASE_PATH : '') + '/group-api.php';
 
 let currentGroupId = null;
 let selectedUsers = [];

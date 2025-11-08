@@ -33,7 +33,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     include 'pwa-meta.php'; 
     ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="auth-style.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body>
     <div class="auth-container">
@@ -83,8 +83,12 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 
     <div id="toast" class="toast"></div>
 
-    <script src="pwa.js?v=<?php echo ASSET_VERSION; ?>"></script>
-    <script src="auth.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script>
+        // Pass PHP BASE_PATH to JavaScript
+        const BASE_PATH = '<?php echo BASE_PATH; ?>';
+    </script>
+    <script src="<?php echo BASE_PATH; ?>/pwa.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/auth.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>
 

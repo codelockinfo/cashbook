@@ -11,7 +11,7 @@ $user = getCurrentUser();
     <title>My Groups - Cash Book</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <style>
         .groups-container {
             max-width: 1200px;
@@ -573,10 +573,12 @@ $user = getCurrentUser();
     </div>
 
     <script>
+        // Pass PHP data to JavaScript
+        const BASE_PATH = '<?php echo BASE_PATH; ?>';
         const CURRENT_USER = <?php echo json_encode($user); ?>;
     </script>
-    <script src="pwa.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="groups.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/groups.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 

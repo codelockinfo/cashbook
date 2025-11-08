@@ -10,7 +10,7 @@ $user = getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cash Book Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
-    <link rel="stylesheet" href="style.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -337,11 +337,12 @@ $user = getCurrentUser();
     </div>
 
     <script>
-        // Pass PHP user data to JavaScript
+        // Pass PHP data to JavaScript
+        const BASE_PATH = '<?php echo BASE_PATH; ?>';
         const CURRENT_USER = <?php echo json_encode($user); ?>;
     </script>
-    <script src="pwa.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="dashboard.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 
