@@ -5,13 +5,13 @@ const API_URL = 'auth-api.php';
 document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname.split('/').pop();
     
-    if (currentPage === 'login.php' || currentPage === 'login.php') {
+    if (currentPage === 'login.php' || currentPage === 'login') {
         initLogin();
-    } else if (currentPage === 'register.php' || currentPage === 'register.php') {
+    } else if (currentPage === 'register.php' || currentPage === 'register') {
         initRegister();
-    } else if (currentPage === 'forgot-password.php' || currentPage === 'forgot-password.php') {
+    } else if (currentPage === 'forgot-password.php' || currentPage === 'forgot-password') {
         initForgotPassword();
-    } else if (currentPage === 'reset-password.php' || currentPage === 'reset-password.php') {
+    } else if (currentPage === 'reset-password.php' || currentPage === 'reset-password') {
         initResetPassword();
     }
 });
@@ -121,7 +121,7 @@ async function handleLogin(e) {
         if (data.success) {
             showToast('Login successful! Redirecting...', 'success');
             setTimeout(() => {
-                window.location.href = 'dashboard.php';
+                window.location.href = 'dashboard';
             }, 1000);
         } else {
             showToast(data.message || 'Login failed', 'error');
@@ -211,7 +211,7 @@ async function handleRegister(e) {
         if (data.success) {
             showToast('Registration successful! Redirecting to login...', 'success');
             setTimeout(() => {
-                window.location.href = 'login.php';
+                window.location.href = 'login';
             }, 1500);
         } else {
             showToast(data.message || 'Registration failed', 'error');
@@ -250,7 +250,7 @@ function initResetPassword() {
     if (!token) {
         showToast('Invalid reset link', 'error');
         setTimeout(() => {
-            window.location.href = 'login.php';
+            window.location.href = 'login';
         }, 2000);
         return;
     }
@@ -347,7 +347,7 @@ async function handleForgotPassword(e) {
                 setTimeout(() => {
                     const goToLogin = confirm('Email sent successfully!\n\nClick OK to return to the login page.');
                     if (goToLogin) {
-                        window.location.href = 'login.php';
+                        window.location.href = 'login';
                     }
                 }, 3000);
             }
@@ -376,14 +376,14 @@ async function verifyResetToken(token) {
         if (!data.success) {
             showToast(data.message || 'Invalid or expired reset link', 'error');
             setTimeout(() => {
-                window.location.href = 'login.php';
+                window.location.href = 'login';
             }, 2000);
         }
     } catch (error) {
         console.error('Token verification error:', error);
         showToast('An error occurred. Please try again.', 'error');
         setTimeout(() => {
-            window.location.href = 'login.php';
+            window.location.href = 'login';
         }, 2000);
     }
 }
@@ -437,7 +437,7 @@ async function handleResetPassword(e) {
         if (data.success) {
             showToast('Password reset successful! Redirecting to login...', 'success');
             setTimeout(() => {
-                window.location.href = 'login.php';
+                window.location.href = 'login';
             }, 2000);
         } else {
             showToast(data.message || 'Failed to reset password', 'error');

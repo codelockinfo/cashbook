@@ -16,24 +16,17 @@ RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.+)$ $1.php [L,QSA]
 
 # Redirect .php URLs to extension-less URLs (301 permanent redirect)
+# BUT exclude API files (they need to keep .php extension for JavaScript)
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^.]+)\.php [NC]
+RewriteCond %{REQUEST_URI} !^.*api\.php$ [NC]
 RewriteRule ^([^.]+)\.php$ /$1 [R=301,L]
 
-# Prevent direct access to certain files
+# Prevent direct access to certain files (Apache 2.4 syntax)
 <FilesMatch "^(config|database|email-config|email-helper)\.php$">
-    Order allow,deny
-    Deny from all
+    Require all denied
 </FilesMatch>
 
-# Protect uploads directory from script execution
-<Directory "uploads">
-    php_flag engine off
-    Options -ExecCGI
-    AddHandler cgi-script .php .php3 .php4 .php5 .phtml .pl .py .jsp .asp .sh .cgi
-</Directory>
-
-# Prevent directory listing
-Options -Indexes
+# Note: uploads directory protection is handled by uploads/.htaccess
 
 # Set default pages
 DirectoryIndex index.php index.html

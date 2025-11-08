@@ -158,7 +158,7 @@ async function handleLogout() {
         if (data.success) {
             showToast('Logged out successfully', 'success');
             setTimeout(() => {
-                window.location.href = 'login.php';
+                window.location.href = 'login';
             }, 500);
         } else {
             showToast('Error logging out', 'error');
