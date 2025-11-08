@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = (typeof BASE_PATH !== 'undefined' ? BASE_PATH : '') + '/auth-api.php';
+const API_URL = ((typeof BASE_PATH !== 'undefined' && BASE_PATH) ? BASE_PATH : '') + '/auth-api.php';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
