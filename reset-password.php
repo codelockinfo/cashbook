@@ -41,7 +41,7 @@ $token = htmlspecialchars($_GET['token']);
     include 'pwa-meta.php'; 
     ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style1.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style2.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body>
     <div class="auth-container">
@@ -103,7 +103,7 @@ $token = htmlspecialchars($_GET['token']);
         // Pass PHP BASE_PATH to JavaScript
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
     </script>
-    <script src="<?php echo BASE_PATH; ?>/pwa6.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa7.js?v=<?php echo ASSET_VERSION; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/auth3.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>

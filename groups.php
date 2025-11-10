@@ -12,7 +12,7 @@ $user = getCurrentUser();
     <title>My Groups - Cash Book</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style1.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style2.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <style>
         .groups-container {
             max-width: 1200px;
@@ -556,6 +556,11 @@ $user = getCurrentUser();
 
     <div id="toast" class="toast"></div>
 
+    <!-- Floating Install Button (Bottom Right) -->
+    <button id="floatingInstallBtn" class="floating-install-btn" onclick="showInstallPopup()" title="Install App">
+        <i class="fas fa-download"></i>
+    </button>
+
     <!-- PWA Install Prompt Banner -->
     <div id="pwaInstallBanner" class="pwa-install-banner">
         <button class="pwa-banner-close" id="closePWABanner">&times;</button>
@@ -578,7 +583,7 @@ $user = getCurrentUser();
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
         const CURRENT_USER = <?php echo json_encode($user); ?>;
     </script>
-    <script src="<?php echo BASE_PATH; ?>/pwa6.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa7.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/groups1.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>

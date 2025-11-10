@@ -87,10 +87,22 @@ function showInstallButton() {
 
 // Install PWA
 async function installPWA() {
+    console.log('🎯 Install button clicked!');
+    
     if (!deferredPrompt) {
-        console.log('Install prompt not available');
+        console.log('⚠️ Install prompt not available - may be already installed or not supported');
+        
+        // If iOS, show instructions
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            alert('To install on iOS:\n\n1. Tap the Share button (⎙)\n2. Select "Add to Home Screen"\n3. Tap "Add"');
+        } else {
+            alert('PWA installation not available.\n\nYour app may already be installed, or your browser doesn\'t support it.');
+        }
         return;
     }
+    
+    // Hide the banner first
+    hideInstallPopup();
     
     // Show the install prompt
     deferredPrompt.prompt();
@@ -102,19 +114,21 @@ async function installPWA() {
     
     if (outcome === 'accepted') {
         console.log('✅ PWA installation accepted');
-        showToast('App installed successfully! Check your home screen.', 'success');
+        if (typeof showToast === 'function') {
+            showToast('App installed successfully! Check your home screen.', 'success');
+        }
+        
+        // Hide floating button
+        const floatingBtn = document.getElementById('floatingInstallBtn');
+        if (floatingBtn) {
+            floatingBtn.style.display = 'none';
+        }
     } else {
         console.log('❌ PWA installation declined');
     }
     
     // Clear the prompt
     deferredPrompt = null;
-    
-    // Hide install button
-    const installBtn = document.getElementById('pwaInstallBtn');
-    if (installBtn) {
-        installBtn.style.display = 'none';
-    }
 }
 
 // Handle app installed event
@@ -209,13 +223,11 @@ function dismissInstallBanner() {
     const banner = document.getElementById('pwaInstallBanner');
     
     if (banner) {
+        console.log('❌ User dismissed install banner');
         banner.classList.remove('show');
-        setTimeout(() => {
-            banner.style.display = 'none';
-        }, 300);
     }
     
-    // Remember dismissal
+    // Remember dismissal (but will be cleared on next login)
     localStorage.setItem('pwa-banner-dismissed', 'true');
 }
 
@@ -360,5 +372,84 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', checkFirstVisitInstall);
 } else {
     setTimeout(checkFirstVisitInstall, 100);
+}
+
+// Show install popup when floating button is clicked
+function showInstallPopup() {
+    const banner = document.getElementById('pwaInstallBanner');
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    console.log('📱 Floating install button clicked!');
+    
+    if (!banner) {
+        console.log('❌ Banner element not found!');
+        return;
+    }
+    
+    // For iOS - update banner with iOS instructions
+    if (isIOS) {
+        console.log('📱 iOS device - showing iOS install instructions');
+        const bannerText = banner.querySelector('.pwa-banner-text');
+        if (bannerText) {
+            bannerText.innerHTML = `
+                <h4>📱 Install Cash Book App</h4>
+                <p>1. Tap the <i class="fas fa-share"></i> Share button below<br>
+                2. Select "Add to Home Screen"<br>
+                3. Tap "Add" to install</p>
+            `;
+        }
+        
+        // Hide install button for iOS (manual install only)
+        const installBtn = document.getElementById('installPWABanner');
+        if (installBtn) {
+            installBtn.style.display = 'none';
+        }
+    }
+    
+    // Show the banner
+    console.log('📢 Showing install popup!');
+    banner.classList.add('show');
+}
+
+// Hide install popup
+function hideInstallPopup() {
+    const banner = document.getElementById('pwaInstallBanner');
+    
+    if (banner) {
+        console.log('🔽 Hiding install popup');
+        banner.classList.remove('show');
+    }
+}
+
+// Show/hide floating button based on conditions
+function updateFloatingButton() {
+    const floatingBtn = document.getElementById('floatingInstallBtn');
+    
+    if (!floatingBtn) return;
+    
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isAlreadyInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    
+    console.log('🔍 Floating button check:', {
+        isMobile,
+        isAlreadyInstalled,
+        buttonExists: !!floatingBtn
+    });
+    
+    // Show button on mobile if not installed
+    if (isMobile && !isAlreadyInstalled) {
+        floatingBtn.style.display = 'flex';
+        console.log('✅ Showing floating install button');
+    } else {
+        floatingBtn.style.display = 'none';
+        console.log('ℹ️ Hiding floating install button');
+    }
+}
+
+// Run on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateFloatingButton);
+} else {
+    updateFloatingButton();
 }
 
