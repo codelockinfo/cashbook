@@ -13,8 +13,8 @@ $basePath = BASE_PATH;
 // Service Worker for Cash Book PWA
 // Auto-generated with correct paths for this environment
 
-const CACHE_NAME = 'cashbook-v1.0.3';
-const RUNTIME_CACHE = 'cashbook-runtime-v1.0.3';
+const CACHE_NAME = 'cashbook-v1.0.4';
+const RUNTIME_CACHE = 'cashbook-runtime-v1.0.4';
 const BASE_PATH = '<?php echo $basePath; ?>';
 
 // Files to cache immediately on install

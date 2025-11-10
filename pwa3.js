@@ -294,22 +294,71 @@ function checkFirstVisitInstall() {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const currentPage = window.location.pathname.split('/').pop();
     const isJustLoggedIn = sessionStorage.getItem('just_logged_in') === 'true';
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    console.log('🔍 PWA Install Check:', {
+        isMobile,
+        currentPage,
+        isJustLoggedIn,
+        isIOS,
+        hasDeferredPrompt: !!deferredPrompt,
+        bannerDismissed: isInstallBannerDismissed()
+    });
     
     // If on mobile, just logged in, and on dashboard
     if (isMobile && isJustLoggedIn && (currentPage === 'dashboard' || currentPage === 'dashboard.php')) {
-        console.log('📱 First visit after login on mobile - showing install prompt');
+        console.log('📱 ✅ First visit after login on mobile - WILL SHOW INSTALL PROMPT');
         
         // Clear the flag
         sessionStorage.removeItem('just_logged_in');
         
-        // If we have deferred prompt, show banner immediately
-        if (deferredPrompt && !isInstallBannerDismissed()) {
-            showInstallBanner(300); // Show after just 300ms
+        // For iOS - show instructions immediately (iOS doesn't support beforeinstallprompt)
+        if (isIOS) {
+            console.log('📱 iOS detected - showing install instructions banner');
+            if (!isInstallBannerDismissed()) {
+                showIOSInstallBanner(500);
+            } else {
+                console.log('⚠️ Banner was previously dismissed by user');
+            }
+            return;
         }
-        // For iOS
-        else if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !isInstallBannerDismissed()) {
-            showIOSInstallBanner(300); // Show after just 300ms
+        
+        // For Android/other mobile - wait for deferredPrompt or show anyway
+        if (!isInstallBannerDismissed()) {
+            // Try to show banner immediately if deferred prompt is ready
+            if (deferredPrompt) {
+                console.log('✅ Deferred prompt ready - showing banner NOW');
+                showInstallBanner(500);
+            } else {
+                console.log('⏳ Deferred prompt not ready yet - waiting for it...');
+                // Wait up to 5 seconds for beforeinstallprompt event
+                let attempts = 0;
+                const maxAttempts = 50; // 5 seconds (50 x 100ms)
+                const checkInterval = setInterval(() => {
+                    attempts++;
+                    console.log(`⏳ Waiting for install prompt... (${attempts}/${maxAttempts})`);
+                    
+                    if (deferredPrompt) {
+                        console.log('✅ Deferred prompt is NOW ready - SHOWING BANNER!');
+                        clearInterval(checkInterval);
+                        showInstallBanner(100);
+                    } else if (attempts >= maxAttempts) {
+                        console.log('⚠️ Deferred prompt not available after 5 seconds');
+                        console.log('   Possible reasons: Already installed, not HTTPS, or browser doesn\'t support PWA');
+                        clearInterval(checkInterval);
+                        
+                        // Show banner anyway for visual feedback
+                        showInstallBanner(100);
+                    }
+                }, 100);
+            }
+        } else {
+            console.log('ℹ️ Install banner was previously dismissed by user');
         }
+    } else {
+        if (!isMobile) console.log('ℹ️ Not on mobile device - banner won\'t auto-show');
+        if (!isJustLoggedIn) console.log('ℹ️ Not just logged in - banner won\'t auto-show');
+        if (currentPage !== 'dashboard' && currentPage !== 'dashboard.php') console.log('ℹ️ Not on dashboard page');
     }
 }
 
