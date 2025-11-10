@@ -375,14 +375,20 @@ if (document.readyState === 'loading') {
 }
 
 // Show install popup when floating button is clicked
-function showInstallPopup() {
+window.showInstallPopup = function() {
+    console.log('🎯 showInstallPopup called!');
+    
     const banner = document.getElementById('pwaInstallBanner');
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     
-    console.log('📱 Floating install button clicked!');
+    console.log('📱 Floating install button clicked!', {
+        bannerExists: !!banner,
+        isIOS: isIOS
+    });
     
     if (!banner) {
         console.log('❌ Banner element not found!');
+        alert('Install banner not found. Please refresh the page.');
         return;
     }
     
@@ -407,19 +413,22 @@ function showInstallPopup() {
     }
     
     // Show the banner
-    console.log('📢 Showing install popup!');
+    console.log('📢 Showing install popup NOW!');
     banner.classList.add('show');
-}
+    
+    console.log('Banner classes after adding show:', banner.className);
+    console.log('Banner computed transform:', window.getComputedStyle(banner).transform);
+};
 
 // Hide install popup
-function hideInstallPopup() {
+window.hideInstallPopup = function() {
     const banner = document.getElementById('pwaInstallBanner');
     
     if (banner) {
         console.log('🔽 Hiding install popup');
         banner.classList.remove('show');
     }
-}
+};
 
 // Show/hide floating button based on conditions
 function updateFloatingButton() {

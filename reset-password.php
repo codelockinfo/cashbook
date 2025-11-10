@@ -103,7 +103,7 @@ $token = htmlspecialchars($_GET['token']);
         // Pass PHP BASE_PATH to JavaScript
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
     </script>
-    <script src="<?php echo BASE_PATH; ?>/pwa7.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa8.js?v=<?php echo ASSET_VERSION; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/auth3.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>
