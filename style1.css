@@ -38,7 +38,7 @@ body {
 .header {
     background: white;
     border-radius: 20px;
-    padding: 30px;
+    padding: 18px 25px;
     margin-bottom: 30px;
     box-shadow: var(--shadow-xl);
 }
@@ -54,7 +54,7 @@ body {
 .logo {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 .logo i {
@@ -258,7 +258,8 @@ body {
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .form-group.full-width {
@@ -334,7 +335,7 @@ body {
 
 .btn-cash-in:hover {
     background: linear-gradient(135deg, #059669, #047857);
-    transform: scale(1.05);
+    transform: scale(1.03);
     box-shadow: var(--shadow-lg);
 }
 
@@ -345,14 +346,13 @@ body {
 
 .btn-cash-out:hover {
     background: linear-gradient(135deg, #dc2626, #b91c1c);
-    transform: scale(1.05);
+    transform: scale(1.03);
     box-shadow: var(--shadow-lg);
 }
 
 .btn-clear {
     background: linear-gradient(135deg, var(--text-secondary), var(--text-primary));
     color: white;
-    padding: 10px 20px;
     font-size: 0.875rem;
 }
 
@@ -541,7 +541,7 @@ body {
     text-align: center;
     padding: 0 5px;
     align-self: center;
-    margin-top: 24px;
+    margin-top: 20px;
 }
 
 .filter-item.date-range {
@@ -672,9 +672,15 @@ body {
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--primary-color);
+}
+
+.transaction-user.has-profile-pic {
     display: flex;
-    align-items: center;
     gap: 8px;
+}
+
+.transaction-user.no-profile-pic {
+    display: block;
 }
 
 .transaction-user img {
@@ -684,8 +690,9 @@ body {
 }
 
 .transaction-user i {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
+    margin-bottom: 5px;
 }
 
 .transaction-actions {
@@ -822,6 +829,130 @@ body {
 }
 
 /* Responsive Design */
+
+/* Small-Medium Screens: 769px to 1129px - Always show horizontal scroll */
+@media (min-width: 769px) and (max-width: 1129px) {
+    .filters-section {
+        padding-bottom: 40px;
+    }
+
+    .filter-group {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-color) var(--light-color);
+        padding-bottom: 10px;
+    }
+
+    .filter-group::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .filter-group::-webkit-scrollbar-track {
+        background: var(--light-color);
+        border-radius: 10px;
+    }
+
+    .filter-group::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+    }
+
+    .filter-group::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary-color);
+    }
+
+    .filter-item {
+        min-width: 180px;
+        flex-shrink: 0;
+    }
+
+    .filter-item.date-range {
+        min-width: 320px;
+    }
+
+    .btn-clear {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Scroll indicator - always visible */
+    .filters-section::after {
+        content: '← Scroll to see more filters →';
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        opacity: 0.7;
+        pointer-events: none;
+        white-space: nowrap;
+    }
+}
+
+/* Medium-Large Screens: 1130px to 1328px - Scroll ONLY when group filter is visible */
+@media (min-width: 1130px) and (max-width: 1328px) {
+    .filters-section.has-group-filter {
+        padding-bottom: 40px;
+    }
+
+    .filters-section.has-group-filter .filter-group {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-color) var(--light-color);
+        padding-bottom: 10px;
+    }
+
+    .filters-section.has-group-filter .filter-group::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .filters-section.has-group-filter .filter-group::-webkit-scrollbar-track {
+        background: var(--light-color);
+        border-radius: 10px;
+    }
+
+    .filters-section.has-group-filter .filter-group::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+    }
+
+    .filters-section.has-group-filter .filter-group::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary-color);
+    }
+
+    .filters-section.has-group-filter .filter-item {
+        min-width: 180px;
+        flex-shrink: 0;
+    }
+
+    .filters-section.has-group-filter .filter-item.date-range {
+        min-width: 320px;
+    }
+
+    .filters-section.has-group-filter .btn-clear {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Scroll indicator - only show when group filter is visible */
+    .filters-section.has-group-filter::after {
+        content: '← Scroll to see more filters →';
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        opacity: 0.7;
+        pointer-events: none;
+        white-space: nowrap;
+    }
+}
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -845,11 +976,13 @@ body {
 
     .card-header-right {
         width: 100%;
+        overflow: hidden;
     }
 
     .default-group-selector {
         width: 100%;
         min-width: auto;
+        max-width: 100%;
     }
 
     .entry-form {

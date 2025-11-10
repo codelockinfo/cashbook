@@ -45,9 +45,16 @@ function displayMyGroups(groups) {
             <div class="empty-groups">
                 <i class="fas fa-users"></i>
                 <p>You haven't joined any groups yet.</p>
-                <p style="font-size: 0.875rem; margin-top: 10px;">Click the "Create Group" button in the header to get started!</p>
+                <p style="font-size: 0.875rem; margin-top: 10px;">Click the <span id="createGroupTextLink" style="font-weight: 600; cursor: pointer;">"Create Group"</span> button to get started!</p>
             </div>
         `;
+        // Add click event listener to the Create Group text
+        setTimeout(() => {
+            const createGroupLink = document.getElementById('createGroupTextLink');
+            if (createGroupLink) {
+                createGroupLink.addEventListener('click', () => openModal('createGroupModal'));
+            }
+        }, 0);
         return;
     }
     
@@ -450,6 +457,18 @@ function openModal(modalId) {
 function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('show');
 }
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        const modals = ['createGroupModal', 'inviteUsersModal', 'viewGroupModal'];
+        modals.forEach(modalId => {
+            if (event.target.id === modalId) {
+                closeModal(modalId);
+            }
+        });
+    }
+});
 
 // Show Toast
 function showToast(message, type = 'success') {

@@ -201,6 +201,12 @@ async function loadGroups() {
                 defaultSelect.value = data.groups[0].id;
                 // Trigger the change event to hide/show appropriate fields
                 handleDefaultGroupChange();
+            } else {
+                // No groups - group filter will be visible, add class
+                const filtersSection = document.querySelector('.filters-section');
+                if (filtersSection) {
+                    filtersSection.classList.add('has-group-filter');
+                }
             }
         }
     } catch (error) {
@@ -216,12 +222,18 @@ function handleDefaultGroupChange() {
     const filterGroupContainer = document.getElementById('filterGroupContainer');
     const entryGroupSelect = document.getElementById('entryGroup');
     const filterGroupSelect = document.getElementById('filterGroup');
+    const filtersSection = document.querySelector('.filters-section');
     
     if (defaultGroupId) {
         // A specific group is selected
         // Hide the group selectors
         entryGroupContainer.style.display = 'none';
         filterGroupContainer.style.display = 'none';
+        
+        // Remove class to disable horizontal scroll
+        if (filtersSection) {
+            filtersSection.classList.remove('has-group-filter');
+        }
         
         // Set the entry group to the selected default group
         entryGroupSelect.value = defaultGroupId;
@@ -237,8 +249,13 @@ function handleDefaultGroupChange() {
     } else {
         // "All Groups" is selected
         // Show the group selectors
-        entryGroupContainer.style.display = 'block';
-        filterGroupContainer.style.display = 'block';
+        entryGroupContainer.style.display = 'flex';
+        filterGroupContainer.style.display = 'flex';
+        
+        // Add class to enable horizontal scroll on medium screens
+        if (filtersSection) {
+            filtersSection.classList.add('has-group-filter');
+        }
         
         // Reset selections
         entryGroupSelect.value = '';
@@ -260,7 +277,7 @@ async function handleGroupChange() {
     
     if (groupId) {
         // Show member filter and load members
-        memberFilterContainer.style.display = 'block';
+        memberFilterContainer.style.display = 'flex';
         await loadGroupMembers(groupId);
     } else {
         // Hide member filter
@@ -439,6 +456,9 @@ function displayTransactions(entries) {
                <i class="fas fa-user" style="display:none;"></i>`
             : `<i class="fas fa-user"></i>`;
         
+        // Determine the class based on profile picture existence
+        const userClass = entry.profile_picture ? 'has-profile-pic' : 'no-profile-pic';
+        
         // Attachment photo icon
         const attachmentIcon = entry.attachment 
             ? `<button class="attachment-icon" onclick="openPhotoModal('${escapeHtml(entry.attachment)}', '${escapeHtml(entry.group_name || 'Transaction')} - ${formattedDate}')" title="View payment proof">
@@ -462,7 +482,7 @@ function displayTransactions(entries) {
                 <div class="transaction-middle-row">
                     <div class="transaction-group-section">
                         <div class="transaction-group">${escapeHtml(entry.group_name || 'No Group')}</div>
-                        <div class="transaction-user">
+                        <div class="transaction-user ${userClass}">
                             ${userAvatar} ${escapeHtml(entry.user_name || 'Unknown User')}
                             ${attachmentIcon}
                         </div>

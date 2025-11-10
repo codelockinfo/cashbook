@@ -48,8 +48,8 @@ $token = htmlspecialchars($_GET['token']);
         <div class="auth-card">
             <div class="auth-header">
                 <div class="logo">
-                    <i class="fas fa-book"></i>
-                    <h1>Cash Book</h1>
+                <img src="icons/Black and Green Simple Organic Cosmetic Product Logo (4).png" alt="bookify" height="50px">
+                <h1>BOOKIFY</h1>
                 </div>
                 <p class="subtitle">Create a new password</p>
             </div>

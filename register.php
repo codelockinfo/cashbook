@@ -39,9 +39,9 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <div class="logo">
-                    <i class="fas fa-book"></i>
-                    <h1>Cash Book</h1>
+                <div class="logo" style="gap:5px;">
+                <img src="icons/Black and Green Simple Organic Cosmetic Product Logo (4).png" alt="bookify" height="50px">
+                <h1>BOOKIFY</h1>
                 </div>
                 <p class="subtitle">Create your account</p>
             </div>

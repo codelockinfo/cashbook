@@ -186,7 +186,7 @@ $user = getCurrentUser();
         }
 
         .modal-close:hover {
-            color: var(--danger-color);
+            color: #211f1f;
         }
 
         .user-list {
@@ -262,9 +262,14 @@ $user = getCurrentUser();
         }
 
         .empty-groups {
+            grid-column: 1 / -1;
             text-align: center;
             padding: 60px 20px;
             color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .empty-groups i {
@@ -514,9 +519,11 @@ $user = getCurrentUser();
                     </label>
                     <textarea id="groupDescription" placeholder="Enter group description" rows="3"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-check"></i> Create Group
-                </button>
+                <div style="display: flex; justify-content: center;">
+                    <button type="submit" class="btn btn-primary" style="color: #211f1f;">
+                        <i class="fas fa-check"></i> Create Group
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -535,7 +542,7 @@ $user = getCurrentUser();
             <div id="usersList" class="user-list">
                 <p style="text-align: center; color: var(--text-secondary);">Loading users...</p>
             </div>
-            <button class="btn btn-primary" id="sendInvitesBtn" style="margin-top: 20px; width: 100%;">
+            <button class="btn btn-primary" id="sendInvitesBtn" style="margin-top: 20px; width: 100%; color: #211f1f;">
                 <i class="fas fa-paper-plane"></i> Send Invitations
             </button>
         </div>

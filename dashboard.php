@@ -20,8 +20,8 @@ $user = getCurrentUser();
         <header class="header">
             <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-book"></i>
-                    <h1>Cash Book</h1>
+                    <img src="icons/Black and Green Simple Organic Cosmetic Product Logo (4).png" alt="bookify" height="50px">
+                    <h1>BOOKIFY</h1>
                 </div>
                 <div class="header-actions">
                     <div class="user-info">
