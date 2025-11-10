@@ -2,7 +2,7 @@
   "name": "Cash Book - Money Manager",
   "short_name": "Cash Book",
   "description": "Track your cash flow, manage groups, and keep records of all transactions",
-  "start_url": "./index.php",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#667eea",
   "theme_color": "#667eea",
@@ -72,7 +72,7 @@
       "name": "Add Cash In",
       "short_name": "Cash In",
       "description": "Add a cash in entry",
-      "url": "./dashboard.php",
+      "url": "./dashboard",
       "icons": [
         {
           "src": "./icons/icon-192x192.png",
@@ -84,7 +84,7 @@
       "name": "My Groups",
       "short_name": "Groups",
       "description": "View and manage groups",
-      "url": "./groups.php",
+      "url": "./groups",
       "icons": [
         {
           "src": "./icons/icon-192x192.png",

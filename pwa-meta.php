@@ -13,7 +13,7 @@ $basePath = defined('BASE_PATH') ? BASE_PATH : rtrim(dirname($_SERVER['SCRIPT_NA
 <meta name="msapplication-tap-highlight" content="no">
 
 <!-- Manifest -->
-<link rel="manifest" href="<?php echo $basePath; ?>/manifest.json">
+<link rel="manifest" href="<?php echo $basePath; ?>/manifest.json.php">
 
 <!-- Apple Touch Icons -->
 <link rel="apple-touch-icon" sizes="152x152" href="<?php echo $basePath; ?>/icons/icon-152x152.png">

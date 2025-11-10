@@ -1424,29 +1424,83 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* PWA Install Banner (Bottom Popup) - Hidden on desktop */
+/* Floating Install Button (Bottom Right) */
+.floating-install-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    z-index: 9999;
+    display: none; /* Hidden by default */
+    font-size: 24px;
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+.floating-install-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+.floating-install-btn:active {
+    transform: scale(0.95);
+}
+
+/* Show only on mobile */
+@media (max-width: 768px) {
+    .floating-install-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Pulse animation for install button */
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 30px rgba(102, 126, 234, 0.8);
+    }
+}
+
+/* PWA Install Modal/Popup */
 .pwa-install-banner {
     position: fixed;
-    bottom: -200px;
+    bottom: 0;
     left: 0;
     right: 0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 20px;
+    padding: 25px 20px;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-    z-index: 9997;
-    transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    display: none; /* Hidden on desktop */
+    z-index: 9998;
+    transform: translateY(100%); /* Start off-screen below */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: none;
 }
 
+/* Show popup with animation */
 .pwa-install-banner.show {
-    bottom: 0;
+    transform: translateY(0) !important; /* Slide up to visible position */
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
-/* Show install banner only on mobile */
+/* Show install popup only on mobile */
 @media (max-width: 768px) {
     .pwa-install-banner {
-        display: block;
+        display: block !important; /* Always block on mobile */
     }
 }
 
