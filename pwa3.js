@@ -52,8 +52,15 @@ window.addEventListener('beforeinstallprompt', (e) => {
     
     // Show bottom banner if not dismissed and on dashboard/groups page
     const currentPage = window.location.pathname.split('/').pop();
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     if ((currentPage === 'dashboard.php' || currentPage === 'dashboard' || currentPage === 'groups.php' || currentPage === 'groups') && !isInstallBannerDismissed()) {
-        showInstallBanner();
+        // On mobile, show immediately; on desktop, show after delay
+        if (isMobile) {
+            showInstallBanner(500); // Show after 500ms on mobile
+        } else {
+            showInstallBanner(2000); // Show after 2 seconds on desktop
+        }
     }
 });
 
@@ -169,17 +176,17 @@ function showUpdateNotification() {
 }
 
 // Show install banner at bottom
-function showInstallBanner() {
+function showInstallBanner(delay = 2000) {
     const banner = document.getElementById('pwaInstallBanner');
     
     if (banner && !isRunningAsPWA()) {
-        // Show banner after a short delay
+        // Show banner after specified delay
         setTimeout(() => {
             banner.style.display = 'block';
             setTimeout(() => {
                 banner.classList.add('show');
             }, 100);
-        }, 2000); // Show 2 seconds after page load
+        }, delay);
     }
 }
 
@@ -240,13 +247,13 @@ function checkIOSInstall() {
         // Show iOS install instructions in banner
         const currentPage = window.location.pathname.split('/').pop();
         if ((currentPage === 'dashboard.php' || currentPage === 'dashboard' || currentPage === 'groups.php' || currentPage === 'groups') && !isInstallBannerDismissed()) {
-            showIOSInstallBanner();
+            showIOSInstallBanner(500); // Show immediately on iOS mobile
         }
     }
 }
 
 // Show iOS-specific install banner
-function showIOSInstallBanner() {
+function showIOSInstallBanner(delay = 500) {
     const banner = document.getElementById('pwaInstallBanner');
     
     if (banner) {
@@ -265,13 +272,13 @@ function showIOSInstallBanner() {
             installBtn.style.display = 'none';
         }
         
-        // Show banner
+        // Show banner immediately on mobile
         setTimeout(() => {
             banner.style.display = 'block';
             setTimeout(() => {
                 banner.classList.add('show');
             }, 100);
-        }, 2000);
+        }, delay);
     }
 }
 
@@ -280,5 +287,36 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', checkIOSInstall);
 } else {
     checkIOSInstall();
+}
+
+// Check if just logged in and on mobile - show install prompt immediately
+function checkFirstVisitInstall() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const currentPage = window.location.pathname.split('/').pop();
+    const isJustLoggedIn = sessionStorage.getItem('just_logged_in') === 'true';
+    
+    // If on mobile, just logged in, and on dashboard
+    if (isMobile && isJustLoggedIn && (currentPage === 'dashboard' || currentPage === 'dashboard.php')) {
+        console.log('📱 First visit after login on mobile - showing install prompt');
+        
+        // Clear the flag
+        sessionStorage.removeItem('just_logged_in');
+        
+        // If we have deferred prompt, show banner immediately
+        if (deferredPrompt && !isInstallBannerDismissed()) {
+            showInstallBanner(300); // Show after just 300ms
+        }
+        // For iOS
+        else if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !isInstallBannerDismissed()) {
+            showIOSInstallBanner(300); // Show after just 300ms
+        }
+    }
+}
+
+// Run check on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkFirstVisitInstall);
+} else {
+    setTimeout(checkFirstVisitInstall, 100);
 }
 

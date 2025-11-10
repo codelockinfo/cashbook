@@ -122,8 +122,8 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
         // Pass PHP BASE_PATH to JavaScript
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
     </script>
-    <script src="<?php echo BASE_PATH; ?>/pwa1.js?v=<?php echo ASSET_VERSION; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/auth1.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa3.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/auth2.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>
 

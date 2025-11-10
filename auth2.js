@@ -120,6 +120,8 @@ async function handleLogin(e) {
         
         if (data.success) {
             showToast('Login successful! Redirecting...', 'success');
+            // Set flag for PWA install prompt on mobile
+            sessionStorage.setItem('just_logged_in', 'true');
             setTimeout(() => {
                 window.location.href = 'dashboard';
             }, 1000);
