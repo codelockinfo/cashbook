@@ -187,15 +187,11 @@ function showInstallBanner(delay = 2000) {
     
     if (banner && !isRunningAsPWA()) {
         console.log('✅ Banner element found - WILL SHOW in ' + delay + 'ms');
-        // Show banner after specified delay
+        // Show banner after specified delay - CSS handles the animation
         setTimeout(() => {
-            console.log('📢 SHOWING BANNER NOW!');
-            banner.style.display = 'block';
-            banner.style.visibility = 'visible';
-            setTimeout(() => {
-                banner.classList.add('show');
-                console.log('✨ Added .show class - banner should slide up!');
-            }, 100);
+            console.log('📢 SHOWING BANNER NOW - Adding .show class!');
+            banner.classList.add('show');
+            console.log('✨ .show class added - banner should slide up from bottom!');
         }, delay);
     } else {
         if (!banner) console.log('❌ Banner element NOT found in DOM!');
@@ -293,15 +289,11 @@ function showIOSInstallBanner(delay = 500) {
             console.log('ℹ️ Hidden install button (iOS uses manual install)');
         }
         
-        // Show banner immediately on mobile
+        // Show banner immediately on mobile - CSS handles the animation
         setTimeout(() => {
-            console.log('📢 SHOWING iOS BANNER NOW!');
-            banner.style.display = 'block';
-            banner.style.visibility = 'visible';
-            setTimeout(() => {
-                banner.classList.add('show');
-                console.log('✨ Added .show class - iOS banner should slide up!');
-            }, 100);
+            console.log('📢 SHOWING iOS BANNER NOW - Adding .show class!');
+            banner.classList.add('show');
+            console.log('✨ .show class added - iOS banner should slide up from bottom!');
         }, delay);
     } else {
         console.log('❌ Banner element NOT found in DOM!');

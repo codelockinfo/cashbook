@@ -1294,7 +1294,7 @@ body {
 /* PWA Install Banner (Bottom Popup) - Hidden on desktop */
 .pwa-install-banner {
     position: fixed;
-    bottom: -200px;
+    bottom: -250px; /* Start off-screen */
     left: 0;
     right: 0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1302,18 +1302,23 @@ body {
     padding: 20px;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
     z-index: 9997;
-    transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    display: none; /* Hidden on desktop */
+    transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: none; /* Hidden by default */
+    opacity: 0;
+    visibility: hidden;
 }
 
+/* Show banner with animation */
 .pwa-install-banner.show {
-    bottom: 0;
+    bottom: 0 !important; /* Slide up to visible position */
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 /* Show install banner only on mobile */
 @media (max-width: 768px) {
     .pwa-install-banner {
-        display: block;
+        display: block !important; /* Always block on mobile */
     }
 }
 

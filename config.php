@@ -25,7 +25,7 @@ define('BASE_PATH', getBasePath());
 
 // Cache busting version for CSS/JS files
 // Update this version number when you deploy new changes
-define('ASSET_VERSION', '1.0.4');
+define('ASSET_VERSION', '1.0.5');
 
 // Set database configuration based on environment
 if (isLocalEnvironment()) {
