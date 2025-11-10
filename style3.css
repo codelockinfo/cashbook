@@ -576,7 +576,7 @@ body {
 }
 
 .transactions-header h3 {
-    font-size: 1.25rem;
+    font-size: 24px;
     color: var(--text-primary);
 }
 
@@ -958,10 +958,30 @@ body {
         padding: 10px;
     }
     .dashboard-section {
-        padding: 20px 9px 9px 9px;
+        padding: 20px 12px 12px 12px;
+    }
+    .dashboard-header h2 {
+        font-size: 24px;
+    }
+    .stat-value{
+        font-size: 14px;
+    }
+    .stat-card {
+        padding: 15px;
     }
     .entry-card {
         max-width: 100%;
+        padding: 20px 12px;
+    }
+    .header {
+        padding: 20px 12px;
+    }
+
+    .stat-icon {
+        height: 46px;
+        width: 46px;
+        padding: 6px;
+        padding-left: 10px;
     }
 
     .card-header {
@@ -979,6 +999,15 @@ body {
         overflow: hidden;
     }
 
+    .unified-entry-card .card-header i {
+        height: 45px;
+        width: 45px;
+    }
+    .card-header i {
+        font-size: 22px;
+        padding: 11px;
+    }
+
     .default-group-selector {
         width: 100%;
         min-width: auto;
@@ -987,6 +1016,7 @@ body {
 
     .entry-form {
         grid-template-columns: 1fr;
+        gap: 0;
     }
 
     .button-group {
@@ -1033,7 +1063,8 @@ body {
     }
 
     .filters-section {
-        padding-bottom: 40px;
+        padding-bottom: 40px !important;
+        padding: 15px;
     }
 
     .filter-group {

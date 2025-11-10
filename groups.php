@@ -301,7 +301,7 @@ $user = getCurrentUser();
         /* Mobile Responsive Styles */
         @media (max-width: 768px) {
             .dashboard-section {
-                padding: 20px;
+                padding: 20px 12px 12px 12px;
             }
             .groups-grid {
                 grid-template-columns: 1fr;

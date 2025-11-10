@@ -106,7 +106,7 @@ $user = getCurrentUser();
                 </div>
 
                 <!-- Change Password Section -->
-                <div class="info-box" style="margin: 20px 0;">
+                <div class="info-box" style="margin: 10px 0;">
                     <i class="fas fa-info-circle"></i>
                     <p>Leave password fields empty if you don't want to change your password.</p>
                 </div>
