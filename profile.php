@@ -14,7 +14,7 @@ $user = getCurrentUser();
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style2.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style2.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style1.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
 </head>
 <body>
     <div class="container" style="max-width: 1200px;">

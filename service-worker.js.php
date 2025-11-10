@@ -25,7 +25,7 @@ const STATIC_CACHE_URLS = [
     BASE_PATH + '/groups',
     BASE_PATH + '/profile',
     BASE_PATH + '/style2.css',
-    BASE_PATH + '/auth-style2.css',
+    BASE_PATH + '/auth-style1.css',
     BASE_PATH + '/dashboard1.js',
     BASE_PATH + '/auth3.js',
     BASE_PATH + '/groups1.js',
