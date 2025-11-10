@@ -9,7 +9,7 @@ const BASE_PATH = window.BASE_PATH || '';
 // Register Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        const swPath = BASE_PATH ? `${BASE_PATH}/service-worker.js` : '/service-worker.js';
+        const swPath = BASE_PATH ? `${BASE_PATH}/service-worker.js.php` : '/service-worker.js.php';
         const swScope = BASE_PATH ? `${BASE_PATH}/` : '/';
         
         navigator.serviceWorker.register(swPath, {
@@ -52,7 +52,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     
     // Show bottom banner if not dismissed and on dashboard/groups page
     const currentPage = window.location.pathname.split('/').pop();
-    if ((currentPage === 'dashboard.php' || currentPage === 'groups.php') && !isInstallBannerDismissed()) {
+    if ((currentPage === 'dashboard.php' || currentPage === 'dashboard' || currentPage === 'groups.php' || currentPage === 'groups') && !isInstallBannerDismissed()) {
         showInstallBanner();
     }
 });
@@ -239,7 +239,7 @@ function checkIOSInstall() {
     if (isIOS && !isInStandaloneMode) {
         // Show iOS install instructions in banner
         const currentPage = window.location.pathname.split('/').pop();
-        if ((currentPage === 'dashboard.php' || currentPage === 'groups.php') && !isInstallBannerDismissed()) {
+        if ((currentPage === 'dashboard.php' || currentPage === 'dashboard' || currentPage === 'groups.php' || currentPage === 'groups') && !isInstallBannerDismissed()) {
             showIOSInstallBanner();
         }
     }

@@ -16,9 +16,10 @@ RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.+)$ $1.php [L,QSA]
 
 # Redirect .php URLs to extension-less URLs (301 permanent redirect)
-# BUT exclude API files (they need to keep .php extension for JavaScript)
+# BUT exclude API files and PWA files (they need to keep .php extension)
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^.]+)\.php [NC]
 RewriteCond %{REQUEST_URI} !^.*api\.php$ [NC]
+RewriteCond %{REQUEST_URI} !^.*(service-worker|manifest)\..*\.php$ [NC]
 RewriteRule ^([^.]+)\.php$ /$1 [R=301,L]
 
 # Prevent direct access to certain files (Apache 2.4 syntax)
