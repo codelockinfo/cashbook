@@ -89,7 +89,7 @@ require_once 'config.php';
         </div>
     </div>
     
-    <script src="<?php echo BASE_PATH; ?>/pwa5.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa6.js?v=<?php echo ASSET_VERSION; ?>"></script>
     <script>
         async function checkPWAFiles() {
             const resultDiv = document.getElementById('fileCheck');
@@ -98,7 +98,7 @@ require_once 'config.php';
             const files = [
                 BASE_PATH + '/manifest.json.php',
                 BASE_PATH + '/service-worker.js.php',
-                BASE_PATH + '/pwa5.js',
+                BASE_PATH + '/pwa6.js',
                 BASE_PATH + '/icons/icon-192x192.png',
                 BASE_PATH + '/icons/icon-512x512.png'
             ];

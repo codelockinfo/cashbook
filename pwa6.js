@@ -329,14 +329,12 @@ function checkFirstVisitInstall() {
     if (isMobile && isJustLoggedIn && !isAlreadyInstalled && (currentPage === 'dashboard' || currentPage === 'dashboard.php')) {
         console.log('📱 ✅ First visit after login on mobile - WILL SHOW INSTALL BANNER!');
         
-        // Clear the flag
+        // Clear the login flag
         sessionStorage.removeItem('just_logged_in');
         
-        // Skip if user previously dismissed the banner
-        if (isInstallBannerDismissed()) {
-            console.log('ℹ️ Install banner was previously dismissed by user');
-            return;
-        }
+        // IMPORTANT: Clear the dismissed flag on login - always show after fresh login!
+        console.log('🔓 Clearing any previous dismissal - banner WILL show after login!');
+        localStorage.removeItem('pwa-banner-dismissed');
         
         // For iOS - show instructions immediately (iOS doesn't support beforeinstallprompt)
         if (isIOS) {
@@ -345,7 +343,7 @@ function checkFirstVisitInstall() {
             return;
         }
         
-        // For Android/other mobile - ALWAYS show banner (even without deferredPrompt)
+        // For Android/other mobile - ALWAYS show banner after login
         console.log('📱 Android/Mobile detected - SHOWING install banner NOW!');
         showInstallBanner(800); // Show after 800ms
         
