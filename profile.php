@@ -10,11 +10,11 @@ $user = getCurrentUser();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - Cash Book</title>
+    <title>My Profile - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style2.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style1.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style3.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style2.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
 </head>
 <body>
     <div class="container" style="max-width: 1200px;">
@@ -167,7 +167,7 @@ $user = getCurrentUser();
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa8.js?v=<?php echo ASSET_VERSION; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/auth3.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/dashboard1.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard2.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
     <script>
         // Initialize profile page
         (function() {

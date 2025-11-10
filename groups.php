@@ -9,10 +9,10 @@ $user = getCurrentUser();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Groups - Cash Book</title>
+    <title>My Groups - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style2.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style3.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <style>
         .groups-container {
             max-width: 1200px;
@@ -591,7 +591,7 @@ $user = getCurrentUser();
         const CURRENT_USER = <?php echo json_encode($user); ?>;
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa8.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/groups1.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/groups2.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 
