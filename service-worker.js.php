@@ -29,7 +29,7 @@ const STATIC_CACHE_URLS = [
     BASE_PATH + '/dashboard1.js',
     BASE_PATH + '/auth2.js',
     BASE_PATH + '/groups1.js',
-    BASE_PATH + '/pwa3.js',
+    BASE_PATH + '/pwa4.js',
     BASE_PATH + '/icons/icon-192x192.png',
     BASE_PATH + '/icons/icon-512x512.png',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'

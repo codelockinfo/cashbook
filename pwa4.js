@@ -179,14 +179,27 @@ function showUpdateNotification() {
 function showInstallBanner(delay = 2000) {
     const banner = document.getElementById('pwaInstallBanner');
     
+    console.log('🎯 showInstallBanner called:', {
+        bannerExists: !!banner,
+        isRunningAsPWA: isRunningAsPWA(),
+        delay: delay
+    });
+    
     if (banner && !isRunningAsPWA()) {
+        console.log('✅ Banner element found - WILL SHOW in ' + delay + 'ms');
         // Show banner after specified delay
         setTimeout(() => {
+            console.log('📢 SHOWING BANNER NOW!');
             banner.style.display = 'block';
+            banner.style.visibility = 'visible';
             setTimeout(() => {
                 banner.classList.add('show');
+                console.log('✨ Added .show class - banner should slide up!');
             }, 100);
         }, delay);
+    } else {
+        if (!banner) console.log('❌ Banner element NOT found in DOM!');
+        if (isRunningAsPWA()) console.log('ℹ️ Already running as PWA - no need to show banner');
     }
 }
 
@@ -256,29 +269,42 @@ function checkIOSInstall() {
 function showIOSInstallBanner(delay = 500) {
     const banner = document.getElementById('pwaInstallBanner');
     
+    console.log('🍎 showIOSInstallBanner called:', {
+        bannerExists: !!banner,
+        delay: delay
+    });
+    
     if (banner) {
+        console.log('✅ Banner found - preparing iOS instructions');
         // Update banner for iOS
         const bannerText = banner.querySelector('.pwa-banner-text');
         if (bannerText) {
             bannerText.innerHTML = `
-                <h4>Install Cash Book App</h4>
-                <p>Tap <i class="fas fa-share"></i> Share, then "Add to Home Screen"</p>
+                <h4>📱 Install Cash Book App</h4>
+                <p>Tap <i class="fas fa-share"></i> Share button, then select "Add to Home Screen"</p>
             `;
+            console.log('✅ Updated banner text for iOS');
         }
         
         // Hide install button for iOS (manual install only)
         const installBtn = document.getElementById('installPWABanner');
         if (installBtn) {
             installBtn.style.display = 'none';
+            console.log('ℹ️ Hidden install button (iOS uses manual install)');
         }
         
         // Show banner immediately on mobile
         setTimeout(() => {
+            console.log('📢 SHOWING iOS BANNER NOW!');
             banner.style.display = 'block';
+            banner.style.visibility = 'visible';
             setTimeout(() => {
                 banner.classList.add('show');
+                console.log('✨ Added .show class - iOS banner should slide up!');
             }, 100);
         }, delay);
+    } else {
+        console.log('❌ Banner element NOT found in DOM!');
     }
 }
 
@@ -295,69 +321,46 @@ function checkFirstVisitInstall() {
     const currentPage = window.location.pathname.split('/').pop();
     const isJustLoggedIn = sessionStorage.getItem('just_logged_in') === 'true';
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAlreadyInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     
     console.log('🔍 PWA Install Check:', {
         isMobile,
         currentPage,
         isJustLoggedIn,
         isIOS,
+        isAlreadyInstalled,
         hasDeferredPrompt: !!deferredPrompt,
         bannerDismissed: isInstallBannerDismissed()
     });
     
-    // If on mobile, just logged in, and on dashboard
-    if (isMobile && isJustLoggedIn && (currentPage === 'dashboard' || currentPage === 'dashboard.php')) {
-        console.log('📱 ✅ First visit after login on mobile - WILL SHOW INSTALL PROMPT');
+    // If on mobile, just logged in, and on dashboard, and NOT already installed
+    if (isMobile && isJustLoggedIn && !isAlreadyInstalled && (currentPage === 'dashboard' || currentPage === 'dashboard.php')) {
+        console.log('📱 ✅ First visit after login on mobile - WILL SHOW INSTALL BANNER!');
         
         // Clear the flag
         sessionStorage.removeItem('just_logged_in');
         
-        // For iOS - show instructions immediately (iOS doesn't support beforeinstallprompt)
-        if (isIOS) {
-            console.log('📱 iOS detected - showing install instructions banner');
-            if (!isInstallBannerDismissed()) {
-                showIOSInstallBanner(500);
-            } else {
-                console.log('⚠️ Banner was previously dismissed by user');
-            }
+        // Skip if user previously dismissed the banner
+        if (isInstallBannerDismissed()) {
+            console.log('ℹ️ Install banner was previously dismissed by user');
             return;
         }
         
-        // For Android/other mobile - wait for deferredPrompt or show anyway
-        if (!isInstallBannerDismissed()) {
-            // Try to show banner immediately if deferred prompt is ready
-            if (deferredPrompt) {
-                console.log('✅ Deferred prompt ready - showing banner NOW');
-                showInstallBanner(500);
-            } else {
-                console.log('⏳ Deferred prompt not ready yet - waiting for it...');
-                // Wait up to 5 seconds for beforeinstallprompt event
-                let attempts = 0;
-                const maxAttempts = 50; // 5 seconds (50 x 100ms)
-                const checkInterval = setInterval(() => {
-                    attempts++;
-                    console.log(`⏳ Waiting for install prompt... (${attempts}/${maxAttempts})`);
-                    
-                    if (deferredPrompt) {
-                        console.log('✅ Deferred prompt is NOW ready - SHOWING BANNER!');
-                        clearInterval(checkInterval);
-                        showInstallBanner(100);
-                    } else if (attempts >= maxAttempts) {
-                        console.log('⚠️ Deferred prompt not available after 5 seconds');
-                        console.log('   Possible reasons: Already installed, not HTTPS, or browser doesn\'t support PWA');
-                        clearInterval(checkInterval);
-                        
-                        // Show banner anyway for visual feedback
-                        showInstallBanner(100);
-                    }
-                }, 100);
-            }
-        } else {
-            console.log('ℹ️ Install banner was previously dismissed by user');
+        // For iOS - show instructions immediately (iOS doesn't support beforeinstallprompt)
+        if (isIOS) {
+            console.log('📱 iOS detected - SHOWING install instructions banner NOW!');
+            showIOSInstallBanner(800); // Show after 800ms
+            return;
         }
+        
+        // For Android/other mobile - ALWAYS show banner (even without deferredPrompt)
+        console.log('📱 Android/Mobile detected - SHOWING install banner NOW!');
+        showInstallBanner(800); // Show after 800ms
+        
     } else {
-        if (!isMobile) console.log('ℹ️ Not on mobile device - banner won\'t auto-show');
-        if (!isJustLoggedIn) console.log('ℹ️ Not just logged in - banner won\'t auto-show');
+        if (!isMobile) console.log('ℹ️ Not on mobile device');
+        if (!isJustLoggedIn) console.log('ℹ️ Not just logged in');
+        if (isAlreadyInstalled) console.log('ℹ️ App is already installed');
         if (currentPage !== 'dashboard' && currentPage !== 'dashboard.php') console.log('ℹ️ Not on dashboard page');
     }
 }

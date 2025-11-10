@@ -557,7 +557,7 @@ $user = getCurrentUser();
     <div id="toast" class="toast"></div>
 
     <!-- PWA Install Prompt Banner -->
-    <div id="pwaInstallBanner" class="pwa-install-banner" style="display: none;">
+    <div id="pwaInstallBanner" class="pwa-install-banner">
         <button class="pwa-banner-close" id="closePWABanner">&times;</button>
         <div class="pwa-banner-content">
             <div class="pwa-banner-icon">
@@ -578,7 +578,7 @@ $user = getCurrentUser();
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
         const CURRENT_USER = <?php echo json_encode($user); ?>;
     </script>
-    <script src="<?php echo BASE_PATH; ?>/pwa3.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa4.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/groups1.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
