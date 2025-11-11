@@ -1,10 +1,18 @@
 // PWA Functionality - Install Prompt and Service Worker Registration
+console.log('🚀 pwa9.js LOADED at:', new Date().toLocaleTimeString());
+console.log('🔍 Initial check:', {
+    url: window.location.href,
+    pathname: window.location.pathname,
+    isSecure: window.location.protocol === 'https:' || window.location.hostname === 'localhost',
+    userAgent: navigator.userAgent.substring(0, 50) + '...'
+});
 
 let deferredPrompt;
 let installButton;
 
-// Get base path from window or default to current directory
-const BASE_PATH = window.BASE_PATH || '';
+// Use BASE_PATH from window (already defined in dashboard.php)
+// Don't redeclare it here to avoid "Identifier already declared" error
+console.log('📂 Using global BASE_PATH:', window.BASE_PATH || '');
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
@@ -39,13 +47,15 @@ if ('serviceWorker' in navigator) {
 
 // Capture the install prompt event
 window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('💾 Install prompt available');
+    console.log('💾 beforeinstallprompt event fired! Install prompt is now available');
+    console.log('📦 Event object:', e);
     
     // Prevent the default mini-infobar
     e.preventDefault();
     
     // Store the event for later use
     deferredPrompt = e;
+    console.log('✅ deferredPrompt stored:', !!deferredPrompt);
     
     // Show custom install button in header
     showInstallButton();
@@ -85,9 +95,9 @@ function showInstallButton() {
     }
 }
 
-// Install PWA
-async function installPWA() {
-    console.log('🎯 Install button clicked!');
+// Install PWA - Make it globally accessible
+window.installPWA = async function installPWA() {
+    console.log('🎯 installPWA() function called!');
     
     if (!deferredPrompt) {
         console.log('⚠️ Install prompt not available - may be already installed or not supported');
@@ -135,7 +145,9 @@ async function installPWA() {
     
     // Clear the prompt
     deferredPrompt = null;
-}
+};
+
+console.log('✅ window.installPWA function defined:', typeof window.installPWA);
 
 // Handle app installed event
 window.addEventListener('appinstalled', (e) => {
@@ -253,29 +265,79 @@ function dismissInstallBanner() {
 
 // Setup banner event listeners
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📋 DOMContentLoaded fired - setting up banner listeners');
     const closeBannerBtn = document.getElementById('closePWABanner');
     const installBannerBtn = document.getElementById('installPWABanner');
     
+    console.log('🔍 Banner elements found:', {
+        closeBannerBtn: !!closeBannerBtn,
+        installBannerBtn: !!installBannerBtn
+    });
+    
     if (closeBannerBtn) {
         closeBannerBtn.addEventListener('click', dismissInstallBanner);
+        console.log('✅ Close button listener attached');
     }
     
     if (installBannerBtn) {
         installBannerBtn.addEventListener('click', async () => {
+            console.log('🖱️ Install button clicked!');
+            console.log('🔍 deferredPrompt status:', deferredPrompt ? 'Available' : 'NULL');
+            
             if (deferredPrompt) {
+                console.log('✅ Showing install prompt...');
+                
                 // Show install prompt
                 deferredPrompt.prompt();
                 
                 const { outcome } = await deferredPrompt.userChoice;
                 
+                console.log('📊 User choice:', outcome);
+                
                 if (outcome === 'accepted') {
                     console.log('✅ PWA installed from banner');
+                    
+                    // Mark as installed
+                    localStorage.setItem('pwa-installed', 'true');
+                    
+                    // Hide floating button
+                    const floatingBtn = document.getElementById('floatingInstallBtn');
+                    if (floatingBtn) {
+                        floatingBtn.style.setProperty('display', 'none', 'important');
+                    }
+                    
                     dismissInstallBanner();
+                    
+                    if (typeof showToast === 'function') {
+                        showToast('App installed successfully!', 'success');
+                    }
+                } else {
+                    console.log('❌ PWA installation declined from banner');
                 }
                 
                 deferredPrompt = null;
+            } else {
+                console.error('❌ deferredPrompt is null!');
+                console.log('ℹ️ This means the beforeinstallprompt event did not fire.');
+                
+                // Check if already installed
+                const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                
+                if (isInstalled) {
+                    alert('App is already installed! Launch it from your home screen.');
+                    dismissInstallBanner();
+                } else if (isIOS) {
+                    // Show iOS instructions
+                    alert('To install on iOS:\n\n1. Tap the Share button (⎙) at the bottom\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install');
+                } else {
+                    alert('Installation not available.\n\nThis may happen if:\n- App is already installed\n- Browser doesn\'t support PWA\n- You need to access via HTTPS');
+                }
             }
         });
+        console.log('✅ Install button listener attached');
+    } else {
+        console.error('❌ Install button not found!');
     }
 });
 

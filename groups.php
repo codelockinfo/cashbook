@@ -579,7 +579,7 @@ $user = getCurrentUser();
                 <h4>Install Cash Book App</h4>
                 <p>Add to your home screen for quick access and offline use!</p>
             </div>
-            <button class="pwa-banner-install" id="installPWABanner">
+            <button class="pwa-banner-install" id="installPWABanner" onclick="console.log('🖱️ INLINE Install clicked!'); if(typeof installPWA === 'function') { installPWA(); } else { alert('installPWA function not loaded! Check console.'); }">
                 <i class="fas fa-download"></i> Install
             </button>
         </div>
@@ -643,7 +643,7 @@ $user = getCurrentUser();
             }
         });
     </script>
-    <script src="<?php echo BASE_PATH; ?>/pwa8.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa9.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/groups2.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>

@@ -13,8 +13,8 @@ $basePath = BASE_PATH;
 // Service Worker for Cash Book PWA
 // Auto-generated with correct paths for this environment
 
-const CACHE_NAME = 'cashbook-v1.2.0';
-const RUNTIME_CACHE = 'cashbook-runtime-v1.2.0';
+const CACHE_NAME = 'cashbook-v1.2.3';
+const RUNTIME_CACHE = 'cashbook-runtime-v1.2.3';
 const BASE_PATH = '<?php echo $basePath; ?>';
 
 // Files to cache immediately on install
@@ -29,7 +29,7 @@ const STATIC_CACHE_URLS = [
     BASE_PATH + '/dashboard2.js',
     BASE_PATH + '/auth3.js',
     BASE_PATH + '/groups2.js',
-    BASE_PATH + '/pwa8.js',
+    BASE_PATH + '/pwa9.js',
     BASE_PATH + '/icons/icon-192x192.png',
     BASE_PATH + '/icons/icon-512x512.png',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
