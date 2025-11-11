@@ -321,108 +321,16 @@ $user = getCurrentUser();
     </div>
 
     <!-- Floating Install Button (Bottom Right) -->
-    <button id="floatingInstallBtn" class="floating-install-btn" onclick="console.log('🖱️ Button CLICKED!'); if(typeof showInstallPopup === 'function') { showInstallPopup(); } else { alert('showInstallPopup not loaded yet!'); }" title="Install App">
+    <button id="floatingInstallBtn" class="floating-install-btn" onclick="if(typeof installPWA === 'function') { installPWA(); } else { alert('Install not available'); }" title="Install App">
         <i class="fas fa-download"></i>
     </button>
-
-    <!-- PWA Install Prompt Banner -->
-    <div id="pwaInstallBanner" class="pwa-install-banner">
-        <button class="pwa-banner-close" id="closePWABanner">&times;</button>
-        <div class="pwa-banner-content">
-            <div class="pwa-banner-icon">
-                <i class="fas fa-mobile-alt"></i>
-            </div>
-            <div class="pwa-banner-text">
-                <h4>Install Cash Book App</h4>
-                <p>Add to your home screen for quick access and offline use!</p>
-            </div>
-            <button class="pwa-banner-install" id="installPWABanner" onclick="console.log('🖱️ INLINE Install clicked!'); if(typeof installPWA === 'function') { installPWA(); } else { alert('installPWA function not loaded! Check console.'); }">
-                <i class="fas fa-download"></i> Install
-            </button>
-        </div>
-    </div>
 
     <script>
         // Pass PHP data to JavaScript
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
         const CURRENT_USER = <?php echo json_encode($user); ?>;
         
-        // Debug: Log BASE_PATH
-        console.log('🔍 Dashboard DEBUG:');
-        console.log('- BASE_PATH:', BASE_PATH);
-        console.log('- Current URL:', window.location.href);
-        console.log('- Expected pwa9.js path:', BASE_PATH + '/pwa9.js');
-        
-        // TEMPORARY: Define showInstallPopup inline as backup
-        if (typeof window.showInstallPopup === 'undefined') {
-            console.log('⚠️ Defining showInstallPopup inline as backup...');
-            window.showInstallPopup = function() {
-                console.log('🎯 INLINE showInstallPopup called!');
-                const banner = document.getElementById('pwaInstallBanner');
-                const floatingBtn = document.getElementById('floatingInstallBtn');
-                
-                if (banner) {
-                    // Show banner
-                    banner.classList.add('show');
-                    banner.style.display = 'block';
-                    banner.style.opacity = '1';
-                    banner.style.visibility = 'visible';
-                    banner.style.transform = 'translateY(0)';
-                    
-                    // Hide floating button with !important
-                    if (floatingBtn) {
-                        floatingBtn.style.setProperty('display', 'none', 'important');
-                        console.log('✅ Floating button hidden with !important');
-                    }
-                    
-                    console.log('✅ Banner shown via inline function!');
-                } else {
-                    alert('Banner element not found!');
-                }
-            };
-            
-            window.hideInstallPopup = function() {
-                const banner = document.getElementById('pwaInstallBanner');
-                const floatingBtn = document.getElementById('floatingInstallBtn');
-                
-                if (banner) {
-                    // Hide banner
-                    banner.classList.remove('show');
-                    banner.style.display = '';
-                    banner.style.opacity = '';
-                    banner.style.visibility = '';
-                    banner.style.transform = '';
-                    
-                    // Show floating button again
-                    if (floatingBtn) {
-                        floatingBtn.style.setProperty('display', 'flex', 'important');
-                        console.log('✅ Floating button shown again');
-                    }
-                }
-            };
-            console.log('✅ Inline functions defined!');
-        }
-        
-        // Debug: Check if scripts loaded
-        window.addEventListener('load', function() {
-            console.log('📊 Page Load Status:');
-            console.log('- showInstallPopup exists?', typeof window.showInstallPopup);
-            console.log('- Floating button exists?', !!document.getElementById('floatingInstallBtn'));
-            console.log('- PWA banner exists?', !!document.getElementById('pwaInstallBanner'));
-        });
-        
-        // Setup close button for banner
-        document.addEventListener('DOMContentLoaded', function() {
-            const closeBtn = document.getElementById('closePWABanner');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', function() {
-                    console.log('❌ Close button clicked');
-                    if (typeof window.hideInstallPopup === 'function') {
-                        window.hideInstallPopup();
-                    }
-                });
-            }
-        });
+        // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa9.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>" onerror="console.error('❌ Failed to load pwa9.js from: <?php echo BASE_PATH; ?>/pwa9.js')"></script>
     <script src="<?php echo BASE_PATH; ?>/dashboard2.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>

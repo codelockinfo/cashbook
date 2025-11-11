@@ -57,21 +57,11 @@ window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
     console.log('✅ deferredPrompt stored:', !!deferredPrompt);
     
-    // Show custom install button in header
-    showInstallButton();
+    // Don't show install button in header - only use floating button
+    // showInstallButton(); // DISABLED
     
-    // Show bottom banner if not dismissed and on dashboard/groups page
-    const currentPage = window.location.pathname.split('/').pop();
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if ((currentPage === 'dashboard.php' || currentPage === 'dashboard' || currentPage === 'groups.php' || currentPage === 'groups') && !isInstallBannerDismissed()) {
-        // On mobile, show immediately; on desktop, show after delay
-        if (isMobile) {
-            showInstallBanner(500); // Show after 500ms on mobile
-        } else {
-            showInstallBanner(2000); // Show after 2 seconds on desktop
-        }
-    }
+    // Update floating button visibility
+    updateFloatingButton();
 });
 
 // Show install button
@@ -456,114 +446,22 @@ if (document.readyState === 'loading') {
     setTimeout(checkFirstVisitInstall, 100);
 }
 
-// Show install popup when floating button is clicked
+// Show install popup (deprecated - now calls installPWA directly)
 window.showInstallPopup = function() {
-    console.log('🎯 showInstallPopup called!');
-    console.log('🔍 Full debug info:');
-    console.log('- Window location:', window.location.href);
-    console.log('- Document ready state:', document.readyState);
+    console.log('🎯 showInstallPopup called - redirecting to installPWA()');
     
-    const banner = document.getElementById('pwaInstallBanner');
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    
-    console.log('📱 Floating install button clicked!', {
-        bannerExists: !!banner,
-        bannerId: banner ? banner.id : 'NULL',
-        isIOS: isIOS,
-        isAndroid: isAndroid,
-        bannerDisplay: banner ? window.getComputedStyle(banner).display : 'N/A',
-        bannerVisibility: banner ? window.getComputedStyle(banner).visibility : 'N/A',
-        bannerTransform: banner ? window.getComputedStyle(banner).transform : 'N/A'
-    });
-    
-    if (!banner) {
-        console.error('❌ Banner element not found in DOM!');
-        console.log('Available elements with "install" in ID:', 
-            Array.from(document.querySelectorAll('[id*="install"]')).map(el => el.id));
-        
-        // Try to find it another way
-        const allBanners = document.querySelectorAll('.pwa-install-banner');
-        console.log('Found banners by class:', allBanners.length);
-        
-        alert('Install banner not found. Please refresh the page and try again.');
-        return;
+    // Call installPWA directly (no popup banner)
+    if (typeof window.installPWA === 'function') {
+        window.installPWA();
+    } else {
+        console.error('❌ installPWA function not available');
+        alert('Install feature not available at this time.');
     }
-    
-    console.log('✅ Banner found! Element details:');
-    console.log('- Tag:', banner.tagName);
-    console.log('- Classes:', banner.className);
-    console.log('- Current display:', window.getComputedStyle(banner).display);
-    console.log('- Current transform:', window.getComputedStyle(banner).transform);
-    console.log('- Current opacity:', window.getComputedStyle(banner).opacity);
-    
-    // For iOS - update banner with iOS instructions
-    if (isIOS) {
-        console.log('📱 iOS device - showing iOS install instructions');
-        const bannerText = banner.querySelector('.pwa-banner-text');
-        if (bannerText) {
-            bannerText.innerHTML = `
-                <h4>📱 Install Cash Book App</h4>
-                <p>1. Tap the <i class="fas fa-share"></i> Share button below<br>
-                2. Select "Add to Home Screen"<br>
-                3. Tap "Add" to install</p>
-            `;
-        }
-        
-        // Hide install button for iOS (manual install only)
-        const installBtn = document.getElementById('installPWABanner');
-        if (installBtn) {
-            installBtn.style.display = 'none';
-        }
-    }
-    
-    // FORCE show the banner with multiple methods
-    console.log('📢 FORCING banner to show NOW!');
-    
-    // Method 1: Add show class
-    banner.classList.add('show');
-    console.log('✅ Added .show class');
-    
-    // Method 2: Force inline styles as backup
-    banner.style.display = 'block';
-    banner.style.opacity = '1';
-    banner.style.visibility = 'visible';
-    banner.style.transform = 'translateY(0)';
-    console.log('✅ Applied inline styles');
-    
-    // Method 3: Hide the floating button while popup is open
-    const floatingBtn = document.getElementById('floatingInstallBtn');
-    if (floatingBtn) {
-        floatingBtn.style.setProperty('display', 'none', 'important');
-        console.log('✅ Floating button hidden with !important');
-    }
-    
-    // Log final state
-    setTimeout(() => {
-        console.log('📊 Final banner state after 100ms:');
-        console.log('- Classes:', banner.className);
-        console.log('- Computed display:', window.getComputedStyle(banner).display);
-        console.log('- Computed transform:', window.getComputedStyle(banner).transform);
-        console.log('- Computed opacity:', window.getComputedStyle(banner).opacity);
-        console.log('- Computed visibility:', window.getComputedStyle(banner).visibility);
-    }, 100);
 };
 
-// Hide install popup
+// Hide install popup (deprecated - no longer used)
 window.hideInstallPopup = function() {
-    const banner = document.getElementById('pwaInstallBanner');
-    const floatingBtn = document.getElementById('floatingInstallBtn');
-    
-    if (banner) {
-        console.log('🔽 Hiding install popup');
-        banner.classList.remove('show');
-    }
-    
-    // Show floating button again
-    if (floatingBtn) {
-        floatingBtn.style.setProperty('display', 'flex', 'important');
-        console.log('✅ Floating button shown again');
-    }
+    console.log('ℹ️ hideInstallPopup called but popup is removed');
 };
 
 // Show/hide floating button based on conditions
@@ -576,7 +474,7 @@ function updateFloatingButton() {
     const wasInstalled = localStorage.getItem('pwa-installed') === 'true';
     if (wasInstalled) {
         console.log('✅ App already installed - hiding button permanently');
-        floatingBtn.style.setProperty('display', 'none', 'important');
+        // floatingBtn.style.setProperty('display', 'none', 'important');
         return;
     }
     
@@ -598,20 +496,36 @@ function updateFloatingButton() {
         return;
     }
     
-    // Show button on mobile if not installed
-    if (isMobile && !isAlreadyInstalled) {
+    // Show button if not installed (on any device)
+    if (!isAlreadyInstalled) {
         floatingBtn.style.display = 'flex';
         console.log('✅ Showing floating install button');
     } else {
         floatingBtn.style.display = 'none';
-        console.log('ℹ️ Hiding floating install button');
+        console.log('ℹ️ Hiding floating install button (not mobile or already installed)');
     }
 }
 
 // Run on page load
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', updateFloatingButton);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Remove any existing top install buttons
+        const topInstallBtn = document.getElementById('pwaInstallBtn');
+        if (topInstallBtn) {
+            topInstallBtn.remove();
+            console.log('🗑️ Removed top install button');
+        }
+        
+        updateFloatingButton();
+    });
 } else {
+    // Remove any existing top install buttons
+    const topInstallBtn = document.getElementById('pwaInstallBtn');
+    if (topInstallBtn) {
+        topInstallBtn.remove();
+        console.log('🗑️ Removed top install button');
+    }
+    
     updateFloatingButton();
 }
 
@@ -627,13 +541,13 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             console.log('🖱️ Floating button CLICKED via addEventListener!');
             
-            // First try: call the global function
-            if (typeof window.showInstallPopup === 'function') {
-                console.log('✅ Calling window.showInstallPopup()');
-                window.showInstallPopup();
+            // Call installPWA directly (no popup, just install)
+            if (typeof window.installPWA === 'function') {
+                console.log('✅ Calling window.installPWA()');
+                window.installPWA();
             } else {
-                console.error('❌ window.showInstallPopup is not a function!');
-                console.log('Available window functions:', Object.keys(window).filter(k => k.includes('install')));
+                console.error('❌ window.installPWA is not a function!');
+                alert('Install not available at this time.');
             }
         });
         
