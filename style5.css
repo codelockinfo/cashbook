@@ -1457,33 +1457,7 @@ body {
 
 /* Floating Install Button (Bottom Right) */
 .floating-install-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-    cursor: pointer;
-    z-index: 9999;
-    display: flex; /* Show by default */
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    transition: all 0.3s ease;
-    animation: pulse 2s infinite;
-}
-
-.floating-install-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
-}
-
-.floating-install-btn:active {
-    transform: scale(0.95);
+    display: none;
 }
 
 /* Pulse animation for install button */
@@ -1522,8 +1496,38 @@ body {
     visibility: visible !important;
 }
 
+
 /* Show install popup only on mobile */
 @media (max-width: 768px) {
+    .floating-install-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        cursor: pointer;
+        z-index: 9999;
+        display: flex; /* Show by default */
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+    }
+    
+    .floating-install-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    }
+    
+    .floating-install-btn:active {
+        transform: scale(0.95);
+    }
     .pwa-install-banner {
         display: block !important; /* Always block on mobile */
     }

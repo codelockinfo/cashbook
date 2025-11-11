@@ -5,8 +5,8 @@ const AUTH_API_URL = ((typeof BASE_PATH !== 'undefined' && BASE_PATH) ? BASE_PAT
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeDateTimeInputs();
-    loadGroups();
-    loadTransactions();
+    loadGroups(); // This will call loadTransactions() after setting default group
+    // Don't call loadTransactions() here - it will be called by handleDefaultGroupChange()
     setupEventListeners();
 });
 
@@ -164,7 +164,6 @@ async function handleLogout() {
             showToast('Error logging out', 'error');
         }
     } catch (error) {
-        console.error('Logout error:', error);
         showToast('Error logging out', 'error');
     }
 }
@@ -207,10 +206,11 @@ async function loadGroups() {
                 if (filtersSection) {
                     filtersSection.classList.add('has-group-filter');
                 }
+                // Still load transactions (will show empty state)
+                loadTransactions();
             }
         }
     } catch (error) {
-        console.error('Error loading groups:', error);
         showToast('Error loading groups', 'error');
     }
 }
@@ -310,7 +310,6 @@ async function loadGroupMembers(groupId) {
             showToast(data.message || 'Error loading members', 'error');
         }
     } catch (error) {
-        console.error('Error loading group members:', error);
         showToast('Error loading members', 'error');
     }
 }
@@ -364,19 +363,29 @@ async function submitEntry(formData, form) {
             const typeText = formData.get('type') === 'in' ? 'In' : 'Out';
             showToast(`Cash ${typeText} entry added successfully!`, 'success');
             
+            // Get the default group value BEFORE resetting
+            const defaultGroupId = document.getElementById('defaultGroupSelector').value;
+            
             // Reset only input fields, not the entire form
             document.getElementById('entryAmount').value = '';
-            document.getElementById('entryGroup').value = '';
             document.getElementById('entryMessage').value = '';
             removeAttachment(); // Clear attachment
             initializeDateTimeInputs();
+            
+            // Restore group selection from default selector
+            if (defaultGroupId) {
+                // If a default group is selected, restore it to entryGroup
+                document.getElementById('entryGroup').value = defaultGroupId;
+            } else {
+                // If "All Groups" is selected, clear the entryGroup
+                document.getElementById('entryGroup').value = '';
+            }
             
             loadTransactions();
         } else {
             showToast(data.message || 'Error adding entry', 'error');
         }
     } catch (error) {
-        console.error('Error submitting entry:', error);
         showToast('Error submitting entry', 'error');
     }
 }
@@ -413,7 +422,6 @@ async function loadTransactions() {
             showToast(data.message || 'Error loading transactions', 'error');
         }
     } catch (error) {
-        console.error('Error loading transactions:', error);
         showToast('Error loading transactions', 'error');
     }
 }
@@ -421,6 +429,10 @@ async function loadTransactions() {
 // Display transactions in the list
 function displayTransactions(entries) {
     const container = document.getElementById('transactionsList');
+    
+    if (!container) {
+        return;
+    }
     
     if (!entries || entries.length === 0) {
         container.innerHTML = `
