@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Popup Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        #console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #667eea;
+            padding-left: 10px;
+        }
+        
+        /* Copy styles from main app */
+        .floating-install-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: all 0.3s ease;
+        }
+        
+        .floating-install-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .pwa-install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 9998;
+            transform: translateY(100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: none;
+        }
+        
+        .pwa-install-banner.show {
+            display: block !important;
+            transform: translateY(0) !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        .pwa-banner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .pwa-banner-icon {
+            font-size: 2.5rem;
+        }
+        
+        .pwa-banner-text h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.2rem;
+        }
+        
+        .pwa-banner-text p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .pwa-banner-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            line-height: 1;
+        }
+        
+        .pwa-banner-install {
+            background: white;
+            color: #667eea;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 PWA Install Popup Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="testShowPopup()">
+            <i class="fas fa-play"></i> Test Show Popup
+        </button>
+        <button onclick="testBannerExists()">
+            <i class="fas fa-search"></i> Check Banner Exists
+        </button>
+        <button onclick="testClearConsole()">
+            <i class="fas fa-trash"></i> Clear Console
+        </button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Floating Button Test</h2>
+        <p>Click the purple floating button in the bottom-right corner →</p>
+    </div>
+    
+    <div id="console-output"></div>
+    
+    <!-- Floating Install Button -->
+    <button id="floatingInstallBtn" class="floating-install-btn" onclick="showInstallPopup()" title="Install App">
+        <i class="fas fa-download"></i>
+    </button>
+    
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" class="pwa-install-banner">
+        <button class="pwa-banner-close" onclick="hideInstallPopup()">&times;</button>
+        <div class="pwa-banner-content">
+            <div class="pwa-banner-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="pwa-banner-text">
+                <h4>Install Cash Book App</h4>
+                <p>Add to your home screen for quick access and offline use!</p>
+            </div>
+            <button class="pwa-banner-install">
+                <i class="fas fa-download"></i> Install
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        const consoleOutput = document.getElementById('console-output');
+        
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            entry.style.borderLeftColor = type === 'error' ? '#e74c3c' : type === 'success' ? '#2ecc71' : '#667eea';
+            consoleOutput.appendChild(entry);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            
+            // Also log to real console
+            console.log(message);
+        }
+        
+        function testClearConsole() {
+            consoleOutput.innerHTML = '';
+            log('Console cleared');
+        }
+        
+        function testBannerExists() {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) {
+                log('✅ Banner found!', 'success');
+                log(`Banner display: ${window.getComputedStyle(banner).display}`);
+                log(`Banner transform: ${window.getComputedStyle(banner).transform}`);
+                log(`Banner opacity: ${window.getComputedStyle(banner).opacity}`);
+                log(`Banner classes: ${banner.className}`);
+            } else {
+                log('❌ Banner NOT found!', 'error');
+            }
+        }
+        
+        function testShowPopup() {
+            log('🎯 Test: Calling showInstallPopup()');
+            if (typeof showInstallPopup === 'function') {
+                showInstallPopup();
+                log('✅ showInstallPopup() called successfully', 'success');
+            } else {
+                log('❌ showInstallPopup() is not defined!', 'error');
+            }
+        }
+        
+        // Define showInstallPopup function
+        window.showInstallPopup = function() {
+            log('🎯 showInstallPopup() CALLED!');
+            
+            const banner = document.getElementById('pwaInstallBanner');
+            
+            if (!banner) {
+                log('❌ Banner element not found!', 'error');
+                alert('Banner not found!');
+                return;
+            }
+            
+            log('✅ Banner found, attempting to show...');
+            
+            // Method 1: Add class
+            banner.classList.add('show');
+            log('Added .show class');
+            
+            // Method 2: Inline styles
+            banner.style.display = 'block';
+            banner.style.opacity = '1';
+            banner.style.visibility = 'visible';
+            banner.style.transform = 'translateY(0)';
+            log('Applied inline styles');
+            
+            // Check final state
+            setTimeout(() => {
+                log(`Final display: ${window.getComputedStyle(banner).display}`);
+                log(`Final transform: ${window.getComputedStyle(banner).transform}`);
+                log(`Final opacity: ${window.getComputedStyle(banner).opacity}`);
+                log('✅ Banner should be visible!', 'success');
+            }, 100);
+        };
+        
+        window.hideInstallPopup = function() {
+            log('🔽 hideInstallPopup() called');
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) {
+                banner.classList.remove('show');
+                banner.style.display = '';
+                banner.style.opacity = '';
+                banner.style.visibility = '';
+                banner.style.transform = '';
+                log('✅ Banner hidden', 'success');
+            }
+        };
+        
+        // Log initial state
+        log('🚀 Test page loaded');
+        log('Checking initial banner state...');
+        testBannerExists();
+        
+        // Add click listener to floating button
+        document.getElementById('floatingInstallBtn').addEventListener('click', function() {
+            log('🖱️ Floating button clicked via addEventListener');
+        });
+    </script>
+</body>
+</html>
+

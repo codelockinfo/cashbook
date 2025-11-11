@@ -1492,6 +1492,7 @@ body {
 
 /* Show popup with animation */
 .pwa-install-banner.show {
+    display: block !important; /* Force display */
     transform: translateY(0) !important; /* Slide up to visible position */
     opacity: 1 !important;
     visibility: visible !important;
