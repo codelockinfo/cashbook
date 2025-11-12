@@ -104,7 +104,7 @@ $token = htmlspecialchars($_GET['token']);
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo ASSET_VERSION; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/auth4.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/auth5.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>
 
