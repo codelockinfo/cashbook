@@ -22,7 +22,7 @@ $user = getCurrentUser();
         <header class="header">
             <div class="header-content">
                 <div class="logo">
-                <img src="icons/Black and Green Simple Organic Cosmetic Product Logo (4).png" alt="bookify" height="50px">
+                <img src="icons/bookify logo.png" alt="bookify" height="50px">
                 <h1>BOOKIFY</h1>
                 </div>
                 <div class="header-actions">
