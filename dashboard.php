@@ -11,7 +11,7 @@ $user = getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookify Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style5.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style6.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -95,7 +95,7 @@ $user = getCurrentUser();
                             <i class="fas fa-paperclip"></i> Payment Proof (Optional)
                         </label>
                         <div class="file-upload-wrapper">
-                            <input type="file" id="entryAttachment" name="entryAttachment" accept="image/*" class="file-input">
+                            <input type="file" id="entryAttachment" name="entryAttachment" accept="image/*" capture="environment" class="file-input">
                             <label for="entryAttachment" class="file-upload-label">
                                 <i class="fas fa-camera"></i> Choose Photo
                             </label>
@@ -297,7 +297,7 @@ $user = getCurrentUser();
                         </button>
                     </div>
                     <div class="file-upload-wrapper">
-                        <input type="file" id="editEntryAttachment" name="editEntryAttachment" accept="image/*" class="file-input">
+                        <input type="file" id="editEntryAttachment" name="editEntryAttachment" accept="image/*" capture="environment" class="file-input">
                         <label for="editEntryAttachment" class="file-upload-label">
                             <i class="fas fa-camera"></i> Choose New Photo
                         </label>
@@ -332,7 +332,7 @@ $user = getCurrentUser();
         
         // PWA popup functionality removed
     </script>
-    <script src="<?php echo BASE_PATH; ?>/pwa9.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>" onerror="console.error('❌ Failed to load pwa9.js from: <?php echo BASE_PATH; ?>/pwa9.js')"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>" onerror="console.error('❌ Failed to load pwa10.js from: <?php echo BASE_PATH; ?>/pwa10.js')"></script>
     <script src="<?php echo BASE_PATH; ?>/dashboard2.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>

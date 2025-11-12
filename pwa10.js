@@ -153,8 +153,12 @@ window.addEventListener('offline', () => {
     }
 });
 
-// Show update notification
+// Show update notification - DISABLED
 function showUpdateNotification() {
+    // Update notification functionality disabled
+    // The app will use the latest cached version without showing update prompts
+    
+    /* DISABLED - Uncomment if you want to re-enable update notifications
     if (typeof showToast === 'function') {
         showToast('New version available! Refresh to update.', 'success');
     }
@@ -168,6 +172,7 @@ function showUpdateNotification() {
     });
     
     document.body.appendChild(updateBtn);
+    */
 }
 
 // Show install banner at bottom

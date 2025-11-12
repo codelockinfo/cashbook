@@ -57,7 +57,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
                                  onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22 fill=%22%23666%22%3E👤%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="file-input-wrapper">
-                            <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
+                            <input type="file" id="profilePicture" name="profilePicture" accept="image/*" capture="user">
                             <label for="profilePicture" class="file-input-label">
                                 <i class="fas fa-upload"></i> Choose Photo
                             </label>
@@ -122,7 +122,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
         // Pass PHP BASE_PATH to JavaScript
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
     </script>
-    <script src="<?php echo BASE_PATH; ?>/pwa9.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo ASSET_VERSION; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/auth3.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>
