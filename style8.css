@@ -322,6 +322,27 @@ body {
     letter-spacing: 0.5px;
 }
 
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+    transform: scale(1.02);
+    box-shadow: 0 10px 15px -3px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .button-group {
     display: grid;
     grid-template-columns: 1fr 1fr;

@@ -12,7 +12,7 @@ $user = getCurrentUser();
     <title>My Groups - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style7.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style8.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <style>
         .groups-container {
             max-width: 1200px;
@@ -520,7 +520,7 @@ $user = getCurrentUser();
                     <textarea id="groupDescription" placeholder="Enter group description" rows="3"></textarea>
                 </div>
                 <div style="display: flex; justify-content: center;">
-                    <button type="submit" class="btn btn-primary" style="color: #211f1f;">
+                    <button type="submit" class="btn btn-primary">
                         <i class="fas fa-check"></i> Create Group
                     </button>
                 </div>
@@ -542,7 +542,7 @@ $user = getCurrentUser();
             <div id="usersList" class="user-list">
                 <p style="text-align: center; color: var(--text-secondary);">Loading users...</p>
             </div>
-            <button class="btn btn-primary" id="sendInvitesBtn" style="margin-top: 20px; width: 100%; color: #211f1f;">
+            <button class="btn btn-primary" id="sendInvitesBtn" style="margin-top: 20px; width: 100%;">
                 <i class="fas fa-paper-plane"></i> Send Invitations
             </button>
         </div>
@@ -598,7 +598,7 @@ $user = getCurrentUser();
         // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/groups2.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/groups3.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 
