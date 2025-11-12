@@ -1205,14 +1205,18 @@ body {
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+    position: relative;
 }
 
 .file-input {
     position: absolute;
     opacity: 0;
-    width: 0.1px;
-    height: 0.1px;
-    z-index: -1;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    pointer-events: none;
 }
 
 .file-upload-label {
@@ -1229,9 +1233,11 @@ body {
     transition: all 0.3s ease;
     font-size: 0.9rem;
     position: relative;
+    z-index: 1;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .file-upload-label:hover {
