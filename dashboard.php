@@ -11,7 +11,7 @@ $user = getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookify Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style7.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style9.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -95,7 +95,7 @@ $user = getCurrentUser();
                             <i class="fas fa-paperclip"></i> Payment Proof (Optional)
                         </label>
                         <div class="file-upload-wrapper">
-                            <input type="file" id="entryAttachment" name="entryAttachment" accept="image/*" capture="environment" class="file-input">
+                            <input type="file" id="entryAttachment" name="entryAttachment" accept="image/*" class="file-input">
                             <label for="entryAttachment" class="file-upload-label">
                                 <i class="fas fa-camera"></i> Choose Photo
                             </label>
@@ -297,7 +297,7 @@ $user = getCurrentUser();
                         </button>
                     </div>
                     <div class="file-upload-wrapper">
-                        <input type="file" id="editEntryAttachment" name="editEntryAttachment" accept="image/*" capture="environment" class="file-input">
+                        <input type="file" id="editEntryAttachment" name="editEntryAttachment" accept="image/*" class="file-input">
                         <label for="editEntryAttachment" class="file-upload-label">
                             <i class="fas fa-camera"></i> Choose New Photo
                         </label>
@@ -320,6 +320,28 @@ $user = getCurrentUser();
         </div>
     </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="confirm-modal" style="display: none;">
+        <div class="confirm-modal-overlay"></div>
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header">
+                <i class="fas fa-exclamation-circle"></i>
+                <h3>Confirm Logout</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p>Are you sure you want to logout?</p>
+            </div>
+            <div class="confirm-modal-footer">
+                <button class="btn-cancel" id="logoutCancelBtn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-confirm" id="logoutConfirmBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Floating Install Button (Bottom Right) -->
     <button id="floatingInstallBtn" class="floating-install-btn" onclick="if(typeof installPWA === 'function') { installPWA(); } else { alert('Install not available'); }" title="Install App">
         <i class="fas fa-download"></i>
@@ -333,7 +355,7 @@ $user = getCurrentUser();
         // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>" onerror="console.error('❌ Failed to load pwa10.js from: <?php echo BASE_PATH; ?>/pwa10.js')"></script>
-    <script src="<?php echo BASE_PATH; ?>/dashboard3.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard5.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 

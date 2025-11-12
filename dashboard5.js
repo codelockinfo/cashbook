@@ -33,17 +33,12 @@ function setupEventListeners() {
     if (attachmentInput) {
         attachmentInput.addEventListener('change', handleAttachmentChange);
         
-        // Mobile fix: Ensure label click triggers file input
-        const attachmentLabel = document.querySelector('label[for="entryAttachment"]');
+        // Explicit click handler for mobile compatibility
+        const attachmentLabel = document.querySelector('label[for="entryAttachment"].file-upload-label');
         if (attachmentLabel) {
             attachmentLabel.addEventListener('click', function(e) {
-                // Let the default label behavior work, but ensure input is focused
-                if (attachmentInput && !attachmentInput.disabled) {
-                    // Timeout to ensure this happens after label's default behavior
-                    setTimeout(() => {
-                        attachmentInput.click();
-                    }, 10);
-                }
+                e.preventDefault();
+                attachmentInput.click();
             });
         }
     }
@@ -151,10 +146,43 @@ function closePhotoModal() {
 }
 
 // Handle Logout
-async function handleLogout() {
-    if (!confirm('Are you sure you want to logout?')) {
-        return;
-    }
+function handleLogout() {
+    showLogoutModal();
+}
+
+// Show logout confirmation modal
+function showLogoutModal() {
+    const modal = document.getElementById('logoutModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Setup button handlers
+    const confirmBtn = document.getElementById('logoutConfirmBtn');
+    const cancelBtn = document.getElementById('logoutCancelBtn');
+    const overlay = modal.querySelector('.confirm-modal-overlay');
+    
+    // Remove old listeners
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    // Add new listeners
+    newConfirmBtn.addEventListener('click', performLogout);
+    newCancelBtn.addEventListener('click', hideLogoutModal);
+    overlay.addEventListener('click', hideLogoutModal);
+}
+
+// Hide logout modal
+function hideLogoutModal() {
+    const modal = document.getElementById('logoutModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Perform actual logout
+async function performLogout() {
+    hideLogoutModal();
     
     try {
         const response = await fetch(AUTH_API_URL, {
@@ -292,6 +320,7 @@ async function handleGroupChange() {
     if (groupId) {
         // Show member filter and load members
         memberFilterContainer.style.display = 'flex';
+        
         await loadGroupMembers(groupId);
     } else {
         // Hide member filter
@@ -719,10 +748,9 @@ function setupEditFormListeners() {
     fileInput.removeEventListener('change', handleEditAttachmentChange);
     fileInput.addEventListener('change', handleEditAttachmentChange);
     
-    // Mobile fix: Ensure label click triggers file input
-    const editAttachmentLabel = document.querySelector('label[for="editEntryAttachment"]');
-    if (editAttachmentLabel && fileInput) {
-        // Remove old listener if any
+    // Explicit click handler for mobile compatibility
+    const editAttachmentLabel = document.querySelector('label[for="editEntryAttachment"].file-upload-label');
+    if (editAttachmentLabel) {
         editAttachmentLabel.removeEventListener('click', handleEditLabelClick);
         editAttachmentLabel.addEventListener('click', handleEditLabelClick);
     }
@@ -738,13 +766,12 @@ function setupEditFormListeners() {
     removeCurrentBtn.addEventListener('click', removeCurrentAttachment);
 }
 
-// Mobile fix: Handle edit form label click
+// Handle edit label click for mobile
 function handleEditLabelClick(e) {
+    e.preventDefault();
     const fileInput = document.getElementById('editEntryAttachment');
-    if (fileInput && !fileInput.disabled) {
-        setTimeout(() => {
-            fileInput.click();
-        }, 10);
+    if (fileInput) {
+        fileInput.click();
     }
 }
 
@@ -888,4 +915,3 @@ document.addEventListener('click', function(e) {
         closeEditModal();
     }
 });
-

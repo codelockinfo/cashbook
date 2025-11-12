@@ -79,16 +79,12 @@ function initRegister() {
             }
         });
         
-        // Mobile fix: Ensure label click triggers file input
-        const profilePictureLabel = document.querySelector('label[for="profilePicture"]');
-        if (profilePictureLabel) {
-            profilePictureLabel.addEventListener('click', function(e) {
-                // Let the default label behavior work, but ensure input is triggered
-                if (profilePictureInput && !profilePictureInput.disabled) {
-                    setTimeout(() => {
-                        profilePictureInput.click();
-                    }, 10);
-                }
+        // Explicit click handler for mobile compatibility
+        const fileLabel = document.querySelector('label[for="profilePicture"].file-input-label');
+        if (fileLabel) {
+            fileLabel.addEventListener('click', function(e) {
+                e.preventDefault();
+                profilePictureInput.click();
             });
         }
     }

@@ -13,8 +13,8 @@ $user = getCurrentUser();
     <title>My Profile - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style7.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style5.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style9.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style7.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
 </head>
 <body>
     <div class="container" style="max-width: 1200px;">
@@ -75,7 +75,7 @@ $user = getCurrentUser();
                                  onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e5e7eb%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22 fill=%22%23666%22%3E👤%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="file-input-wrapper">
-                            <input type="file" id="profilePicture" name="profilePicture" accept="image/*" capture="user">
+                            <input type="file" id="profilePicture" name="profilePicture" accept="image/*">
                             <label for="profilePicture" class="file-input-label">
                                 <i class="fas fa-upload"></i> Change Photo
                             </label>
@@ -159,6 +159,50 @@ $user = getCurrentUser();
         </div>
     </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="confirm-modal" style="display: none;">
+        <div class="confirm-modal-overlay"></div>
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header">
+                <i class="fas fa-exclamation-circle"></i>
+                <h3>Confirm Logout</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p>Are you sure you want to logout?</p>
+            </div>
+            <div class="confirm-modal-footer">
+                <button class="btn-cancel" id="logoutCancelBtn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-confirm" id="logoutConfirmBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remove Photo Confirmation Modal -->
+    <div id="removePhotoModal" class="confirm-modal" style="display: none;">
+        <div class="confirm-modal-overlay"></div>
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header confirm-modal-header-danger">
+                <i class="fas fa-trash-alt"></i>
+                <h3>Remove Profile Picture</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p>Are you sure you want to remove your profile picture?</p>
+            </div>
+            <div class="confirm-modal-footer">
+                <button class="btn-cancel" id="removePhotoCancelBtn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-confirm" id="removePhotoConfirmBtn">
+                    <i class="fas fa-trash"></i> Remove
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast"></div>
     
     <script>
@@ -166,8 +210,8 @@ $user = getCurrentUser();
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo ASSET_VERSION; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/auth4.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/dashboard3.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/auth6.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard5.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
     <script>
         // Initialize profile page
         (function() {
@@ -181,42 +225,74 @@ $user = getCurrentUser();
             if (logoutBtn && !logoutBtn.dataset.handlerAdded) {
                 console.log('Adding logout handler...');
                 logoutBtn.dataset.handlerAdded = 'true';
-                logoutBtn.addEventListener('click', async function(e) {
+                logoutBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     console.log('Logout button clicked!');
+                    showLogoutModal();
+                });
+            }
+            
+            // Show logout confirmation modal
+            function showLogoutModal() {
+                const modal = document.getElementById('logoutModal');
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                
+                // Setup button handlers
+                const confirmBtn = document.getElementById('logoutConfirmBtn');
+                const cancelBtn = document.getElementById('logoutCancelBtn');
+                const overlay = modal.querySelector('.confirm-modal-overlay');
+                
+                // Remove old listeners
+                const newConfirmBtn = confirmBtn.cloneNode(true);
+                const newCancelBtn = cancelBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+                cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+                
+                // Add new listeners
+                newConfirmBtn.addEventListener('click', performLogout);
+                newCancelBtn.addEventListener('click', hideLogoutModal);
+                overlay.addEventListener('click', hideLogoutModal);
+            }
+            
+            // Hide logout modal
+            function hideLogoutModal() {
+                const modal = document.getElementById('logoutModal');
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            
+            // Perform actual logout
+            async function performLogout() {
+                hideLogoutModal();
+                
+                try {
+                    const AUTH_API_URL = BASE_PATH + '/auth-api.php';
+                    const response = await fetch(AUTH_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            action: 'logout'
+                        })
+                    });
                     
-                    if (!confirm('Are you sure you want to logout?')) {
-                        return;
-                    }
+                    const data = await response.json();
+                    console.log('Logout response:', data);
                     
-                    try {
-                        const AUTH_API_URL = BASE_PATH + '/auth-api.php';
-                        const response = await fetch(AUTH_API_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: new URLSearchParams({
-                                action: 'logout'
-                            })
-                        });
-                        
-                        const data = await response.json();
-                        console.log('Logout response:', data);
-                        
-                        if (data.success) {
-                            showToast('Logged out successfully', 'success');
-                            setTimeout(() => {
-                                window.location.href = BASE_PATH + '/login';
-                            }, 500);
-                        } else {
-                            showToast('Error logging out', 'error');
-                        }
-                    } catch (error) {
-                        console.error('Logout error:', error);
+                    if (data.success) {
+                        showToast('Logged out successfully', 'success');
+                        setTimeout(() => {
+                            window.location.href = BASE_PATH + '/login';
+                        }, 500);
+                    } else {
                         showToast('Error logging out', 'error');
                     }
-                });
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    showToast('Error logging out', 'error');
+                }
             }
             
             const profilePictureInput = document.getElementById('profilePicture');
@@ -252,52 +328,81 @@ $user = getCurrentUser();
             }
         });
         
-        // Mobile fix: Ensure label click triggers file input
-        const profilePictureLabel = document.querySelector('label[for="profilePicture"]');
-        if (profilePictureLabel && profilePictureInput) {
+        // Explicit click handler for mobile compatibility
+        const profilePictureLabel = document.querySelector('label[for="profilePicture"].file-input-label');
+        if (profilePictureLabel) {
             profilePictureLabel.addEventListener('click', function(e) {
-                // Let the default label behavior work, but ensure input is triggered
-                if (profilePictureInput && !profilePictureInput.disabled) {
-                    setTimeout(() => {
-                        profilePictureInput.click();
-                    }, 10);
-                }
+                e.preventDefault();
+                profilePictureInput.click();
             });
         }
 
-        // Remove photo
+        // Remove photo - show confirmation modal
         if (removePhotoBtn) {
-            removePhotoBtn.addEventListener('click', async function() {
-                if (!confirm('Are you sure you want to remove your profile picture?')) {
-                    return;
-                }
-
-                try {
-                    const response = await fetch(BASE_PATH + '/profile-api.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: new URLSearchParams({
-                            action: 'remove_photo'
-                        })
-                    });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            showToast('Profile picture removed successfully!', 'success');
-                            profilePreview.src = 'uploads/default-avatar.png';
-                            removePhotoBtn.style.display = 'none';
-                        } else {
-                            showToast(data.message || 'Failed to remove picture', 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showToast('An error occurred', 'error');
-                    }
+            removePhotoBtn.addEventListener('click', function() {
+                showRemovePhotoModal();
+            });
+        }
+        
+        // Show remove photo confirmation modal
+        function showRemovePhotoModal() {
+            const modal = document.getElementById('removePhotoModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Setup button handlers
+            const confirmBtn = document.getElementById('removePhotoConfirmBtn');
+            const cancelBtn = document.getElementById('removePhotoCancelBtn');
+            const overlay = modal.querySelector('.confirm-modal-overlay');
+            
+            // Remove old listeners
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+            
+            // Add new listeners
+            newConfirmBtn.addEventListener('click', performRemovePhoto);
+            newCancelBtn.addEventListener('click', hideRemovePhotoModal);
+            overlay.addEventListener('click', hideRemovePhotoModal);
+        }
+        
+        // Hide remove photo modal
+        function hideRemovePhotoModal() {
+            const modal = document.getElementById('removePhotoModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Perform actual photo removal
+        async function performRemovePhoto() {
+            hideRemovePhotoModal();
+            
+            try {
+                const response = await fetch(BASE_PATH + '/profile-api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'remove_photo'
+                    })
                 });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Profile picture removed successfully!', 'success');
+                    profilePreview.src = 'uploads/default-avatar.png';
+                    removePhotoBtn.style.display = 'none';
+                } else {
+                    showToast(data.message || 'Failed to remove picture', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('An error occurred', 'error');
             }
+        }
 
             // Handle profile form submission
             if (profileForm) {

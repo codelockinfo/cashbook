@@ -417,11 +417,49 @@ function displayGroupDetails(group) {
     `;
 }
 
-// Delete Group
-async function deleteGroup(groupId, groupName) {
-    if (!confirm(`Are you sure you want to delete the group "${groupName}"? This will delete all associated entries and cannot be undone.`)) {
-        return;
-    }
+// Delete Group - Show confirmation modal
+function deleteGroup(groupId, groupName) {
+    showDeleteGroupModal(groupId, groupName);
+}
+
+// Show delete group confirmation modal
+function showDeleteGroupModal(groupId, groupName) {
+    const modal = document.getElementById('deleteGroupModal');
+    const messageEl = document.getElementById('deleteGroupMessage');
+    
+    // Update message with group name
+    messageEl.innerHTML = `Are you sure you want to delete the group <strong>"${escapeHtml(groupName)}"</strong>? This will delete all associated entries and cannot be undone.`;
+    
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Setup button handlers
+    const confirmBtn = document.getElementById('deleteGroupConfirmBtn');
+    const cancelBtn = document.getElementById('deleteGroupCancelBtn');
+    const overlay = modal.querySelector('.confirm-modal-overlay');
+    
+    // Remove old listeners
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    // Add new listeners
+    newConfirmBtn.addEventListener('click', () => performDeleteGroup(groupId));
+    newCancelBtn.addEventListener('click', hideDeleteGroupModal);
+    overlay.addEventListener('click', hideDeleteGroupModal);
+}
+
+// Hide delete group modal
+function hideDeleteGroupModal() {
+    const modal = document.getElementById('deleteGroupModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Perform actual group deletion
+async function performDeleteGroup(groupId) {
+    hideDeleteGroupModal();
     
     try {
         const response = await fetch(API_URL, {
