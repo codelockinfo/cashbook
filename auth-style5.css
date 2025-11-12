@@ -369,18 +369,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    position: relative;
 }
 
 .file-input-wrapper input[type="file"] {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    cursor: pointer;
-    pointer-events: none;
+    display: none;
 }
 
 .file-input-label {

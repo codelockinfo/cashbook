@@ -251,6 +251,15 @@ $user = getCurrentUser();
                 fileName.textContent = 'No file chosen';
             }
         });
+        
+        // Explicit click handler for mobile compatibility
+        const profilePictureLabel = document.querySelector('label[for="profilePicture"].file-input-label');
+        if (profilePictureLabel) {
+            profilePictureLabel.addEventListener('click', function(e) {
+                e.preventDefault();
+                profilePictureInput.click();
+            });
+        }
 
         // Remove photo
         if (removePhotoBtn) {

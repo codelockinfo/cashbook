@@ -78,6 +78,15 @@ function initRegister() {
                 fileName.textContent = 'No file chosen';
             }
         });
+        
+        // Explicit click handler for mobile compatibility
+        const fileLabel = document.querySelector('label[for="profilePicture"].file-input-label');
+        if (fileLabel) {
+            fileLabel.addEventListener('click', function(e) {
+                e.preventDefault();
+                profilePictureInput.click();
+            });
+        }
     }
     
     // Handle register form submission

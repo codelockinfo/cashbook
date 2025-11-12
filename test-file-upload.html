@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+        }
+        h2 {
+            color: #667eea;
+        }
+        .file-wrapper {
+            margin: 15px 0;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>📱 Mobile File Upload Test</h1>
+    <p>This page tests if file uploads work on your mobile device.</p>
+
+    <!-- Test 1: Standard HTML for attribute -->
+    <div class="test-section">
+        <h2>Test 1: Standard Label (for attribute)</h2>
+        <div class="file-wrapper">
+            <input type="file" id="test1" accept="image/*" capture="user">
+            <label for="test1" class="btn">Choose Photo (Standard)</label>
+        </div>
+        <div class="result" id="result1">No file selected</div>
+    </div>
+
+    <!-- Test 2: JavaScript click trigger -->
+    <div class="test-section">
+        <h2>Test 2: JavaScript Click Handler</h2>
+        <div class="file-wrapper">
+            <input type="file" id="test2" accept="image/*" capture="user">
+            <button class="btn" id="test2btn">Choose Photo (JS Click)</button>
+        </div>
+        <div class="result" id="result2">No file selected</div>
+    </div>
+
+    <!-- Test 3: Direct button click (no hidden input) -->
+    <div class="test-section">
+        <h2>Test 3: Visible File Input</h2>
+        <div class="file-wrapper">
+            <input type="file" id="test3" accept="image/*" capture="user" style="display: block;">
+        </div>
+        <div class="result" id="result3">No file selected</div>
+    </div>
+
+    <script>
+        // Test 1: Standard for attribute
+        document.getElementById('test1').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('result1').innerHTML = 
+                    `<span class="success">✓ Success!</span><br>File: ${file.name}<br>Size: ${(file.size/1024).toFixed(2)} KB`;
+            }
+        });
+
+        // Test 2: JavaScript click handler
+        document.getElementById('test2btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('test2').click();
+        });
+        
+        document.getElementById('test2').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('result2').innerHTML = 
+                    `<span class="success">✓ Success!</span><br>File: ${file.name}<br>Size: ${(file.size/1024).toFixed(2)} KB`;
+            }
+        });
+
+        // Test 3: Visible input
+        document.getElementById('test3').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('result3').innerHTML = 
+                    `<span class="success">✓ Success!</span><br>File: ${file.name}<br>Size: ${(file.size/1024).toFixed(2)} KB`;
+            }
+        });
+
+        // Device info
+        document.write(`
+            <div class="test-section">
+                <h2>Device Information</h2>
+                <p><strong>User Agent:</strong><br>${navigator.userAgent}</p>
+                <p><strong>Platform:</strong> ${navigator.platform}</p>
+                <p><strong>Screen:</strong> ${window.innerWidth}x${window.innerHeight}</p>
+            </div>
+        `);
+    </script>
+</body>
+</html>
+

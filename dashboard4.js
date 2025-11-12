@@ -32,6 +32,15 @@ function setupEventListeners() {
     
     if (attachmentInput) {
         attachmentInput.addEventListener('change', handleAttachmentChange);
+        
+        // Explicit click handler for mobile compatibility
+        const attachmentLabel = document.querySelector('label[for="entryAttachment"].file-upload-label');
+        if (attachmentLabel) {
+            attachmentLabel.addEventListener('click', function(e) {
+                e.preventDefault();
+                attachmentInput.click();
+            });
+        }
     }
     
     if (removeAttachmentBtn) {
@@ -705,6 +714,13 @@ function setupEditFormListeners() {
     fileInput.removeEventListener('change', handleEditAttachmentChange);
     fileInput.addEventListener('change', handleEditAttachmentChange);
     
+    // Explicit click handler for mobile compatibility
+    const editAttachmentLabel = document.querySelector('label[for="editEntryAttachment"].file-upload-label');
+    if (editAttachmentLabel) {
+        editAttachmentLabel.removeEventListener('click', handleEditLabelClick);
+        editAttachmentLabel.addEventListener('click', handleEditLabelClick);
+    }
+    
     // Remove new attachment button
     const removeNewBtn = document.getElementById('removeEditAttachment');
     removeNewBtn.removeEventListener('click', removeEditAttachment);
@@ -714,6 +730,15 @@ function setupEditFormListeners() {
     const removeCurrentBtn = document.getElementById('removeCurrentAttachment');
     removeCurrentBtn.removeEventListener('click', removeCurrentAttachment);
     removeCurrentBtn.addEventListener('click', removeCurrentAttachment);
+}
+
+// Handle edit label click for mobile
+function handleEditLabelClick(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('editEntryAttachment');
+    if (fileInput) {
+        fileInput.click();
+    }
 }
 
 // Handle edit attachment file selection
