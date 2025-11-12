@@ -2237,7 +2237,7 @@ body {
     
     .confirm-modal-footer {
         padding: 16px 20px 20px;
-        flex-direction: column;
+        flex-direction: row;
     }
     
     .confirm-modal-footer button {
