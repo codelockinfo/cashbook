@@ -32,6 +32,20 @@ function setupEventListeners() {
     
     if (attachmentInput) {
         attachmentInput.addEventListener('change', handleAttachmentChange);
+        
+        // Mobile fix: Ensure label click triggers file input
+        const attachmentLabel = document.querySelector('label[for="entryAttachment"]');
+        if (attachmentLabel) {
+            attachmentLabel.addEventListener('click', function(e) {
+                // Let the default label behavior work, but ensure input is focused
+                if (attachmentInput && !attachmentInput.disabled) {
+                    // Timeout to ensure this happens after label's default behavior
+                    setTimeout(() => {
+                        attachmentInput.click();
+                    }, 10);
+                }
+            });
+        }
     }
     
     if (removeAttachmentBtn) {
@@ -705,6 +719,14 @@ function setupEditFormListeners() {
     fileInput.removeEventListener('change', handleEditAttachmentChange);
     fileInput.addEventListener('change', handleEditAttachmentChange);
     
+    // Mobile fix: Ensure label click triggers file input
+    const editAttachmentLabel = document.querySelector('label[for="editEntryAttachment"]');
+    if (editAttachmentLabel && fileInput) {
+        // Remove old listener if any
+        editAttachmentLabel.removeEventListener('click', handleEditLabelClick);
+        editAttachmentLabel.addEventListener('click', handleEditLabelClick);
+    }
+    
     // Remove new attachment button
     const removeNewBtn = document.getElementById('removeEditAttachment');
     removeNewBtn.removeEventListener('click', removeEditAttachment);
@@ -714,6 +736,16 @@ function setupEditFormListeners() {
     const removeCurrentBtn = document.getElementById('removeCurrentAttachment');
     removeCurrentBtn.removeEventListener('click', removeCurrentAttachment);
     removeCurrentBtn.addEventListener('click', removeCurrentAttachment);
+}
+
+// Mobile fix: Handle edit form label click
+function handleEditLabelClick(e) {
+    const fileInput = document.getElementById('editEntryAttachment');
+    if (fileInput && !fileInput.disabled) {
+        setTimeout(() => {
+            fileInput.click();
+        }, 10);
+    }
 }
 
 // Handle edit attachment file selection

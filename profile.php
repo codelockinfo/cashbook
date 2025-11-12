@@ -13,8 +13,8 @@ $user = getCurrentUser();
     <title>My Profile - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style6.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style4.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style7.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style5.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
 </head>
 <body>
     <div class="container" style="max-width: 1200px;">
@@ -166,8 +166,8 @@ $user = getCurrentUser();
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo ASSET_VERSION; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/auth3.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/dashboard2.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/auth4.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard3.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
     <script>
         // Initialize profile page
         (function() {
@@ -251,6 +251,19 @@ $user = getCurrentUser();
                 fileName.textContent = 'No file chosen';
             }
         });
+        
+        // Mobile fix: Ensure label click triggers file input
+        const profilePictureLabel = document.querySelector('label[for="profilePicture"]');
+        if (profilePictureLabel && profilePictureInput) {
+            profilePictureLabel.addEventListener('click', function(e) {
+                // Let the default label behavior work, but ensure input is triggered
+                if (profilePictureInput && !profilePictureInput.disabled) {
+                    setTimeout(() => {
+                        profilePictureInput.click();
+                    }, 10);
+                }
+            });
+        }
 
         // Remove photo
         if (removePhotoBtn) {
