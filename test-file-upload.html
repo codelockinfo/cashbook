@@ -56,33 +56,43 @@
     <h1>📱 Mobile File Upload Test</h1>
     <p>This page tests if file uploads work on your mobile device.</p>
 
-    <!-- Test 1: Standard HTML for attribute -->
+    <!-- Test 1: Standard HTML for attribute (WITHOUT capture) -->
     <div class="test-section">
-        <h2>Test 1: Standard Label (for attribute)</h2>
+        <h2>Test 1: Standard Label (WITHOUT capture)</h2>
         <div class="file-wrapper">
-            <input type="file" id="test1" accept="image/*" capture="user">
-            <label for="test1" class="btn">Choose Photo (Standard)</label>
+            <input type="file" id="test1" accept="image/*">
+            <label for="test1" class="btn">📸 Camera or Gallery</label>
         </div>
         <div class="result" id="result1">No file selected</div>
     </div>
 
-    <!-- Test 2: JavaScript click trigger -->
+    <!-- Test 2: JavaScript click trigger (WITHOUT capture) -->
     <div class="test-section">
-        <h2>Test 2: JavaScript Click Handler</h2>
+        <h2>Test 2: JavaScript Click (WITHOUT capture)</h2>
         <div class="file-wrapper">
-            <input type="file" id="test2" accept="image/*" capture="user">
-            <button class="btn" id="test2btn">Choose Photo (JS Click)</button>
+            <input type="file" id="test2" accept="image/*">
+            <button class="btn" id="test2btn">📸 Camera or Gallery (JS)</button>
         </div>
         <div class="result" id="result2">No file selected</div>
     </div>
 
-    <!-- Test 3: Direct button click (no hidden input) -->
+    <!-- Test 3: With capture="user" (Camera only) -->
     <div class="test-section">
-        <h2>Test 3: Visible File Input</h2>
+        <h2>Test 3: WITH capture="user" (Camera Only)</h2>
         <div class="file-wrapper">
-            <input type="file" id="test3" accept="image/*" capture="user" style="display: block;">
+            <input type="file" id="test3" accept="image/*" capture="user">
+            <label for="test3" class="btn">📷 Camera Only</label>
         </div>
         <div class="result" id="result3">No file selected</div>
+    </div>
+
+    <!-- Test 4: Visible File Input -->
+    <div class="test-section">
+        <h2>Test 4: Visible File Input</h2>
+        <div class="file-wrapper">
+            <input type="file" id="test4" accept="image/*" style="display: block;">
+        </div>
+        <div class="result" id="result4">No file selected</div>
     </div>
 
     <script>
@@ -109,11 +119,20 @@
             }
         });
 
-        // Test 3: Visible input
+        // Test 3: With capture attribute
         document.getElementById('test3').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 document.getElementById('result3').innerHTML = 
+                    `<span class="success">✓ Success!</span><br>File: ${file.name}<br>Size: ${(file.size/1024).toFixed(2)} KB`;
+            }
+        });
+
+        // Test 4: Visible input
+        document.getElementById('test4').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('result4').innerHTML = 
                     `<span class="success">✓ Success!</span><br>File: ${file.name}<br>Size: ${(file.size/1024).toFixed(2)} KB`;
             }
         });

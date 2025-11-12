@@ -95,7 +95,7 @@ $user = getCurrentUser();
                             <i class="fas fa-paperclip"></i> Payment Proof (Optional)
                         </label>
                         <div class="file-upload-wrapper">
-                            <input type="file" id="entryAttachment" name="entryAttachment" accept="image/*" capture="environment" class="file-input">
+                            <input type="file" id="entryAttachment" name="entryAttachment" accept="image/*" class="file-input">
                             <label for="entryAttachment" class="file-upload-label">
                                 <i class="fas fa-camera"></i> Choose Photo
                             </label>
@@ -297,7 +297,7 @@ $user = getCurrentUser();
                         </button>
                     </div>
                     <div class="file-upload-wrapper">
-                        <input type="file" id="editEntryAttachment" name="editEntryAttachment" accept="image/*" capture="environment" class="file-input">
+                        <input type="file" id="editEntryAttachment" name="editEntryAttachment" accept="image/*" class="file-input">
                         <label for="editEntryAttachment" class="file-upload-label">
                             <i class="fas fa-camera"></i> Choose New Photo
                         </label>
