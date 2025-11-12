@@ -561,6 +561,28 @@ $user = getCurrentUser();
         </div>
     </div>
 
+    <!-- Delete Group Confirmation Modal -->
+    <div id="deleteGroupModal" class="confirm-modal" style="display: none;">
+        <div class="confirm-modal-overlay"></div>
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header confirm-modal-header-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Delete Group</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p id="deleteGroupMessage">Are you sure you want to delete this group? This will delete all associated entries and cannot be undone.</p>
+            </div>
+            <div class="confirm-modal-footer">
+                <button class="btn-cancel" id="deleteGroupCancelBtn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-confirm" id="deleteGroupConfirmBtn">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast"></div>
 
     <!-- Floating Install Button (Bottom Right) -->

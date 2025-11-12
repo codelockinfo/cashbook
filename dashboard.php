@@ -320,6 +320,28 @@ $user = getCurrentUser();
         </div>
     </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="confirm-modal" style="display: none;">
+        <div class="confirm-modal-overlay"></div>
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header">
+                <i class="fas fa-exclamation-circle"></i>
+                <h3>Confirm Logout</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p>Are you sure you want to logout?</p>
+            </div>
+            <div class="confirm-modal-footer">
+                <button class="btn-cancel" id="logoutCancelBtn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-confirm" id="logoutConfirmBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Floating Install Button (Bottom Right) -->
     <button id="floatingInstallBtn" class="floating-install-btn" onclick="if(typeof installPWA === 'function') { installPWA(); } else { alert('Install not available'); }" title="Install App">
         <i class="fas fa-download"></i>

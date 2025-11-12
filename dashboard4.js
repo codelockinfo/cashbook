@@ -146,10 +146,43 @@ function closePhotoModal() {
 }
 
 // Handle Logout
-async function handleLogout() {
-    if (!confirm('Are you sure you want to logout?')) {
-        return;
-    }
+function handleLogout() {
+    showLogoutModal();
+}
+
+// Show logout confirmation modal
+function showLogoutModal() {
+    const modal = document.getElementById('logoutModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Setup button handlers
+    const confirmBtn = document.getElementById('logoutConfirmBtn');
+    const cancelBtn = document.getElementById('logoutCancelBtn');
+    const overlay = modal.querySelector('.confirm-modal-overlay');
+    
+    // Remove old listeners
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    // Add new listeners
+    newConfirmBtn.addEventListener('click', performLogout);
+    newCancelBtn.addEventListener('click', hideLogoutModal);
+    overlay.addEventListener('click', hideLogoutModal);
+}
+
+// Hide logout modal
+function hideLogoutModal() {
+    const modal = document.getElementById('logoutModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Perform actual logout
+async function performLogout() {
+    hideLogoutModal();
     
     try {
         const response = await fetch(AUTH_API_URL, {
@@ -287,6 +320,7 @@ async function handleGroupChange() {
     if (groupId) {
         // Show member filter and load members
         memberFilterContainer.style.display = 'flex';
+        
         await loadGroupMembers(groupId);
     } else {
         // Hide member filter
@@ -881,4 +915,3 @@ document.addEventListener('click', function(e) {
         closeEditModal();
     }
 });
-
