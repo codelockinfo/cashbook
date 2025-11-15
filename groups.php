@@ -586,9 +586,9 @@ $user = getCurrentUser();
     <div id="toast" class="toast"></div>
 
     <!-- Floating Install Button (Bottom Right) -->
-    <button id="floatingInstallBtn" class="floating-install-btn" onclick="if(typeof installPWA === 'function') { installPWA(); } else { alert('Install not available'); }" title="Install App">
+    <!-- <button id="floatingInstallBtn" class="floating-install-btn" onclick="if(typeof installPWA === 'function') { installPWA(); } else { alert('Install not available'); }" title="Install App">
         <i class="fas fa-download"></i>
-    </button>
+    </button> -->
 
     <script>
         // Pass PHP data to JavaScript
