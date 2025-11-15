@@ -106,6 +106,11 @@ async function loadPendingInvitations() {
         } else {
             document.getElementById('pendingSection').style.display = 'none';
         }
+        
+        // Update badge on dashboard if function exists
+        if (typeof window.updatePendingRequestsBadge === 'function') {
+            window.updatePendingRequestsBadge();
+        }
     } catch (error) {
         console.error('Error loading invitations:', error);
     }
@@ -333,6 +338,10 @@ async function respondToInvitation(invitationId, status) {
         if (data.success) {
             showToast(status === 'approved' ? 'Invitation accepted!' : 'Invitation declined', 'success');
             loadPendingInvitations();
+            // Update badge on dashboard if function exists
+            if (typeof window.updatePendingRequestsBadge === 'function') {
+                window.updatePendingRequestsBadge();
+            }
             loadMyGroups();
         } else {
             showToast(data.message || 'Error responding to invitation', 'error');

@@ -12,7 +12,7 @@ $user = getCurrentUser();
     <title>My Groups - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style9.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style10.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <style>
         .groups-container {
             max-width: 1200px;
@@ -173,7 +173,7 @@ $user = getCurrentUser();
 
         .modal-header h2 {
             font-size: 1.5rem;
-            color: var(--text-primary);
+            color: white;
         }
 
         .modal-close {
@@ -181,7 +181,7 @@ $user = getCurrentUser();
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: var(--text-secondary);
+            color: white;
             transition: color 0.3s ease;
         }
 
@@ -468,7 +468,7 @@ $user = getCurrentUser();
                         <i class="fas fa-plus-circle"></i> Create Group
                     </button>
                     <a href="profile" class="manage-users-link">
-                        <i class="fas fa-user-edit"></i> My Profile
+                        <i class="fas fa-circle-user"></i> My Profile
                     </a>
                     <a href="dashboard" class="manage-users-link">
                         <i class="fas fa-arrow-left"></i> Back to Dashboard
@@ -598,7 +598,7 @@ $user = getCurrentUser();
         // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/groups3.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/groups4.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 

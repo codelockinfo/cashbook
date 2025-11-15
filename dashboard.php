@@ -11,7 +11,7 @@ $user = getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookify Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style9.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style10.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -37,10 +37,11 @@ $user = getCurrentUser();
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
                     </div>
                     <a href="profile" class="manage-users-link">
-                        <i class="fas fa-user-edit"></i> My Profile
+                        <i class="fas fa-circle-user"></i> My Profile
                     </a>
-                    <a href="groups" class="manage-users-link">
+                    <a href="groups" class="manage-users-link" id="myGroupsLink">
                         <i class="fas fa-users"></i> My Groups
+                        <span class="notification-badge" id="pendingRequestsBadge" style="display: none;">0</span>
                     </a>
                     <button id="logoutBtn" class="manage-users-link logout-btn">
                         <i class="fas fa-sign-out-alt"></i> Logout
@@ -355,7 +356,7 @@ $user = getCurrentUser();
         // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>" onerror="console.error('❌ Failed to load pwa10.js from: <?php echo BASE_PATH; ?>/pwa10.js')"></script>
-    <script src="<?php echo BASE_PATH; ?>/dashboard5.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard6.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 

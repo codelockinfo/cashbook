@@ -46,6 +46,9 @@ switch ($action) {
     case 'getPendingInvitations':
         getPendingInvitations($conn, $user_id);
         break;
+    case 'getPendingInvitationsCount':
+        getPendingInvitationsCount($conn, $user_id);
+        break;
     case 'respondToInvitation':
         respondToInvitation($conn, $user_id);
         break;
@@ -251,6 +254,28 @@ function getPendingInvitations($conn, $user_id) {
         $stmt->close();
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Get count of pending invitations for current user
+function getPendingInvitationsCount($conn, $user_id) {
+    try {
+        $sql = "SELECT COUNT(*) as count
+                FROM group_requests gr
+                WHERE gr.user_id = ? AND gr.status = 'pending'";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        
+        $count = intval($row['count']);
+        
+        echo json_encode(['success' => true, 'count' => $count]);
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage(), 'count' => 0]);
     }
 }
 

@@ -1,6 +1,7 @@
 // API Configuration  
 const API_URL = ((typeof BASE_PATH !== 'undefined' && BASE_PATH) ? BASE_PATH : '') + '/api.php';
 const AUTH_API_URL = ((typeof BASE_PATH !== 'undefined' && BASE_PATH) ? BASE_PATH : '') + '/auth-api.php';
+const GROUP_API_URL = ((typeof BASE_PATH !== 'undefined' && BASE_PATH) ? BASE_PATH : '') + '/group-api.php';
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
@@ -8,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadGroups(); // This will call loadTransactions() after setting default group
     // Don't call loadTransactions() here - it will be called by handleDefaultGroupChange()
     setupEventListeners();
+    updatePendingRequestsBadge(); // Load pending requests count
+    // Update badge every 30 seconds
+    setInterval(updatePendingRequestsBadge, 30000);
 });
 
 // Initialize datetime inputs with current date/time
@@ -608,6 +612,34 @@ function clearFilters() {
     
     loadTransactions();
 }
+
+// Update pending requests badge
+async function updatePendingRequestsBadge() {
+    try {
+        const response = await fetch(`${GROUP_API_URL}?action=getPendingInvitationsCount`);
+        const data = await response.json();
+        
+        const badge = document.getElementById('pendingRequestsBadge');
+        if (!badge) return;
+        
+        if (data.success && data.count > 0) {
+            badge.textContent = data.count > 99 ? '99+' : data.count;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error updating pending requests badge:', error);
+        // Hide badge on error
+        const badge = document.getElementById('pendingRequestsBadge');
+        if (badge) {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+// Make function globally accessible for manual updates
+window.updatePendingRequestsBadge = updatePendingRequestsBadge;
 
 // Show toast notification
 function showToast(message, type = 'success') {

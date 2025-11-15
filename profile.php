@@ -13,8 +13,8 @@ $user = getCurrentUser();
     <title>My Profile - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style9.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style7.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style10.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style8.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
 </head>
 <body>
     <div class="container" style="max-width: 1200px;">
@@ -45,7 +45,7 @@ $user = getCurrentUser();
                         <i class="fas fa-users"></i> My Groups
                     </a>
                     <a href="profile" class="manage-users-link" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
-                        <i class="fas fa-user-edit"></i> My Profile
+                        <i class="fas fa-circle-user"></i> My Profile
                     </a>
                     <button id="logoutBtn" class="manage-users-link logout-btn">
                         <i class="fas fa-sign-out-alt"></i> Logout
@@ -57,7 +57,7 @@ $user = getCurrentUser();
         <div style="max-width: 800px; margin: 0 auto;">
         <div class="auth-card">
             <div class="auth-header">
-                <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+                <h1><i class="fas fa-circle-user"></i> My Profile</h1>
                 <p class="subtitle">Update your account information</p>
             </div>
 
@@ -211,7 +211,7 @@ $user = getCurrentUser();
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo ASSET_VERSION; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/auth6.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/dashboard5.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard6.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
     <script>
         // Initialize profile page
         (function() {

@@ -57,6 +57,14 @@ body {
     margin-bottom: 30px;
 }
 
+.auth-header h1 {
+background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+margin-bottom: 5px;
+    font-size: 26px;
+}
+
 .logo {
     display: flex;
     align-items: center;
@@ -81,7 +89,7 @@ body {
 
 .subtitle {
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: 15px;
 }
 
 .auth-form {

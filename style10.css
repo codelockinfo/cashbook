@@ -116,11 +116,42 @@ body {
     font-size: 0.95rem;
     border: none;
     cursor: pointer;
+    position: relative;
 }
 
 .manage-users-link:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
+}
+
+/* Notification Badge */
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #7c44ef;
+    color: white;
+    border-radius: 12px;
+    min-width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0 6px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    border: 2px solid white;
+    animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 .logout-btn {
@@ -740,7 +771,6 @@ body {
     font-size: 0.875rem;
     color: var(--text-secondary);
     margin-bottom: 8px;
-    font-style: italic;
     line-height: 1.4;
     max-height: 2.8em;
     overflow: hidden;
@@ -1808,6 +1838,7 @@ body {
     gap: 10px;
     line-height: 1.2;
     flex-grow: 1;
+    color: white;
 }
 
 .modal-close {
