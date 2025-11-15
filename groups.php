@@ -503,7 +503,7 @@ $user = getCurrentUser();
     <div class="modal" id="createGroupModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-plus-circle"></i> Create New Group</h2>
+                <h2><i class="fas fa-plus-circle"></i> Create Group</h2>
                 <button class="modal-close" onclick="closeModal('createGroupModal')">&times;</button>
             </div>
             <form id="createGroupForm" class="auth-form">
