@@ -293,18 +293,10 @@ function forgotPassword($conn) {
             $emailResult = sendPasswordResetEmail($email, $user['name'], $resetLink);
             
             if ($emailResult['success']) {
-                $response = [
+                echo json_encode([
                     'success' => true,
                     'message' => 'Password reset link has been sent to your email'
-                ];
-                
-                // Include reset link in development mode for testing
-                if (isset($emailResult['dev_mode']) && $emailResult['dev_mode']) {
-                    $response['reset_link'] = $emailResult['reset_link'];
-                    $response['dev_mode'] = true;
-                }
-                
-                echo json_encode($response);
+                ]);
             } else {
                 echo json_encode([
                     'success' => false,

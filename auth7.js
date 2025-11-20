@@ -331,37 +331,20 @@ async function handleForgotPassword(e) {
         const data = await response.json();
         
         if (data.success) {
-            // For development: show reset link in popup (for testing without email)
-            if (data.dev_mode && data.reset_link) {
-                showToast('Development Mode: Reset link generated', 'success');
-                setTimeout(() => {
-                    const confirmGo = confirm('🔧 DEVELOPMENT MODE\n\nReset link generated!\n\n' + data.reset_link + '\n\nIn production, this link will be sent via email.\n\nClick OK to open the reset page now.');
-                    if (confirmGo) {
-                        window.location.href = data.reset_link;
-                    } else {
-                        // Clear form
-                        document.getElementById('email').value = '';
-                        resetBtn.disabled = false;
-                        resetBtn.innerHTML = originalHTML;
-                    }
-                }, 1000);
-            } else {
-                // Production mode: Email sent successfully
-                showToast('✓ ' + data.message + '\n\nCheck your email inbox for the reset link.', 'success');
-                
-                // Clear form
-                document.getElementById('email').value = '';
-                resetBtn.disabled = false;
-                resetBtn.innerHTML = originalHTML;
-                
-                // Optionally redirect to login after showing success
-                setTimeout(() => {
-                    const goToLogin = confirm('Email sent successfully!\n\nClick OK to return to the login page.');
-                    if (goToLogin) {
-                        window.location.href = 'login';
-                    }
-                }, 3000);
-            }
+            showToast('✓ ' + data.message + '\n\nCheck your email inbox for the reset link.', 'success');
+            
+            // Clear form
+            document.getElementById('email').value = '';
+            resetBtn.disabled = false;
+            resetBtn.innerHTML = originalHTML;
+            
+            // Optionally redirect to login after showing success
+            setTimeout(() => {
+                const goToLogin = confirm('Email sent successfully!\n\nClick OK to return to the login page.');
+                if (goToLogin) {
+                    window.location.href = 'login';
+                }
+            }, 3000);
         } else {
             showToast(data.message || 'Failed to send reset link', 'error');
             resetBtn.disabled = false;

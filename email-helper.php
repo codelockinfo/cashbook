@@ -7,7 +7,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require_once 'email-config.php';
+require_once __DIR__ . '/email-config.php';
 
 /**
  * Send password reset email
@@ -17,17 +17,6 @@ require_once 'email-config.php';
  * @return array Result with success status and message
  */
 function sendPasswordResetEmail($email, $name, $resetLink) {
-    // Check if DEV_MODE_DISABLE_EMAIL is defined, if not, default to false (production mode)
-    $devModeDisable = defined('DEV_MODE_DISABLE_EMAIL') ? DEV_MODE_DISABLE_EMAIL : false;
-    if ($devModeDisable) {
-        return [
-            'success' => true,
-            'dev_mode' => true,
-            'reset_link' => $resetLink,
-            'message' => 'Development mode: Reset link generated (email sending disabled)'
-        ];
-    }
-    
     // Check if PHPMailer is available
     $vendorPath = __DIR__ . '/vendor/autoload.php';
     if (!file_exists($vendorPath)) {
