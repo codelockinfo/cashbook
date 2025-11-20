@@ -30,7 +30,7 @@
  * true  = Show reset link in popup (NO EMAIL SENT) ✅ Current
  * false = Send actual emails (REQUIRES EMAIL CONFIG BELOW)
  */
-define('DEV_MODE', true);
+define('DEV_MODE', false);
 
 
 // ═══════════════════════════════════════════════════════════
@@ -58,11 +58,11 @@ define('DEV_MODE', true);
  *    SMTP_ENCRYPTION: tls
  */
 
-define('SMTP_HOST', 'smtp.gmail.com');           // SMTP server address
-define('SMTP_PORT', 587);                         // Port (587=TLS, 465=SSL, 25=Standard)
-define('SMTP_USERNAME', 'your-email@gmail.com'); // Your email address
-define('SMTP_PASSWORD', 'your-app-password');    // Your email password/app-password
-define('SMTP_ENCRYPTION', 'tls');                // Encryption: 'tls' or 'ssl'
+define('SMTP_HOST', 'smtp.hostinger.com');           // SMTP server address
+define('SMTP_PORT', 465);                            // Port (587=TLS, 465=SSL, 25=Standard)
+define('SMTP_USERNAME', 'tailorpro@happyeventsurat.com'); // Your email address
+define('SMTP_PASSWORD', 'Tailor@99');                // Your email password/app-password
+define('SMTP_ENCRYPTION', 'tls');                    // Encryption: 'tls' or 'ssl'
 
 
 // ═══════════════════════════════════════════════════════════
@@ -72,8 +72,8 @@ define('SMTP_ENCRYPTION', 'tls');                // Encryption: 'tls' or 'ssl'
 /**
  * The "From" email and name that appears in user's inbox
  */
-define('FROM_EMAIL', 'noreply@cashbook.com');    // Sender email address
-define('FROM_NAME', 'Cash Book');                // Sender name
+define('FROM_EMAIL', 'tailorpro@happyeventsurat.com');    // Sender email address
+define('FROM_NAME', 'TailorPro');                       // Sender name
 
 
 // ═══════════════════════════════════════════════════════════
