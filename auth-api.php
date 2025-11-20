@@ -76,12 +76,40 @@ try {
     ob_clean();
     error_log("Auth API Error: " . $e->getMessage());
     error_log("Stack trace: " . $e->getTraceAsString());
-    echo json_encode(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()]);
+    
+    // Show detailed error in development, generic in production
+    $isLocal = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || 
+               strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false;
+    
+    $errorMsg = $isLocal ? $e->getMessage() : 'An error occurred. Please try again.';
+    echo json_encode(['success' => false, 'message' => $errorMsg]);
 } catch (Error $e) {
     ob_clean();
     error_log("Auth API Fatal Error: " . $e->getMessage());
+    error_log("File: " . $e->getFile() . " Line: " . $e->getLine());
     error_log("Stack trace: " . $e->getTraceAsString());
-    echo json_encode(['success' => false, 'message' => 'A fatal error occurred. Please check server logs.']);
+    
+    // Show detailed error in development, generic in production
+    $isLocal = strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false || 
+               strpos($_SERVER['HTTP_HOST'] ?? '', '127.0.0.1') !== false;
+    
+    // Check for common errors and provide helpful messages
+    $errorMessage = $e->getMessage();
+    $helpfulMsg = 'A fatal error occurred.';
+    
+    if (strpos($errorMessage, 'password_reset_tokens') !== false || 
+        strpos($errorMessage, "doesn't exist") !== false ||
+        strpos($errorMessage, 'Unknown table') !== false) {
+        $helpfulMsg = 'Database table missing. Please run setup-forgot-password.php to create the required table.';
+    } elseif (strpos($errorMessage, 'Call to undefined') !== false) {
+        $helpfulMsg = 'Function not found: ' . $errorMessage;
+    } elseif (strpos($errorMessage, 'Class') !== false && strpos($errorMessage, 'not found') !== false) {
+        $helpfulMsg = 'Class not found. Please check if all required files are included.';
+    } elseif ($isLocal) {
+        $helpfulMsg = $errorMessage . ' (File: ' . basename($e->getFile()) . ':' . $e->getLine() . ')';
+    }
+    
+    echo json_encode(['success' => false, 'message' => $helpfulMsg]);
 } finally {
     // Ensure connection is closed
     if (isset($conn)) {
@@ -313,7 +341,19 @@ function forgotPassword($conn) {
         
         // Delete any existing unused tokens for this user
         $deleteStmt = $conn->prepare("DELETE FROM password_reset_tokens WHERE user_id = ? AND used = 0");
-        if ($deleteStmt) {
+        if ($deleteStmt === false) {
+            $errorMsg = $conn->error;
+            // Check if table doesn't exist
+            if (strpos($errorMsg, "doesn't exist") !== false || strpos($errorMsg, 'Unknown table') !== false) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Password reset table not found. Please run setup-forgot-password.php to create it.'
+                ]);
+                return;
+            }
+            // For other errors, log but continue (token might not exist yet)
+            error_log("Failed to delete old tokens: " . $errorMsg);
+        } else {
             $deleteStmt->bind_param("i", $userId);
             $deleteStmt->execute();
             $deleteStmt->close();
@@ -321,8 +361,17 @@ function forgotPassword($conn) {
         
         // Insert new token
         $stmt = $conn->prepare("INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?, ?, ?)");
-        if (!$stmt) {
-            echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
+        if ($stmt === false) {
+            $errorMsg = $conn->error;
+            // Check if table doesn't exist
+            if (strpos($errorMsg, "doesn't exist") !== false || strpos($errorMsg, 'Unknown table') !== false) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Password reset table not found. Please run setup-forgot-password.php to create it.'
+                ]);
+                return;
+            }
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $errorMsg]);
             return;
         }
         
