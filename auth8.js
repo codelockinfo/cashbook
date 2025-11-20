@@ -328,7 +328,22 @@ async function handleForgotPassword(e) {
             })
         });
         
-        const data = await response.json();
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Get response text first to handle non-JSON responses
+        const responseText = await response.text();
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.error('Response text:', responseText);
+            throw new Error('Invalid response from server. Please check server logs.');
+        }
         
         if (data.success) {
             showToast('✓ ' + data.message + '\n\nCheck your email inbox for the reset link.', 'success');
@@ -352,7 +367,8 @@ async function handleForgotPassword(e) {
         }
     } catch (error) {
         console.error('Forgot password error:', error);
-        showToast('An error occurred. Please try again.', 'error');
+        const errorMessage = error.message || 'An error occurred. Please try again.';
+        showToast(errorMessage, 'error');
         resetBtn.disabled = false;
         resetBtn.innerHTML = originalHTML;
     }

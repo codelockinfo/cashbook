@@ -1,4 +1,7 @@
 <?php
+// Suppress any output before JSON
+ob_start();
+
 // Configure session for subdirectory support
 if (session_status() === PHP_SESSION_NONE) {
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
@@ -16,39 +19,76 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Clear any output before setting headers
+ob_clean();
+
 header('Content-Type: application/json');
 
-require_once 'config.php';
-require_once 'email-helper.php';
+// Error handling to ensure valid JSON (only catch fatal errors, not warnings)
+set_error_handler(function($severity, $message, $file, $line) {
+    if ($severity === E_ERROR || $severity === E_PARSE || $severity === E_CORE_ERROR || $severity === E_COMPILE_ERROR) {
+        throw new ErrorException($message, 0, $severity, $file, $line);
+    }
+    return false; // Let PHP handle other errors normally
+});
 
-$conn = getDBConnection();
-$action = $_POST['action'] ?? $_GET['action'] ?? '';
+try {
+    require_once 'config.php';
+    require_once 'email-helper.php';
+} catch (Exception $e) {
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => 'Configuration error: ' . $e->getMessage()]);
+    exit;
+}
 
-switch ($action) {
-    case 'register':
-        register($conn);
-        break;
-    case 'login':
-        login($conn);
-        break;
-    case 'logout':
-        logout();
-        break;
-    case 'check':
-        checkSession();
-        break;
-    case 'forgot_password':
-        forgotPassword($conn);
-        break;
-    case 'verify_reset_token':
-        verifyResetToken($conn);
-        break;
-    case 'reset_password':
-        resetPassword($conn);
-        break;
-    default:
-        echo json_encode(['success' => false, 'message' => 'Invalid action']);
-        break;
+try {
+    $conn = getDBConnection();
+    $action = $_POST['action'] ?? $_GET['action'] ?? '';
+    
+    switch ($action) {
+        case 'register':
+            register($conn);
+            break;
+        case 'login':
+            login($conn);
+            break;
+        case 'logout':
+            logout();
+            break;
+        case 'check':
+            checkSession();
+            break;
+        case 'forgot_password':
+            forgotPassword($conn);
+            break;
+        case 'verify_reset_token':
+            verifyResetToken($conn);
+            break;
+        case 'reset_password':
+            resetPassword($conn);
+            break;
+        default:
+            ob_clean();
+            echo json_encode(['success' => false, 'message' => 'Invalid action']);
+            break;
+    }
+} catch (Exception $e) {
+    ob_clean();
+    error_log("Auth API Error: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+    echo json_encode(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()]);
+} catch (Error $e) {
+    ob_clean();
+    error_log("Auth API Fatal Error: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+    echo json_encode(['success' => false, 'message' => 'A fatal error occurred. Please check server logs.']);
+} finally {
+    // Ensure connection is closed
+    if (isset($conn)) {
+        $conn->close();
+    }
+    // Clean any remaining output
+    ob_end_flush();
 }
 
 // Register new user
@@ -272,15 +312,25 @@ function forgotPassword($conn) {
         $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
         
         // Delete any existing unused tokens for this user
-        $stmt = $conn->prepare("DELETE FROM password_reset_tokens WHERE user_id = ? AND used = 0");
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
+        $deleteStmt = $conn->prepare("DELETE FROM password_reset_tokens WHERE user_id = ? AND used = 0");
+        if ($deleteStmt) {
+            $deleteStmt->bind_param("i", $userId);
+            $deleteStmt->execute();
+            $deleteStmt->close();
+        }
         
         // Insert new token
         $stmt = $conn->prepare("INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?, ?, ?)");
+        if (!$stmt) {
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
+            return;
+        }
+        
         $stmt->bind_param("iss", $userId, $token, $expiresAt);
         
         if ($stmt->execute()) {
+            $stmt->close();
+            
             // Generate reset link - use SITE_URL if defined, otherwise construct from server
             if (defined('SITE_URL') && !empty(SITE_URL)) {
                 $resetLink = rtrim(SITE_URL, '/') . "/reset-password.php?token=" . $token;
@@ -298,16 +348,18 @@ function forgotPassword($conn) {
                     'message' => 'Password reset link has been sent to your email'
                 ]);
             } else {
+                error_log("Email sending failed for $email: " . ($emailResult['message'] ?? 'Unknown error'));
                 echo json_encode([
                     'success' => false,
-                    'message' => $emailResult['message']
+                    'message' => $emailResult['message'] ?? 'Failed to send email. Please try again later.'
                 ]);
             }
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to generate reset token']);
+            $errorMsg = $stmt->error ?: 'Failed to generate reset token';
+            $stmt->close();
+            error_log("Failed to insert reset token: " . $errorMsg);
+            echo json_encode(['success' => false, 'message' => 'Failed to generate reset token: ' . $errorMsg]);
         }
-        
-        $stmt->close();
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
@@ -431,7 +483,5 @@ function resetPassword($conn) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
-
-$conn->close();
 ?>
 
