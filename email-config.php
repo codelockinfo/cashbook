@@ -62,7 +62,7 @@ define('SMTP_HOST', 'smtp.hostinger.com');           // SMTP server address
 define('SMTP_PORT', 465);                            // Port (587=TLS, 465=SSL, 25=Standard)
 define('SMTP_USERNAME', 'tailorpro@happyeventsurat.com'); // Your email address
 define('SMTP_PASSWORD', 'Tailor@99');                // Your email password/app-password
-define('SMTP_ENCRYPTION', 'tls');                    // Encryption: 'tls' or 'ssl'
+define('SMTP_ENCRYPTION', 'ssl');                    // Encryption: 'tls' or 'ssl' (465 uses SSL)
 
 
 // ═══════════════════════════════════════════════════════════
@@ -85,7 +85,12 @@ define('FROM_NAME', 'TailorPro');                       // Sender name
  * Update SITE_URL when deploying to production!
  */
 define('SITE_NAME', 'Cash Book');                       // Your application name
-define('SITE_URL', 'http://localhost/cashbook');        // Your site URL (CHANGE IN PRODUCTION!)
+// Auto-detect SITE_URL from current request
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$scriptPath = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+$scriptPath = ($scriptPath === '/' || $scriptPath === '\\') ? '' : $scriptPath;
+define('SITE_URL', $protocol . '://' . $host . $scriptPath);
 
 
 // ═══════════════════════════════════════════════════════════

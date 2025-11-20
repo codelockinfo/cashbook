@@ -17,8 +17,16 @@ require_once 'email-config.php';
  * @return array Result with success status and message
  */
 function sendPasswordResetEmail($email, $name, $resetLink) {
+    // Check if DEV_MODE is defined, if not, default to false (production mode)
+    if (!defined('DEV_MODE')) {
+        // If not defined, try to load config again
+        if (file_exists(__DIR__ . '/email-config.php')) {
+            require_once __DIR__ . '/email-config.php';
+        }
+    }
+    
     // If in development mode, don't actually send email
-    if (DEV_MODE) {
+    if (defined('DEV_MODE') && DEV_MODE === true) {
         return [
             'success' => true,
             'dev_mode' => true,
@@ -28,14 +36,15 @@ function sendPasswordResetEmail($email, $name, $resetLink) {
     }
     
     // Check if PHPMailer is available
-    if (!file_exists('vendor/autoload.php')) {
+    $vendorPath = __DIR__ . '/vendor/autoload.php';
+    if (!file_exists($vendorPath)) {
         return [
             'success' => false,
             'message' => 'PHPMailer not installed. Run: composer install'
         ];
     }
     
-    require 'vendor/autoload.php';
+    require $vendorPath;
     
     $mail = new PHPMailer(true);
     
@@ -69,11 +78,13 @@ function sendPasswordResetEmail($email, $name, $resetLink) {
         
     } catch (Exception $e) {
         error_log("Email sending failed: {$mail->ErrorInfo}");
+        error_log("Exception: " . $e->getMessage());
         
         return [
             'success' => false,
-            'message' => 'Failed to send email. Please contact support.',
-            'error' => $mail->ErrorInfo
+            'message' => 'Failed to send email: ' . $mail->ErrorInfo,
+            'error' => $mail->ErrorInfo,
+            'exception' => $e->getMessage()
         ];
     }
 }

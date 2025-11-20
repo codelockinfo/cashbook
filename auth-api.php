@@ -281,8 +281,13 @@ function forgotPassword($conn) {
         $stmt->bind_param("iss", $userId, $token, $expiresAt);
         
         if ($stmt->execute()) {
-            // Generate reset link
-            $resetLink = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset-password.php?token=" . $token;
+            // Generate reset link - use SITE_URL if defined, otherwise construct from server
+            if (defined('SITE_URL') && !empty(SITE_URL)) {
+                $resetLink = rtrim(SITE_URL, '/') . "/reset-password.php?token=" . $token;
+            } else {
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $resetLink = $protocol . "://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . "/reset-password.php?token=" . $token;
+            }
             
             // Send password reset email
             $emailResult = sendPasswordResetEmail($email, $user['name'], $resetLink);
