@@ -4,6 +4,13 @@
  * Handles sending emails for password reset
  */
 
+// Load Composer autoloader first if it exists
+$vendorPath = __DIR__ . '/vendor/autoload.php';
+if (file_exists($vendorPath)) {
+    require_once $vendorPath;
+}
+
+// Use PHPMailer classes only after autoloader is loaded
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -22,11 +29,21 @@ function sendPasswordResetEmail($email, $name, $resetLink) {
     if (!file_exists($vendorPath)) {
         return [
             'success' => false,
-            'message' => 'PHPMailer not installed. Run: composer install'
+            'message' => 'PHPMailer not installed. Please run: composer install'
         ];
     }
     
-    require $vendorPath;
+    // Ensure autoloader is loaded
+    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        require_once $vendorPath;
+    }
+    
+    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        return [
+            'success' => false,
+            'message' => 'PHPMailer class not found. Please install dependencies with: composer install'
+        ];
+    }
     
     $mail = new PHPMailer(true);
     

@@ -33,11 +33,27 @@ set_error_handler(function($severity, $message, $file, $line) {
 });
 
 try {
+    // Load Composer autoloader first if it exists (required for PHPMailer)
+    $vendorPath = __DIR__ . '/vendor/autoload.php';
+    if (file_exists($vendorPath)) {
+        require_once $vendorPath;
+    }
+    
     require_once 'config.php';
     require_once 'email-helper.php';
 } catch (Exception $e) {
     ob_clean();
     echo json_encode(['success' => false, 'message' => 'Configuration error: ' . $e->getMessage()]);
+    exit;
+} catch (Error $e) {
+    ob_clean();
+    $errorMsg = $e->getMessage();
+    // Check if it's a class not found error
+    if (strpos($errorMsg, 'not found') !== false || strpos($errorMsg, 'Class') !== false) {
+        echo json_encode(['success' => false, 'message' => 'Required library not found. Please run: composer install']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Configuration error: ' . $errorMsg]);
+    }
     exit;
 }
 
