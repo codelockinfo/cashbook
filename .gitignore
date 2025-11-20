@@ -1,0 +1,39 @@
+# Dependencies
+/vendor/
+composer.lock
+composer.phar
+composer-setup.php
+
+# Environment and config files
+.env
+.env.local
+*.env
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Uploads (if you want to exclude user uploads from git)
+# uploads/
+
+# PHP specific
+*.php~
+*.php.bak
+
