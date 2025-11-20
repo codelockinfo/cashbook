@@ -5,6 +5,7 @@
  */
 
 // Load Composer autoloader first if it exists
+// The autoloader registers itself automatically when required
 $vendorPath = __DIR__ . '/vendor/autoload.php';
 if (file_exists($vendorPath)) {
     require_once $vendorPath;
@@ -24,28 +25,46 @@ require_once __DIR__ . '/email-config.php';
  * @return array Result with success status and message
  */
 function sendPasswordResetEmail($email, $name, $resetLink) {
-    // Check if PHPMailer is available
+    // Ensure autoloader is loaded (check if it's already loaded at top of file)
     $vendorPath = __DIR__ . '/vendor/autoload.php';
-    if (!file_exists($vendorPath)) {
-        return [
-            'success' => false,
-            'message' => 'PHPMailer not installed. Please run: composer install'
-        ];
-    }
-    
-    // Ensure autoloader is loaded
-    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+    if (file_exists($vendorPath) && !class_exists('PHPMailer\PHPMailer\PHPMailer', false)) {
         require_once $vendorPath;
     }
     
-    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
-        return [
-            'success' => false,
-            'message' => 'PHPMailer class not found. Please install dependencies with: composer install'
-        ];
+    // Try to load PHPMailer class - trigger autoloader
+    if (!class_exists('PHPMailer\PHPMailer\PHPMailer', true)) {
+        // Fallback: manually require files if autoloader failed
+        $phpmailerPath = __DIR__ . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
+        $exceptionPath = __DIR__ . '/vendor/phpmailer/phpmailer/src/Exception.php';
+        $smtpPath = __DIR__ . '/vendor/phpmailer/phpmailer/src/SMTP.php';
+        
+        // Check if files exist and manually load them
+        if (file_exists($exceptionPath) && file_exists($smtpPath) && file_exists($phpmailerPath)) {
+            require_once $exceptionPath;
+            require_once $smtpPath;
+            require_once $phpmailerPath;
+        } else {
+            return [
+                'success' => false,
+                'message' => 'PHPMailer not installed. Please run: composer install in the project directory.'
+            ];
+        }
     }
     
-    $mail = new PHPMailer(true);
+    // Try to instantiate PHPMailer to ensure it works
+    try {
+        $mail = new PHPMailer(true);
+    } catch (\Exception $e) {
+        return [
+            'success' => false,
+            'message' => 'Failed to load PHPMailer: ' . $e->getMessage()
+        ];
+    } catch (\Error $e) {
+        return [
+            'success' => false,
+            'message' => 'Failed to load PHPMailer. Please ensure composer dependencies are installed.'
+        ];
+    }
     
     try {
         // Server settings
