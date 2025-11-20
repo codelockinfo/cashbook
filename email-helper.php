@@ -4,55 +4,53 @@
  * Handles sending emails for password reset
  */
 
+// Function to load PHPMailer files manually
+function loadPHPMailerManually() {
+    $baseDir = rtrim(str_replace('\\', '/', __DIR__), '/');
+    $vendorDir = $baseDir . '/vendor/phpmailer/phpmailer/src';
+    
+    $files = [
+        $vendorDir . '/Exception.php',
+        $vendorDir . '/SMTP.php',
+        $vendorDir . '/PHPMailer.php'
+    ];
+    
+    foreach ($files as $file) {
+        $realPath = @realpath($file);
+        $pathToUse = $realPath ?: $file;
+        
+        if (@file_exists($pathToUse)) {
+            try {
+                require_once $pathToUse;
+            } catch (\Throwable $e) {
+                error_log("Failed to load PHPMailer file: $pathToUse - " . $e->getMessage());
+                return false;
+            }
+        } else {
+            error_log("PHPMailer file not found: $pathToUse (base dir: $baseDir)");
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 // Load Composer autoloader first if it exists
-// The autoloader registers itself automatically when required
 $vendorPath = __DIR__ . '/vendor/autoload.php';
-$autoloaderLoaded = false;
-if (file_exists($vendorPath)) {
+if (@file_exists($vendorPath)) {
     try {
         require_once $vendorPath;
-        $autoloaderLoaded = true;
     } catch (\Exception $e) {
-        // Autoloader failed, will fall back to manual loading
         error_log("Autoloader failed to load: " . $e->getMessage());
     }
 }
 
-// If autoloader didn't work or PHPMailer class doesn't exist, manually load it
+// If PHPMailer class doesn't exist, try to load it manually
 if (!class_exists('PHPMailer\PHPMailer\PHPMailer', false)) {
-    // Normalize the base directory path
-    $baseDir = rtrim(str_replace('\\', '/', __DIR__), '/');
-    
-    // Build paths - use forward slashes (works on Windows and Linux)
-    $exceptionPath = $baseDir . '/vendor/phpmailer/phpmailer/src/Exception.php';
-    $smtpPath = $baseDir . '/vendor/phpmailer/phpmailer/src/SMTP.php';
-    $phpmailerPath = $baseDir . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
-    
-    // Try to load files directly
-    try {
-        // Use realpath to normalize paths
-        $exceptionReal = @realpath($exceptionPath);
-        $smtpReal = @realpath($smtpPath);
-        $phpmailerReal = @realpath($phpmailerPath);
-        
-        if ($exceptionReal && $smtpReal && $phpmailerReal) {
-            require_once $exceptionReal;
-            require_once $smtpReal;
-            require_once $phpmailerReal;
-        } elseif (file_exists($exceptionPath) && file_exists($smtpPath) && file_exists($phpmailerPath)) {
-            require_once $exceptionPath;
-            require_once $smtpPath;
-            require_once $phpmailerPath;
-        } else {
-            // Log which files are missing
-            $missing = [];
-            if (!file_exists($exceptionPath) && !@realpath($exceptionPath)) $missing[] = 'Exception.php';
-            if (!file_exists($smtpPath) && !@realpath($smtpPath)) $missing[] = 'SMTP.php';
-            if (!file_exists($phpmailerPath) && !@realpath($phpmailerPath)) $missing[] = 'PHPMailer.php';
-            error_log("PHPMailer files missing at file level. Base dir: $baseDir. Missing: " . implode(', ', $missing));
-        }
-    } catch (\Throwable $e) {
-        error_log("PHPMailer file-level load error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+    // Try autoloader first
+    if (!class_exists('PHPMailer\PHPMailer\PHPMailer', true)) {
+        // Autoloader failed, load manually
+        loadPHPMailerManually();
     }
 }
 
@@ -119,10 +117,9 @@ function sendPasswordResetEmail($email, $name, $resetLink) {
                 error_log("PHPMailer realpath: " . ($realTest ?: 'NOT FOUND'));
                 error_log("PHPMailer file_exists: " . ($exists ? 'YES' : 'NO'));
                 
-                // Show a cleaner error message without the full path
                 return [
                     'success' => false,
-                    'message' => 'PHPMailer could not be loaded. Please ensure the vendor directory exists and composer install has been run on the server.'
+                    'message' => 'PHPMailer library not found. The vendor directory is missing on the server. Please SSH into your server and run: composer install (or upload the vendor folder manually).'
                 ];
             }
         }
