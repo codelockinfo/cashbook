@@ -1,0 +1,12 @@
+#!/bin/bash
+# Hostinger Custom Deployment Script
+# This file is executed by Hostinger before/after Git operations
+# Configure this in Hostinger Panel > Git > Deployment Settings
+
+# Remove vendor directory and composer.lock BEFORE git pull
+echo "Cleaning up vendor directory and composer.lock..."
+rm -rf vendor composer.lock
+
+# Git pull will happen automatically after this script
+# Then run composer install in post-deploy hook
+
