@@ -31,6 +31,7 @@
  * false = Send actual emails (REQUIRES EMAIL CONFIG BELOW)
  */
 define('DEV_MODE', false);
+define('DEV_MODE_DISABLE_EMAIL', false);
 
 
 // ═══════════════════════════════════════════════════════════
