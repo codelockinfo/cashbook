@@ -21,14 +21,29 @@ if (file_exists($vendorPath)) {
 // If autoloader didn't work or PHPMailer class doesn't exist, manually load it
 if (!class_exists('PHPMailer\PHPMailer\PHPMailer', false)) {
     $baseDir = __DIR__;
+    
+    // Build paths - use forward slashes (works on Windows and Linux)
     $exceptionPath = $baseDir . '/vendor/phpmailer/phpmailer/src/Exception.php';
     $smtpPath = $baseDir . '/vendor/phpmailer/phpmailer/src/SMTP.php';
     $phpmailerPath = $baseDir . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
     
-    if (file_exists($exceptionPath) && file_exists($smtpPath) && file_exists($phpmailerPath)) {
-        require_once $exceptionPath;
-        require_once $smtpPath;
-        require_once $phpmailerPath;
+    // Try to load files directly
+    try {
+        // Just try to require - if files exist, they'll load; if not, we'll catch the error
+        if (file_exists($exceptionPath) && file_exists($smtpPath) && file_exists($phpmailerPath)) {
+            require_once $exceptionPath;
+            require_once $smtpPath;
+            require_once $phpmailerPath;
+        } else {
+            // Log which files are missing
+            $missing = [];
+            if (!file_exists($exceptionPath)) $missing[] = 'Exception.php';
+            if (!file_exists($smtpPath)) $missing[] = 'SMTP.php';
+            if (!file_exists($phpmailerPath)) $missing[] = 'PHPMailer.php';
+            error_log("PHPMailer files missing at file level. Base dir: $baseDir. Missing: " . implode(', ', $missing));
+        }
+    } catch (\Throwable $e) {
+        error_log("PHPMailer file-level load error: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
     }
 }
 
@@ -46,70 +61,58 @@ require_once __DIR__ . '/email-config.php';
  * @return array Result with success status and message
  */
 function sendPasswordResetEmail($email, $name, $resetLink) {
-    // Check if PHPMailer class already exists (maybe autoloader worked)
+    // Check if PHPMailer class already exists
     if (!class_exists('PHPMailer\PHPMailer\PHPMailer', false)) {
-        // Class doesn't exist yet, try to load via autoloader first
+        // Try autoloader first
         if (!class_exists('PHPMailer\PHPMailer\PHPMailer', true)) {
-            // Autoloader failed, manually require files
-            // Get base directory - try multiple methods
+            // Autoloader failed, try to manually load files
+            // Use the same base directory as file-level loading
             $baseDir = __DIR__;
+            $exceptionPath = $baseDir . '/vendor/phpmailer/phpmailer/src/Exception.php';
+            $smtpPath = $baseDir . '/vendor/phpmailer/phpmailer/src/SMTP.php';
+            $phpmailerPath = $baseDir . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
             
-            // Also try using dirname(__FILE__) as fallback
-            $altBaseDir = dirname(__FILE__);
-            
-            // Build list of possible base directories
-            $baseDirs = array_unique([$baseDir, $altBaseDir]);
-            
-            $filesLoaded = false;
-            
-            // Try each base directory
-            foreach ($baseDirs as $dir) {
-                // Try forward slashes first (works on Windows and Linux)
-                $exceptionPath = $dir . '/vendor/phpmailer/phpmailer/src/Exception.php';
-                $smtpPath = $dir . '/vendor/phpmailer/phpmailer/src/SMTP.php';
-                $phpmailerPath = $dir . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
+            // Try to require files directly - let PHP handle errors
+            $loaded = false;
+            try {
+                // Try with realpath first
+                $exceptionReal = realpath($exceptionPath);
+                $smtpReal = realpath($smtpPath);
+                $phpmailerReal = realpath($phpmailerPath);
                 
-                // Use realpath to normalize and verify
-                $exceptionReal = @realpath($exceptionPath);
-                $smtpReal = @realpath($smtpPath);
-                $phpmailerReal = @realpath($phpmailerPath);
-                
-                // If realpath worked, use those paths, otherwise try original
                 if ($exceptionReal && $smtpReal && $phpmailerReal) {
-                    try {
-                        require_once $exceptionReal;
-                        require_once $smtpReal;
-                        require_once $phpmailerReal;
-                        $filesLoaded = true;
-                        break;
-                    } catch (\Throwable $e) {
-                        error_log("Error loading PHPMailer (realpath): " . $e->getMessage());
-                    }
-                } elseif (@file_exists($exceptionPath) && @file_exists($smtpPath) && @file_exists($phpmailerPath)) {
-                    // Try direct paths if realpath failed but files exist
-                    try {
-                        require_once $exceptionPath;
-                        require_once $smtpPath;
-                        require_once $phpmailerPath;
-                        $filesLoaded = true;
-                        break;
-                    } catch (\Throwable $e) {
-                        error_log("Error loading PHPMailer (direct): " . $e->getMessage());
-                    }
+                    require_once $exceptionReal;
+                    require_once $smtpReal;
+                    require_once $phpmailerReal;
+                    $loaded = true;
+                }
+            } catch (\Throwable $e) {
+                // Try direct paths
+                try {
+                    require_once $exceptionPath;
+                    require_once $smtpPath;
+                    require_once $phpmailerPath;
+                    $loaded = true;
+                } catch (\Throwable $e2) {
+                    error_log("PHPMailer load failed: " . $e2->getMessage());
                 }
             }
             
-            if (!$filesLoaded) {
-                // Log all attempted paths for debugging
-                error_log("PHPMailer loading failed. Attempted base dirs: " . implode(', ', $baseDirs));
-                foreach ($baseDirs as $dir) {
-                    $testPath = $dir . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
-                    error_log("  - Tested: $testPath (exists: " . (@file_exists($testPath) ? 'YES' : 'NO') . ")");
-                }
+            // Final check
+            if (!$loaded || !class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+                // Log detailed information for debugging
+                $testPath = $baseDir . '/vendor/phpmailer/phpmailer/src/PHPMailer.php';
+                $realTest = realpath($testPath);
+                $exists = file_exists($testPath);
+                
+                error_log("PHPMailer load failed. Base dir: $baseDir");
+                error_log("PHPMailer test path: $testPath");
+                error_log("PHPMailer realpath: " . ($realTest ?: 'NOT FOUND'));
+                error_log("PHPMailer file_exists: " . ($exists ? 'YES' : 'NO'));
                 
                 return [
                     'success' => false,
-                    'message' => 'PHPMailer files not found. Please ensure composer install has been run.'
+                    'message' => 'PHPMailer could not be loaded. Checked path: ' . $testPath . '. Please ensure composer install has been run.'
                 ];
             }
         }
@@ -137,8 +140,7 @@ function sendPasswordResetEmail($email, $name, $resetLink) {
         error_log("PHPMailer instantiation fatal error: " . $e->getMessage());
         return [
             'success' => false,
-            'message' => 'Failed to initialize PHPMailer. Please check server logs for details.'
-        ];
+            'message' => 'Failed to initialize PHPMailer. Please check server logs for details.'        ];
     }
     
     try {
