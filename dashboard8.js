@@ -581,11 +581,11 @@ function displayTransactions(entries) {
             timeZone: 'Asia/Kolkata'
         });
         
-        // User profile picture or icon
+        // User profile picture or icon - show only one at a time
         const userAvatar = entry.profile_picture 
-            ? `<img src="${escapeHtml(entry.profile_picture)}" alt="Profile" class="transaction-user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+            ? `<img src="${escapeHtml(entry.profile_picture)}" alt="Profile" class="transaction-user-avatar" onerror="this.style.display='none'; this.nextElementSibling && (this.nextElementSibling.style.display='inline-flex');">
                <i class="fas fa-user" style="display:none;"></i>`
-            : `<i class="fas fa-user"></i>`;
+            : `<i class="fas fa-user" style="display:inline-flex;"></i>`;
         
         // Determine the class based on profile picture existence
         const userClass = entry.profile_picture ? 'has-profile-pic' : 'no-profile-pic';
@@ -1332,16 +1332,17 @@ function displayEditHistory(history) {
             timeZone: 'Asia/Kolkata'
         });
         
+        // User avatar or icon - show only one at a time
         const userAvatar = group.edited_by_picture 
-            ? `<img src="${escapeHtml(group.edited_by_picture)}" alt="Profile" class="history-user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">`
-            : '';
+            ? `<img src="${escapeHtml(group.edited_by_picture)}" alt="Profile" class="history-user-avatar" onerror="this.style.display='none'; this.nextElementSibling && (this.nextElementSibling.style.display='inline-flex');">
+               <i class="fas fa-user" style="display:none;"></i>`
+            : `<i class="fas fa-user" style="display:inline-flex;"></i>`;
         
         html += `
             <div class="edit-history-group">
                 <div class="edit-history-header">
                     <div class="edit-history-user">
                         ${userAvatar}
-                        <i class="fas fa-user" style="${group.edited_by_picture ? 'display:none;' : ''}"></i>
                         <div class="edit-history-user-info">
                             <strong>${escapeHtml(group.edited_by_name || 'Unknown User')}</strong>
                             <span class="edit-history-date">${formattedDate} at ${formattedTime}</span>

@@ -89,6 +89,22 @@ body {
     font-weight: 600;
 }
 
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+    display: block;
+    flex-shrink: 0;
+}
+
+.user-avatar[style*="display: none"] {
+    display: none !important;
+}
+
 .user-info i.fa-user-circle,
 .user-info i.fas,
 .user-info i {
@@ -97,7 +113,6 @@ body {
     height: 32px !important;
     min-width: 32px !important;
     min-height: 32px !important;
-    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     border-radius: 50% !important;
@@ -106,12 +121,27 @@ body {
     flex-shrink: 0 !important;
 }
 
-.user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--primary-color);
+.user-info i[style*="display: none"] {
+    display: none !important;
+}
+
+.user-info i[style*="display: inline-flex"] {
+    display: inline-flex !important;
+}
+
+/* Hide icon when image is present and visible */
+.user-info .user-avatar ~ i {
+    display: none !important;
+}
+
+/* Show icon when image is hidden */
+.user-info .user-avatar[style*="display: none"] ~ i {
+    display: inline-flex !important;
+}
+
+/* Show icon when no image exists */
+.user-info:not(:has(.user-avatar)) i {
+    display: inline-flex !important;
 }
 
 .manage-users-link {
@@ -755,6 +785,12 @@ body {
     width: 22px;
     height: 22px;
     border-radius: 50%;
+    display: block;
+    flex-shrink: 0;
+}
+
+.transaction-user img[style*="display: none"] {
+    display: none !important;
 }
 
 .transaction-user i.fa-user,
@@ -764,7 +800,6 @@ body {
     height: 22px !important;
     min-width: 22px !important;
     min-height: 22px !important;
-    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     border-radius: 50% !important;
@@ -773,6 +808,14 @@ body {
     font-size: 11px !important;
     margin-bottom: 0 !important;
     flex-shrink: 0 !important;
+}
+
+.transaction-user i[style*="display: none"] {
+    display: none !important;
+}
+
+.transaction-user i[style*="display: inline-flex"] {
+    display: inline-flex !important;
 }
 
 .transaction-actions {
@@ -2208,6 +2251,11 @@ body {
     border: 2px solid var(--primary-color);
     flex-shrink: 0;
     align-self: center;
+    display: block;
+}
+
+.history-user-avatar[style*="display: none"] {
+    display: none !important;
 }
 
 .edit-history-user i.fa-user,
@@ -2220,11 +2268,18 @@ body {
     border-radius: 50% !important;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
     color: white !important;
-    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     font-size: 1.1rem !important;
     flex-shrink: 0 !important;
+}
+
+.edit-history-user i[style*="display: none"] {
+    display: none !important;
+}
+
+.edit-history-user i[style*="display: inline-flex"] {
+    display: inline-flex !important;
 }
 
 .edit-history-user-info {

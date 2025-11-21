@@ -11,7 +11,7 @@ $user = getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookify Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style11.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style12.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -29,10 +29,10 @@ $user = getCurrentUser();
                             <img src="<?php echo htmlspecialchars($user['profile_picture']); ?>" 
                                  alt="Profile" 
                                  class="user-avatar"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                            <i class="fas fa-user-circle" style="display:none;"></i>
-                        <?php else: ?>
+                                 onerror="this.style.display='none'; if(this.nextElementSibling) { this.nextElementSibling.style.display='inline-flex'; }">
                             <i class="fas fa-user-circle"></i>
+                        <?php else: ?>
+                            <i class="fas fa-user-circle" style="display:inline-flex;"></i>
                         <?php endif; ?>
                         <span><?php echo htmlspecialchars($user['name']); ?></span>
                     </div>
@@ -390,7 +390,7 @@ $user = getCurrentUser();
         // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>" onerror="console.error('❌ Failed to load pwa10.js from: <?php echo BASE_PATH; ?>/pwa10.js')"></script>
-    <script src="<?php echo BASE_PATH; ?>/dashboard7.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard8.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 
