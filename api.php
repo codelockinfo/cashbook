@@ -57,6 +57,12 @@ switch ($action) {
     case 'getEntries':
         getEntries($conn, $user_id);
         break;
+    case 'deleteEntry':
+        deleteEntry($conn, $user_id);
+        break;
+    case 'getEntryEditHistory':
+        getEntryEditHistory($conn, $user_id);
+        break;
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;
@@ -243,10 +249,11 @@ function getEntry($conn, $user_id) {
         }
         
         // Get entry with permission check (user must be member of the group)
+        // Only allow editing active entries (status = 1)
         $sql = "SELECT e.* FROM entries e 
                 INNER JOIN `groups` g ON e.group_id = g.id
                 INNER JOIN group_members gm ON g.id = gm.group_id
-                WHERE e.id = ? AND gm.user_id = ?";
+                WHERE e.id = ? AND gm.user_id = ? AND e.status = 1";
         
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("ii", $entry_id, $user_id);
@@ -254,7 +261,7 @@ function getEntry($conn, $user_id) {
         $result = $stmt->get_result();
         
         if ($result->num_rows === 0) {
-            echo json_encode(['success' => false, 'message' => 'Entry not found or access denied']);
+            echo json_encode(['success' => false, 'message' => 'Entry not found, deleted, or access denied']);
             return;
         }
         
@@ -274,12 +281,11 @@ function updateEntry($conn, $user_id) {
         $type = $_POST['type'] ?? '';
         $group_id = $_POST['group_id'] ?? '';
         $amount = $_POST['amount'] ?? 0;
-        $datetime = $_POST['datetime'] ?? '';
         $message = $_POST['message'] ?? '';
         $remove_attachment = $_POST['remove_attachment'] ?? '';
         
-        // Validate inputs
-        if (empty($entry_id) || empty($type) || empty($group_id) || empty($amount) || empty($datetime)) {
+        // Validate inputs (datetime is not editable, so we don't need it from POST)
+        if (empty($entry_id) || empty($type) || empty($group_id) || empty($amount)) {
             echo json_encode(['success' => false, 'message' => 'All required fields must be filled']);
             return;
         }
@@ -295,7 +301,9 @@ function updateEntry($conn, $user_id) {
         }
         
         // Check if entry exists and user has permission (must be member of the group)
-        $checkStmt = $conn->prepare("SELECT e.id, e.attachment FROM entries e 
+        // Get all current values to compare for edit history (datetime is preserved from original entry)
+        $checkStmt = $conn->prepare("SELECT e.id, e.group_id, e.type, e.amount, e.datetime, e.message, e.attachment, e.status 
+                                      FROM entries e 
                                       INNER JOIN group_members gm ON e.group_id = gm.group_id
                                       WHERE e.id = ? AND gm.user_id = ?");
         $checkStmt->bind_param("ii", $entry_id, $user_id);
@@ -308,6 +316,13 @@ function updateEntry($conn, $user_id) {
         }
         
         $currentEntry = $checkResult->fetch_assoc();
+        
+        // Check if entry is inactive (status=0)
+        if ($currentEntry['status'] == 0) {
+            echo json_encode(['success' => false, 'message' => 'Cannot edit a deleted entry']);
+            return;
+        }
+        
         $currentAttachment = $currentEntry['attachment'];
         
         // Check if user is member of the new group
@@ -351,11 +366,64 @@ function updateEntry($conn, $user_id) {
             }
         }
         
-        // Update entry
-        $stmt = $conn->prepare("UPDATE entries SET group_id = ?, type = ?, amount = ?, datetime = ?, message = ?, attachment = ? WHERE id = ?");
-        $stmt->bind_param("isdsssi", $group_id, $type, $amount, $datetime, $message, $attachment, $entry_id);
+        // Update entry (datetime is not editable, keep original value)
+        $stmt = $conn->prepare("UPDATE entries SET group_id = ?, type = ?, amount = ?, message = ?, attachment = ? WHERE id = ?");
+        $stmt->bind_param("isdssi", $group_id, $type, $amount, $message, $attachment, $entry_id);
         
         if ($stmt->execute()) {
+            // Log edit history - track what fields were changed
+            $now = date('Y-m-d H:i:s');
+            $historyStmt = $conn->prepare("INSERT INTO entry_edit_history (entry_id, edited_by, edited_at, field_name, old_value, new_value) VALUES (?, ?, ?, ?, ?, ?)");
+            
+            // Track changes for each field (datetime is not editable, so don't track it)
+            $fieldsToTrack = [
+                'group_id' => ['old' => $currentEntry['group_id'], 'new' => $group_id],
+                'type' => ['old' => $currentEntry['type'], 'new' => $type],
+                'amount' => ['old' => $currentEntry['amount'], 'new' => $amount],
+                'message' => ['old' => $currentEntry['message'] ?? '', 'new' => $message ?? ''],
+                'attachment' => ['old' => $currentEntry['attachment'] ?? '', 'new' => $attachment ?? '']
+            ];
+            
+            foreach ($fieldsToTrack as $fieldName => $values) {
+                $oldVal = $values['old'];
+                $newVal = $values['new'];
+                
+                // Only log if value actually changed
+                if ($oldVal != $newVal) {
+                    // Format values for display
+                    $oldDisplay = is_null($oldVal) || $oldVal === '' ? '(empty)' : (string)$oldVal;
+                    $newDisplay = is_null($newVal) || $newVal === '' ? '(empty)' : (string)$newVal;
+                    
+                    // Special handling for group_id - get group names
+                    if ($fieldName === 'group_id') {
+                        if (!empty($oldVal)) {
+                            $groupStmt = $conn->prepare("SELECT name FROM `groups` WHERE id = ?");
+                            $groupStmt->bind_param("i", $oldVal);
+                            $groupStmt->execute();
+                            $groupResult = $groupStmt->get_result();
+                            if ($groupResult->num_rows > 0) {
+                                $oldDisplay = $groupResult->fetch_assoc()['name'];
+                            }
+                            $groupStmt->close();
+                        }
+                        if (!empty($newVal)) {
+                            $groupStmt = $conn->prepare("SELECT name FROM `groups` WHERE id = ?");
+                            $groupStmt->bind_param("i", $newVal);
+                            $groupStmt->execute();
+                            $groupResult = $groupStmt->get_result();
+                            if ($groupResult->num_rows > 0) {
+                                $newDisplay = $groupResult->fetch_assoc()['name'];
+                            }
+                            $groupStmt->close();
+                        }
+                    }
+                    
+                    $historyStmt->bind_param("isssss", $entry_id, $user_id, $now, $fieldName, $oldDisplay, $newDisplay);
+                    $historyStmt->execute();
+                }
+            }
+            
+            $historyStmt->close();
             echo json_encode(['success' => true, 'message' => 'Entry updated successfully']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Error updating entry: ' . $conn->error]);
@@ -377,13 +445,17 @@ function getEntries($conn, $user_id) {
         $type = $_GET['type'] ?? '';
         $sort = $_GET['sort'] ?? 'date_desc';
         
-        // Build query - only show entries from user's groups
+        // Build query - show all entries from user's groups (including deleted ones with status=0)
+        // Include deletion info for deleted entries
         $sql = "SELECT e.id, e.user_id, e.group_id, e.type, e.amount, e.datetime, e.message, e.attachment,
-                g.name as group_name, u.name as user_name, u.profile_picture
+                e.status, e.deleted_at, e.deleted_by,
+                g.name as group_name, u.name as user_name, u.profile_picture,
+                du.name as deleted_by_name, du.profile_picture as deleted_by_picture
                 FROM entries e 
                 INNER JOIN `groups` g ON e.group_id = g.id
                 INNER JOIN users u ON e.user_id = u.id
                 INNER JOIN group_members gm ON g.id = gm.group_id
+                LEFT JOIN users du ON e.deleted_by = du.id
                 WHERE gm.user_id = ?";
         
         $params = [$user_id];
@@ -398,6 +470,9 @@ function getEntries($conn, $user_id) {
             $params[] = $searchParam;
             $types .= 'sss';
         }
+        
+        // Ensure only active entries (status=1) are included
+        // This is already in WHERE clause, but keeping for safety
         
         // Add date filters
         if (!empty($date_from)) {
@@ -463,18 +538,35 @@ function getEntries($conn, $user_id) {
         $entries = [];
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
+                // Debug: Log deleted entries to check data
+                if (isset($row['status']) && $row['status'] == 0) {
+                    error_log("Deleted entry ID {$row['id']}: deleted_at={$row['deleted_at']}, deleted_by={$row['deleted_by']}, deleted_by_name=" . ($row['deleted_by_name'] ?? 'NULL'));
+                    
+                    // If deleted_by_name is NULL but deleted_by exists, try to get it directly
+                    if (empty($row['deleted_by_name']) && !empty($row['deleted_by'])) {
+                        $nameStmt = $conn->prepare("SELECT name FROM users WHERE id = ?");
+                        $nameStmt->bind_param("i", $row['deleted_by']);
+                        $nameStmt->execute();
+                        $nameResult = $nameStmt->get_result();
+                        if ($nameResult->num_rows > 0) {
+                            $nameRow = $nameResult->fetch_assoc();
+                            $row['deleted_by_name'] = $nameRow['name'];
+                        }
+                        $nameStmt->close();
+                    }
+                }
                 $entries[] = $row;
             }
         }
         
-        // Get statistics for user's groups only
+        // Get statistics for user's groups only (exclude entries with status=0)
         $stats_sql = "SELECT 
-                        COALESCE(SUM(CASE WHEN e.type = 'in' THEN e.amount ELSE 0 END), 0) as total_in,
-                        COALESCE(SUM(CASE WHEN e.type = 'out' THEN e.amount ELSE 0 END), 0) as total_out,
-                        COUNT(DISTINCT e.id) as total_entries
+                        COALESCE(SUM(CASE WHEN e.type = 'in' AND e.status = 1 THEN e.amount ELSE 0 END), 0) as total_in,
+                        COALESCE(SUM(CASE WHEN e.type = 'out' AND e.status = 1 THEN e.amount ELSE 0 END), 0) as total_out,
+                        COUNT(DISTINCT CASE WHEN e.status = 1 THEN e.id END) as total_entries
                       FROM entries e
                       INNER JOIN group_members gm ON e.group_id = gm.group_id
-                      WHERE gm.user_id = ?";
+                      WHERE gm.user_id = ? AND e.status = 1";
         
         // Apply same filters to statistics
         $stats_params = [$user_id];
@@ -535,6 +627,115 @@ function getEntries($conn, $user_id) {
         
         $stmt->close();
         $stats_stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Delete entry (set status to 0 and record deletion info)
+function deleteEntry($conn, $user_id) {
+    try {
+        $entry_id = $_POST['id'] ?? '';
+        
+        if (empty($entry_id)) {
+            echo json_encode(['success' => false, 'message' => 'Entry ID is required']);
+            return;
+        }
+        
+        // Check if entry exists and user has permission (must be member of the group)
+        $checkStmt = $conn->prepare("SELECT e.id, e.status FROM entries e 
+                                      INNER JOIN group_members gm ON e.group_id = gm.group_id
+                                      WHERE e.id = ? AND gm.user_id = ?");
+        $checkStmt->bind_param("ii", $entry_id, $user_id);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        
+        if ($checkResult->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'Entry not found or access denied']);
+            return;
+        }
+        
+        $entry = $checkResult->fetch_assoc();
+        
+        // Check if already deleted
+        if ($entry['status'] == 0) {
+            echo json_encode(['success' => false, 'message' => 'Entry is already deleted']);
+            return;
+        }
+        
+        // Set status to 0 and record deletion info
+        $now = date('Y-m-d H:i:s');
+        $updateStmt = $conn->prepare("UPDATE entries SET status = 0, deleted_at = ?, deleted_by = ? WHERE id = ?");
+        $updateStmt->bind_param("sii", $now, $user_id, $entry_id);
+        
+        if ($updateStmt->execute()) {
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Entry deleted successfully',
+                'deleted_at' => $now,
+                'deleted_by' => $user_id
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error deleting entry: ' . $conn->error]);
+        }
+        
+        $updateStmt->close();
+        $checkStmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Get entry edit history
+function getEntryEditHistory($conn, $user_id) {
+    try {
+        $entry_id = $_GET['entry_id'] ?? '';
+        
+        if (empty($entry_id)) {
+            echo json_encode(['success' => false, 'message' => 'Entry ID is required']);
+            return;
+        }
+        
+        // Check if user has permission to view this entry's history
+        $checkStmt = $conn->prepare("SELECT e.id FROM entries e 
+                                      INNER JOIN group_members gm ON e.group_id = gm.group_id
+                                      WHERE e.id = ? AND gm.user_id = ?");
+        $checkStmt->bind_param("ii", $entry_id, $user_id);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        
+        if ($checkResult->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'Entry not found or access denied']);
+            return;
+        }
+        
+        // Get edit history with user names, grouped by edit session (same edited_at)
+        $sql = "SELECT eh.id, eh.field_name, eh.old_value, eh.new_value, eh.edited_at,
+                u.name as edited_by_name, u.profile_picture as edited_by_picture
+                FROM entry_edit_history eh
+                INNER JOIN users u ON eh.edited_by = u.id
+                WHERE eh.entry_id = ?
+                ORDER BY eh.edited_at DESC, eh.id DESC";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $entry_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $history = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $history[] = $row;
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'history' => $history
+        ]);
+        
+        $stmt->close();
+        $checkStmt->close();
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }

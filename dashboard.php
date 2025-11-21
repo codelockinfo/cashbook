@@ -11,7 +11,7 @@ $user = getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookify Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style10.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style11.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -247,13 +247,6 @@ $user = getCurrentUser();
                 <input type="hidden" id="editEntryId">
                 
                 <div class="form-group">
-                    <label for="editEntryDate">
-                        <i class="fas fa-calendar"></i> Date & Time
-                    </label>
-                    <input type="datetime-local" id="editEntryDate" required>
-                </div>
-                
-                <div class="form-group">
                     <label for="editEntryAmount">
                         <i class="fas fa-rupee-sign"></i> Amount
                     </label>
@@ -321,6 +314,47 @@ $user = getCurrentUser();
         </div>
     </div>
 
+    <!-- Entry Details Modal (Edit History) -->
+    <div id="entryDetailsModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-history"></i> Entry Edit History</h2>
+                <span class="modal-close" onclick="closeEntryDetailsModal()">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 25px; max-height: 70vh; overflow-y: auto;">
+                <div id="entryDetailsContent">
+                    <div class="loading-state" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                        <p style="margin-top: 15px; color: var(--text-secondary);">Loading edit history...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Entry Confirmation Modal -->
+    <div id="deleteEntryModal" class="confirm-modal" style="display: none;">
+        <div class="confirm-modal-overlay"></div>
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header confirm-modal-header-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Delete Entry</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p>Are you sure you want to delete this entry?</p>
+                <p style="margin-top: 12px; font-size: 0.95rem; color: #6b7280;">This entry will be hidden and will not be included in calculations. This action cannot be undone.</p>
+            </div>
+            <div class="confirm-modal-footer">
+                <button class="btn-cancel" id="deleteEntryCancelBtn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-confirm" id="deleteEntryConfirmBtn">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Logout Confirmation Modal -->
     <div id="logoutModal" class="confirm-modal" style="display: none;">
         <div class="confirm-modal-overlay"></div>
@@ -356,7 +390,7 @@ $user = getCurrentUser();
         // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>" onerror="console.error('❌ Failed to load pwa10.js from: <?php echo BASE_PATH; ?>/pwa10.js')"></script>
-    <script src="<?php echo BASE_PATH; ?>/dashboard6.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/dashboard7.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 

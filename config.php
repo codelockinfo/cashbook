@@ -25,7 +25,10 @@ define('BASE_PATH', getBasePath());
 
 // Cache busting version for CSS/JS files
 // Update this version number when you deploy new changes
-define('ASSET_VERSION', '1.4.0');
+define('ASSET_VERSION', '1.5.0');
+
+// Set PHP timezone to Asia/Kolkata (IST)
+date_default_timezone_set('Asia/Kolkata');
 
 // Set database configuration based on environment
 if (isLocalEnvironment()) {
@@ -51,6 +54,10 @@ function getDBConnection() {
     }
     
     $conn->set_charset('utf8mb4');
+    
+    // Set MySQL session timezone to IST
+    $conn->query("SET time_zone = '+05:30'");
+    
     return $conn;
 }
 ?>

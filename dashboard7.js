@@ -79,6 +79,43 @@ function setupEventListeners() {
     
     // Default group selector
     document.getElementById('defaultGroupSelector').addEventListener('change', handleDefaultGroupChange);
+    
+    // Delete entry modal handlers
+    setupDeleteEntryModalListeners();
+}
+
+// Setup delete entry modal event listeners
+function setupDeleteEntryModalListeners() {
+    const deleteModal = document.getElementById('deleteEntryModal');
+    const deleteConfirmBtn = document.getElementById('deleteEntryConfirmBtn');
+    const deleteCancelBtn = document.getElementById('deleteEntryCancelBtn');
+    
+    if (deleteConfirmBtn) {
+        deleteConfirmBtn.addEventListener('click', confirmDeleteEntry);
+    }
+    
+    if (deleteCancelBtn) {
+        deleteCancelBtn.addEventListener('click', hideDeleteEntryModal);
+    }
+    
+    // Close modal when clicking overlay
+    if (deleteModal) {
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === deleteModal || e.target.classList.contains('confirm-modal-overlay')) {
+                hideDeleteEntryModal();
+            }
+        });
+    }
+    
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const deleteModal = document.getElementById('deleteEntryModal');
+            if (deleteModal && deleteModal.style.display === 'flex') {
+                hideDeleteEntryModal();
+            }
+        }
+    });
 }
 
 // Handle attachment file selection
@@ -463,6 +500,14 @@ async function loadTransactions() {
         const data = await response.json();
         
         if (data.success) {
+            // Debug: Log entries to check deletion info
+            if (data.entries && data.entries.length > 0) {
+                const deletedEntries = data.entries.filter(e => e.status === 0 || e.status === '0');
+                if (deletedEntries.length > 0) {
+                    console.log('Deleted entries found:', deletedEntries);
+                    console.log('First deleted entry data:', deletedEntries[0]);
+                }
+            }
             displayTransactions(data.entries);
             updateStatistics(data.statistics);
         } else {
@@ -497,16 +542,43 @@ function displayTransactions(entries) {
         const typeText = entry.type === 'in' ? 'Cash In' : 'Cash Out';
         const sign = entry.type === 'in' ? '+' : '-';
         
-        // Format date and time
-        const date = new Date(entry.datetime);
+        // Format date and time in Indian Standard Time (IST)
+        // MySQL datetime values are stored in IST (server timezone is set to +05:30)
+        // Parse MySQL datetime string and format it in IST
+        let date;
+        const dtStr = entry.datetime;
+        
+        if (dtStr.includes('T') && dtStr.includes('Z')) {
+            // ISO with UTC - convert to IST
+            date = new Date(dtStr);
+        } else if (dtStr.includes('T') && (dtStr.includes('+') || dtStr.match(/-\d{2}:\d{2}$/))) {
+            // ISO with timezone offset - parse directly
+            date = new Date(dtStr);
+        } else if (dtStr.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
+            // MySQL datetime format 'YYYY-MM-DD HH:MM:SS' - treat as IST
+            // Create date object treating the string as IST time
+            // Convert to ISO format: '2025-11-21 14:04:00' -> '2025-11-21T14:04:00+05:30'
+            date = new Date(dtStr.replace(' ', 'T') + '+05:30');
+        } else if (dtStr.includes('T')) {
+            // ISO without timezone - treat as IST
+            date = new Date(dtStr + '+05:30');
+        } else {
+            // Fallback - try to parse as-is
+            date = new Date(dtStr);
+        }
+        
+        // Format in Indian timezone (IST) - ensures correct display
         const formattedDate = date.toLocaleDateString('en-IN', {
             year: 'numeric',
             month: 'short',
-            day: 'numeric'
+            day: 'numeric',
+            timeZone: 'Asia/Kolkata'
         });
         const formattedTime = date.toLocaleTimeString('en-IN', {
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'Asia/Kolkata'
         });
         
         // User profile picture or icon
@@ -525,8 +597,94 @@ function displayTransactions(entries) {
                </button>`
             : '';
         
+        // Check if entry is deleted (status = 0)
+        const isDeleted = entry.status === 0 || entry.status === '0' || entry.status === false || entry.status == 0;
+        const deletedClass = isDeleted ? 'deleted-entry' : '';
+        
+        // Format deletion info if entry is deleted
+        let deletionInfo = '';
+        if (isDeleted) {
+            // Debug: Log entry data to see what we're getting
+            if (!entry.deleted_by_name || !entry.deleted_at) {
+                console.log('Entry missing deletion info:', {
+                    id: entry.id,
+                    deleted_by: entry.deleted_by,
+                    deleted_by_name: entry.deleted_by_name,
+                    deleted_at: entry.deleted_at,
+                    status: entry.status
+                });
+            }
+            
+            // Get deletion info - use deleted_at if available
+            let deletedDateStr = 'Unknown date';
+            let deletedTimeStr = 'Unknown time';
+            
+            if (entry.deleted_at && entry.deleted_at !== null && entry.deleted_at !== '' && entry.deleted_at !== 'null') {
+                try {
+                    // Parse MySQL datetime - explicitly treat as IST (server timezone)
+                    let deletedDate;
+                    const delStr = entry.deleted_at;
+                    if (delStr.includes('T') && delStr.includes('Z')) {
+                        deletedDate = new Date(delStr);
+                    } else if (delStr.includes('T') && (delStr.includes('+') || delStr.includes('-', 10))) {
+                        deletedDate = new Date(delStr);
+                    } else if (delStr.includes('T')) {
+                        deletedDate = new Date(delStr + '+05:30');
+                    } else if (delStr.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
+                        // MySQL datetime format - explicitly treat as IST
+                        deletedDate = new Date(delStr.replace(' ', 'T') + '+05:30');
+                    } else {
+                        deletedDate = new Date(delStr);
+                    }
+                    
+                    if (!isNaN(deletedDate.getTime())) {
+                        // Format in Indian timezone (IST)
+                        deletedDateStr = deletedDate.toLocaleDateString('en-IN', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            timeZone: 'Asia/Kolkata'
+                        });
+                        deletedTimeStr = deletedDate.toLocaleTimeString('en-IN', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true,
+                            timeZone: 'Asia/Kolkata'
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error parsing deleted_at:', e, entry.deleted_at);
+                }
+            }
+            
+            // Get deleted by name - try multiple fields
+            let deletedByName = 'Unknown User';
+            if (entry.deleted_by_name && entry.deleted_by_name !== null && entry.deleted_by_name !== '' && entry.deleted_by_name !== 'null') {
+                deletedByName = entry.deleted_by_name;
+            } else if (entry.deleted_by && entry.deleted_by !== null && entry.deleted_by !== 'null') {
+                // If we have deleted_by ID but no name, show the ID
+                deletedByName = 'User #' + entry.deleted_by;
+            }
+            
+            // Always show deletion info overlay for deleted entries
+            deletionInfo = `
+                <div class="deletion-info-overlay">
+                    <div class="deletion-info-content">
+                        <i class="fas fa-trash-alt"></i>
+                        <div class="deletion-info-text">
+                            <strong>Deleted by ${escapeHtml(deletedByName)}</strong>
+                            <span>on ${deletedDateStr} at ${deletedTimeStr}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
         return `
-            <div class="transaction-item ${typeClass}">
+            <div class="transaction-item ${typeClass} ${deletedClass}">
+                <!-- Blur overlay for deleted entries -->
+                ${isDeleted ? '<div class="deleted-overlay"></div>' : ''}
+                
                 <!-- Row 1: Icon, Empty Space, Amount -->
                 <div class="transaction-top-row">
                     <div class="transaction-icon">
@@ -547,9 +705,19 @@ function displayTransactions(entries) {
                         </div>
                     </div>
                     <div class="transaction-actions">
-                        <button class="btn-edit-entry" onclick="openEditModal(${entry.id})" title="Edit entry">
-                            <i class="fas fa-edit"></i>
-                        </button>
+                        ${isDeleted ? '' : `
+                            <div class="transaction-actions-buttons">
+                                <button class="btn-edit-entry" onclick="openEditModal(${entry.id})" title="Edit entry">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-delete-entry" onclick="deleteEntry(${entry.id})" title="Delete entry">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="transaction-view-details-text" onclick="viewEntryDetails(${entry.id})" title="View edit history">
+                                View Details
+                            </div>
+                        `}
                     </div>
                 </div>
                 
@@ -566,6 +734,9 @@ function displayTransactions(entries) {
                 <div>
                     <span class="transaction-type">${typeText}</span>
                 </div>
+                
+                <!-- Deletion Info Overlay (shown on top of blur) -->
+                ${deletionInfo}
             </div>
         `;
     }).join('');
@@ -717,16 +888,11 @@ function populateEditForm(entry) {
     document.getElementById('editAttachmentFileName').textContent = 'No file chosen';
     document.getElementById('removeEditAttachment').style.display = 'none';
     
-    // Set values
+    // Set values (datetime is not editable)
     document.getElementById('editEntryId').value = entry.id;
     document.getElementById('editEntryAmount').value = entry.amount;
     document.getElementById('editEntryType').value = entry.type;
     document.getElementById('editEntryMessage').value = entry.message || '';
-    
-    // Format datetime for datetime-local input
-    const date = new Date(entry.datetime);
-    const localDateTime = new Date(date - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    document.getElementById('editEntryDate').value = localDateTime;
     
     // Load groups and set current group
     loadGroupsForEdit(entry.group_id);
@@ -860,6 +1026,100 @@ function removeCurrentAttachment() {
     showToast('Current attachment will be removed when you save', 'info');
 }
 
+// Delete entry - show confirmation modal
+function deleteEntry(entryId) {
+    if (!entryId) {
+        showToast('Invalid entry ID', 'error');
+        return;
+    }
+    
+    // Store entry ID for deletion
+    window.pendingDeleteEntryId = entryId;
+    
+    // Show delete confirmation modal
+    showDeleteEntryModal();
+}
+
+// Show delete entry confirmation modal
+function showDeleteEntryModal() {
+    const modal = document.getElementById('deleteEntryModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// Hide delete entry confirmation modal
+function hideDeleteEntryModal() {
+    const modal = document.getElementById('deleteEntryModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    // Clear pending delete ID
+    window.pendingDeleteEntryId = null;
+}
+
+// Confirm delete entry (called from modal button)
+async function confirmDeleteEntry() {
+    const entryId = window.pendingDeleteEntryId;
+    
+    if (!entryId) {
+        showToast('Invalid entry ID', 'error');
+        hideDeleteEntryModal();
+        return;
+    }
+    
+    // Disable buttons during deletion
+    const confirmBtn = document.getElementById('deleteEntryConfirmBtn');
+    const cancelBtn = document.getElementById('deleteEntryCancelBtn');
+    const originalConfirmText = confirmBtn.innerHTML;
+    const originalCancelText = cancelBtn.innerHTML;
+    
+    confirmBtn.disabled = true;
+    cancelBtn.disabled = true;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+    
+    try {
+        const formData = new URLSearchParams({
+            action: 'deleteEntry',
+            id: entryId
+        });
+        
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Entry deleted successfully', 'success');
+            hideDeleteEntryModal();
+            // Reload transactions and statistics to reflect changes
+            loadTransactions();
+        } else {
+            showToast(data.message || 'Failed to delete entry', 'error');
+            // Re-enable buttons on error
+            confirmBtn.disabled = false;
+            cancelBtn.disabled = false;
+            confirmBtn.innerHTML = originalConfirmText;
+            cancelBtn.innerHTML = originalCancelText;
+        }
+    } catch (error) {
+        console.error('Delete error:', error);
+        showToast('An error occurred while deleting the entry', 'error');
+        // Re-enable buttons on error
+        confirmBtn.disabled = false;
+        cancelBtn.disabled = false;
+        confirmBtn.innerHTML = originalConfirmText;
+        cancelBtn.innerHTML = originalCancelText;
+    }
+}
+
 // Handle edit form submission
 async function handleEditSubmit(e) {
     e.preventDefault();
@@ -868,12 +1128,11 @@ async function handleEditSubmit(e) {
     const amount = document.getElementById('editEntryAmount').value;
     const type = document.getElementById('editEntryType').value;
     const groupId = document.getElementById('editEntryGroup').value;
-    const datetime = document.getElementById('editEntryDate').value;
     const message = document.getElementById('editEntryMessage').value;
     const attachmentInput = document.getElementById('editEntryAttachment');
     
-    // Validate
-    if (!entryId || !amount || !type || !groupId || !datetime) {
+    // Validate (datetime is not editable)
+    if (!entryId || !amount || !type || !groupId) {
         showToast('Please fill in all required fields', 'error');
         return;
     }
@@ -890,7 +1149,6 @@ async function handleEditSubmit(e) {
     formData.append('amount', amount);
     formData.append('type', type);
     formData.append('group_id', groupId);
-    formData.append('datetime', datetime);
     formData.append('message', message);
     formData.append('remove_attachment', shouldRemoveCurrentAttachment ? 'true' : 'false');
     
@@ -946,4 +1204,205 @@ document.addEventListener('click', function(e) {
     if (e.target === modal) {
         closeEditModal();
     }
+    
+    const detailsModal = document.getElementById('entryDetailsModal');
+    if (e.target === detailsModal) {
+        closeEntryDetailsModal();
+    }
 });
+
+// ============================================
+// Entry Details (Edit History) Functions
+// ============================================
+
+// View entry details (edit history)
+async function viewEntryDetails(entryId) {
+    if (!entryId) {
+        showToast('Invalid entry ID', 'error');
+        return;
+    }
+    
+    // Show modal
+    const modal = document.getElementById('entryDetailsModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Show loading state
+    const content = document.getElementById('entryDetailsContent');
+    content.innerHTML = `
+        <div class="loading-state" style="text-align: center; padding: 40px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+            <p style="margin-top: 15px; color: var(--text-secondary);">Loading edit history...</p>
+        </div>
+    `;
+    
+    try {
+        const response = await fetch(`${API_URL}?action=getEntryEditHistory&entry_id=${entryId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            displayEditHistory(data.history);
+        } else {
+            content.innerHTML = `
+                <div class="error-state" style="text-align: center; padding: 40px;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #ef4444;"></i>
+                    <p style="margin-top: 15px; color: var(--text-secondary);">${data.message || 'Failed to load edit history'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading edit history:', error);
+        content.innerHTML = `
+            <div class="error-state" style="text-align: center; padding: 40px;">
+                <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #ef4444;"></i>
+                <p style="margin-top: 15px; color: var(--text-secondary);">Error loading edit history. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+// Display edit history in modal
+function displayEditHistory(history) {
+    const content = document.getElementById('entryDetailsContent');
+    
+    if (!history || history.length === 0) {
+        content.innerHTML = `
+            <div class="empty-state" style="text-align: center; padding: 40px;">
+                <i class="fas fa-history" style="font-size: 3rem; color: var(--text-secondary); opacity: 0.5;"></i>
+                <p style="margin-top: 20px; color: var(--text-secondary); font-size: 1.1rem;">No edit history found</p>
+                <p style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">This entry has not been edited yet.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Group history by edit session (same edited_at timestamp)
+    const groupedHistory = {};
+    history.forEach(item => {
+        const key = item.edited_at;
+        if (!groupedHistory[key]) {
+            groupedHistory[key] = {
+                edited_at: item.edited_at,
+                edited_by_name: item.edited_by_name,
+                edited_by_picture: item.edited_by_picture,
+                changes: []
+            };
+        }
+        groupedHistory[key].changes.push(item);
+    });
+    
+    // Convert to array and sort by date (newest first)
+    const historyGroups = Object.values(groupedHistory).sort((a, b) => 
+        new Date(b.edited_at) - new Date(a.edited_at)
+    );
+    
+    let html = '<div class="edit-history-list">';
+    
+    historyGroups.forEach((group, groupIndex) => {
+        // Parse date and format in Indian Standard Time (IST)
+        // Parse MySQL datetime - explicitly treat as IST (server timezone)
+        let editDate;
+        const editStr = group.edited_at;
+        if (editStr.includes('T') && editStr.includes('Z')) {
+            editDate = new Date(editStr);
+        } else if (editStr.includes('T') && (editStr.includes('+') || editStr.includes('-', 10))) {
+            editDate = new Date(editStr);
+        } else if (editStr.includes('T')) {
+            editDate = new Date(editStr + '+05:30');
+        } else if (editStr.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
+            // MySQL datetime format - explicitly treat as IST
+            editDate = new Date(editStr.replace(' ', 'T') + '+05:30');
+        } else {
+            editDate = new Date(editStr);
+        }
+        
+        // Format in Indian timezone (IST)
+        const formattedDate = editDate.toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'Asia/Kolkata'
+        });
+        const formattedTime = editDate.toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'Asia/Kolkata'
+        });
+        
+        const userAvatar = group.edited_by_picture 
+            ? `<img src="${escapeHtml(group.edited_by_picture)}" alt="Profile" class="history-user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">`
+            : '';
+        
+        html += `
+            <div class="edit-history-group">
+                <div class="edit-history-header">
+                    <div class="edit-history-user">
+                        ${userAvatar}
+                        <i class="fas fa-user" style="${group.edited_by_picture ? 'display:none;' : ''}"></i>
+                        <div class="edit-history-user-info">
+                            <strong>${escapeHtml(group.edited_by_name || 'Unknown User')}</strong>
+                            <span class="edit-history-date">${formattedDate} at ${formattedTime}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="edit-history-changes">
+        `;
+        
+        group.changes.forEach(change => {
+            const fieldLabels = {
+                'group_id': 'Group',
+                'type': 'Type',
+                'amount': 'Amount',
+                'datetime': 'Date & Time',
+                'message': 'Message',
+                'attachment': 'Attachment'
+            };
+            
+            const fieldName = fieldLabels[change.field_name] || change.field_name;
+            const oldValue = change.old_value === '(empty)' ? '<em>Empty</em>' : escapeHtml(change.old_value);
+            const newValue = change.new_value === '(empty)' ? '<em>Empty</em>' : escapeHtml(change.new_value);
+            
+            html += `
+                <div class="edit-history-change">
+                    <div class="change-field">
+                        <i class="fas fa-edit"></i>
+                        <strong>${fieldName}</strong>
+                    </div>
+                    <div class="change-values">
+                        <div class="change-old">
+                            <span class="change-label">From:</span>
+                            <span class="change-value">${oldValue}</span>
+                        </div>
+                        <div class="change-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="change-new">
+                            <span class="change-label">To:</span>
+                            <span class="change-value">${newValue}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    content.innerHTML = html;
+}
+
+// Close entry details modal
+function closeEntryDetailsModal() {
+    const modal = document.getElementById('entryDetailsModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
