@@ -17,7 +17,9 @@ function isLocalEnvironment() {
 // Get base path for URLs (auto-detect subdirectory)
 function getBasePath() {
     $script_name = dirname($_SERVER['SCRIPT_NAME']);
-    return rtrim($script_name, '/');
+    $path = rtrim($script_name, '/');
+    // Normalize to lowercase to avoid case sensitivity issues with cookies
+    return strtolower($path);
 }
 
 // Define base path constant
@@ -59,6 +61,102 @@ function getDBConnection() {
     $conn->query("SET time_zone = '+05:30'");
     
     return $conn;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 📧 SMTP CONFIGURATION FOR EMAIL SENDING
+// ═══════════════════════════════════════════════════════════
+
+// Optional mail configuration (define SMTP_* constants here)
+$mailConfigFile = __DIR__ . '/mail.php';
+if (file_exists($mailConfigFile)) {
+    require_once $mailConfigFile;
+}
+
+if (!defined('SMTP_HOST')) {
+    define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp.hostinger.com');
+}
+
+if (!defined('SMTP_PORT')) {
+    define('SMTP_PORT', (int)(getenv('SMTP_PORT') ?: 465));
+}
+
+if (!defined('SMTP_ENCRYPTION')) {
+    // Port 465 typically uses 'ssl', port 587 uses 'tls'
+    define('SMTP_ENCRYPTION', strtolower(getenv('SMTP_ENCRYPTION') ?: 'ssl'));
+}
+
+if (!defined('SMTP_USERNAME')) {
+    define('SMTP_USERNAME', getenv('SMTP_USERNAME') ?: 'tailorpro@happyeventsurat.com');
+}
+
+if (!defined('SMTP_PASSWORD')) {
+    define('SMTP_PASSWORD', getenv('SMTP_PASSWORD') ?: 'Tailor@99');
+}
+
+if (!defined('SMTP_FROM_EMAIL')) {
+    define('SMTP_FROM_EMAIL', getenv('SMTP_FROM_EMAIL') ?: 'tailorpro@happyeventsurat.com');
+}
+
+if (!defined('SMTP_FROM_NAME')) {
+    define('SMTP_FROM_NAME', getenv('SMTP_FROM_NAME') ?: 'Bookify');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🌐 SITE INFORMATION
+// ═══════════════════════════════════════════════════════════
+
+if (!defined('SITE_NAME')) {
+    define('SITE_NAME', 'Cash Book');  // Your application name
+}
+
+if (!defined('SITE_URL')) {
+    // Auto-detect SITE_URL from current request
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $scriptPath = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+    $scriptPath = ($scriptPath === '/' || $scriptPath === '\\') ? '' : $scriptPath;
+    define('SITE_URL', $protocol . '://' . $host . $scriptPath);
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔐 SESSION MANAGEMENT
+// ═══════════════════════════════════════════════════════════
+
+// Start session if not already started (with proper cookie params)
+if (session_status() === PHP_SESSION_NONE) {
+    // Use BASE_PATH constant for consistency (normalized to lowercase)
+    $cookiePath = BASE_PATH ? BASE_PATH : '/';
+    
+    session_set_cookie_params([
+        'lifetime' => 604800, // 1 week
+        'path' => $cookiePath,
+        'domain' => '',
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    
+    session_start();
+}
+
+// Check if user is logged in
+function isLoggedIn() {
+    return isset($_SESSION['user_id']);
+}
+
+// Get current user ID
+function getCurrentUserId() {
+    return $_SESSION['user_id'] ?? null;
+}
+
+// Redirect if not logged in
+function requireLogin() {
+    if (!isLoggedIn()) {
+        $basePath = BASE_PATH ?: '';
+        header('Location: ' . $basePath . '/login.php');
+        exit();
+    }
 }
 ?>
 

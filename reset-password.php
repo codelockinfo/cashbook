@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
     $cookiePath = $basePath ? $basePath : '/';
     
     session_set_cookie_params([
-        'lifetime' => 86400,
+        'lifetime' => 604800, // 1 week
         'path' => $cookiePath,
         'domain' => '',
         'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
@@ -104,7 +104,7 @@ $token = htmlspecialchars($_GET['token']);
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo ASSET_VERSION; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/auth8.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/auth9.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>
 

@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
     $cookiePath = $basePath ? $basePath : '/';
     
     session_set_cookie_params([
-        'lifetime' => 86400,
+        'lifetime' => 604800, // 1 week
         'path' => $cookiePath,
         'domain' => '',
         'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',

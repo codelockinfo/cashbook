@@ -1,11 +1,12 @@
 <?php
-// Configure session for subdirectory support
+// Session will be configured in config.php
+// Just ensure it's started if config.php hasn't been loaded yet
 if (session_status() === PHP_SESSION_NONE) {
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-    $cookiePath = $basePath ? $basePath : '/';
+    $cookiePath = $basePath ? strtolower($basePath) : '/';
     
     session_set_cookie_params([
-        'lifetime' => 86400,
+        'lifetime' => 604800, // 1 week
         'path' => $cookiePath,
         'domain' => '',
         'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
@@ -86,9 +87,28 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     <script>
         // Pass PHP BASE_PATH to JavaScript
         const BASE_PATH = '<?php echo BASE_PATH; ?>';
+        
+        // Clear any old session cookies with wrong path (case mismatch)
+        // This fixes the issue where cookies might have /Cashbook instead of /cashbook
+        (function() {
+            // Get all cookies
+            const cookies = document.cookie.split(';');
+            cookies.forEach(function(cookie) {
+                const eqPos = cookie.indexOf('=');
+                const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+                // Clear PHPSESSID cookies with wrong path
+                if (name === 'PHPSESSID') {
+                    // Clear with various possible paths
+                    document.cookie = name + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                    document.cookie = name + '=; path=/Cashbook; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                    document.cookie = name + '=; path=/cashbook; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                    document.cookie = name + '=; path=<?php echo BASE_PATH; ?>; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                }
+            });
+        })();
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo ASSET_VERSION; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/auth8.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/auth9.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>
 

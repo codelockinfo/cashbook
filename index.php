@@ -2,10 +2,11 @@
 // Configure session for subdirectory support
 if (session_status() === PHP_SESSION_NONE) {
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-    $cookiePath = $basePath ? $basePath : '/';
+    // Normalize to lowercase for consistency with other files
+    $cookiePath = $basePath ? strtolower($basePath) : '/';
     
     session_set_cookie_params([
-        'lifetime' => 86400,
+        'lifetime' => 604800, // 1 week
         'path' => $cookiePath,
         'domain' => '',
         'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',

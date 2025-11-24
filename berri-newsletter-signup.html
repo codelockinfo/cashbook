@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join the berri Community - Newsletter Signup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a4d7a 0%, #0d2d4a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a4d7a 0%, #0d2d4a 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .logo {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .logo-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            letter-spacing: 1px;
+        }
+
+        .content {
+            padding: 50px 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #1a4d7a;
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .benefits {
+            text-align: left;
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .benefits h3 {
+            color: #1a4d7a;
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .benefit-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .check-icon {
+            color: #1a4d7a;
+            margin-right: 12px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Klaviyo Form Styles */
+        .klaviyo-form {
+            margin-top: 30px;
+        }
+
+        .klaviyo-form input[type="email"] {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .klaviyo-form input[type="email"]:focus {
+            outline: none;
+            border-color: #1a4d7a;
+        }
+
+        .klaviyo-form button {
+            width: 100%;
+            padding: 16px 30px;
+            background: linear-gradient(135deg, #1a4d7a 0%, #0d2d4a 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .klaviyo-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(26, 77, 122, 0.3);
+        }
+
+        .klaviyo-form button:active {
+            transform: translateY(0);
+        }
+
+        .footer {
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #1a4d7a;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .content {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .logo {
+                font-size: 28px;
+            }
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            padding: 20px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">berri</div>
+            <div class="logo-subtitle">ORGANICS</div>
+        </div>
+
+        <div class="content">
+            <h1>Join the berri Community</h1>
+            <p class="subtitle">Stay connected and get exclusive updates, tips, and special offers delivered to your inbox.</p>
+
+            <div class="benefits">
+                <h3>What You'll Get:</h3>
+                <div class="benefit-item">
+                    <span class="check-icon">✓</span>
+                    <span>Exclusive discounts and early access to new products</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="check-icon">✓</span>
+                    <span>Nutrition tips and wellness insights</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="check-icon">✓</span>
+                    <span>Recipes and healthy lifestyle content</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="check-icon">✓</span>
+                    <span>Special promotions and subscriber-only deals</span>
+                </div>
+            </div>
+
+            <!-- Klaviyo Newsletter Signup Form -->
+            <div class="klaviyo-form">
+                <!-- Replace YOUR_LIST_ID with your actual Klaviyo List ID -->
+                <form action="https://manage.kmail-lists.com/subscriptions/subscribe" method="POST" class="klaviyo-form" data-ajax-submit="//manage.kmail-lists.com/ajax/subscriptions/subscribe">
+                    <input type="hidden" name="g" value="YOUR_LIST_ID">
+                    <input type="hidden" name="$fields" value="$consent">
+                    <input type="hidden" name="$list_fields" value="$consent">
+                    
+                    <input 
+                        type="email" 
+                        name="email" 
+                        id="k_id_email" 
+                        placeholder="Enter your email address" 
+                        required
+                        aria-label="Email address"
+                    >
+                    
+                    <button type="submit">
+                        Subscribe Now
+                    </button>
+                    
+                    <div class="success-message" id="success-message">
+                        Thank you for subscribing! Check your email for a welcome message.
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>By subscribing, you agree to our <a href="/pages/privacy-policy">Privacy Policy</a> and <a href="/pages/terms-of-service">Terms of Service</a>.</p>
+            <p style="margin-top: 10px;">© 2024 berri ORGANICS. All rights reserved.</p>
+        </div>
+    </div>
+
+    <!-- Klaviyo Script -->
+    <script type="text/javascript" src="https://www.klaviyo.com/media/js/public/klaviyo_subscribe.js"></script>
+    
+    <script>
+        // Handle form submission success
+        document.addEventListener('klaviyoForms', function(e) {
+            if (e.detail.type === 'submit' && e.detail.formId === 'YOUR_FORM_ID') {
+                document.getElementById('success-message').classList.add('show');
+                // Scroll to success message
+                document.getElementById('success-message').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+
+        // Alternative: Handle form submission with fetch API
+        document.querySelector('.klaviyo-form form').addEventListener('submit', function(e) {
+            // Let Klaviyo handle the submission, but show success message
+            setTimeout(function() {
+                document.getElementById('success-message').classList.add('show');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+

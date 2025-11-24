@@ -176,6 +176,7 @@ margin-bottom: 5px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 10px;
+    width: 100%;
 }
 
 .btn-primary {
@@ -192,6 +193,17 @@ margin-bottom: 5px;
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+    transform: scale(1.02);
 }
 
 .auth-footer {

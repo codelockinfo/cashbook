@@ -1,37 +1,69 @@
 // API Configuration
 const API_URL = ((typeof BASE_PATH !== 'undefined' && BASE_PATH) ? BASE_PATH : '') + '/auth-api.php';
 
+// Debug: Log API URL
+console.log('API_URL:', API_URL);
+console.log('BASE_PATH:', typeof BASE_PATH !== 'undefined' ? BASE_PATH : 'undefined');
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded event fired');
     const currentPage = window.location.pathname.split('/').pop();
+    console.log('Current page:', currentPage);
+    console.log('Full pathname:', window.location.pathname);
     
     if (currentPage === 'login.php' || currentPage === 'login') {
+        console.log('Detected login page, calling initLogin()');
         initLogin();
     } else if (currentPage === 'register.php' || currentPage === 'register') {
+        console.log('Detected register page, calling initRegister()');
         initRegister();
     } else if (currentPage === 'forgot-password.php' || currentPage === 'forgot-password') {
+        console.log('Detected forgot-password page, calling initForgotPassword()');
         initForgotPassword();
     } else if (currentPage === 'reset-password.php' || currentPage === 'reset-password') {
+        console.log('Detected reset-password page, calling initResetPassword()');
         initResetPassword();
+    } else {
+        console.log('No matching page handler for:', currentPage);
     }
 });
 
 // Initialize Login Page
 function initLogin() {
+    console.log('initLogin() called');
     const loginForm = document.getElementById('loginForm');
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     
+    if (!loginForm) {
+        console.error('Login form not found');
+        return;
+    }
+    
+    console.log('Login form found, attaching event listeners');
+    
     // Toggle password visibility
-    togglePassword.addEventListener('click', function() {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        this.querySelector('i').classList.toggle('fa-eye');
-        this.querySelector('i').classList.toggle('fa-eye-slash');
-    });
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    }
     
     // Handle login form submission
-    loginForm.addEventListener('submit', handleLogin);
+    loginForm.addEventListener('submit', function(e) {
+        console.log('Form submit event triggered');
+        handleLogin(e);
+    });
+    
+    // Clear any reset-related data from session storage
+    sessionStorage.removeItem('resetEmail');
+    sessionStorage.removeItem('resetCode');
+    
+    console.log('Login initialization complete');
 }
 
 // Initialize Register Page
@@ -95,15 +127,28 @@ function initRegister() {
 
 // Handle Login
 async function handleLogin(e) {
+    console.log('handleLogin() called');
     e.preventDefault();
     
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const loginBtn = document.getElementById('loginBtn');
     
+    console.log('Email:', email);
+    console.log('Password length:', password ? password.length : 0);
+    
     // Validation
     if (!email || !password) {
+        console.log('Validation failed: empty fields');
         showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        console.log('Validation failed: invalid email format');
+        showToast('Please enter a valid email address', 'error');
         return;
     }
     
@@ -111,6 +156,8 @@ async function handleLogin(e) {
     loginBtn.disabled = true;
     const originalHTML = loginBtn.innerHTML;
     loginBtn.innerHTML = '<span class="loading"></span> Logging in...';
+    
+    console.log('Making API call to:', API_URL);
     
     try {
         const response = await fetch(API_URL, {
@@ -125,15 +172,42 @@ async function handleLogin(e) {
             })
         });
         
-        const data = await response.json();
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Get response text first to handle non-JSON responses
+        const responseText = await response.text();
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.error('Response text:', responseText);
+            throw new Error('Invalid response from server. Please check server logs.');
+        }
         
         if (data.success) {
             showToast('Login successful! Redirecting...', 'success');
+            // Clear any reset-related session storage
+            sessionStorage.removeItem('resetEmail');
+            sessionStorage.removeItem('resetCode');
             // Set flag for PWA install prompt on mobile
             sessionStorage.setItem('just_logged_in', 'true');
+            
+            // Build dashboard URL with proper base path
+            const basePath = (typeof BASE_PATH !== 'undefined' && BASE_PATH) ? BASE_PATH : '';
+            const dashboardUrl = basePath ? basePath + '/dashboard' : 'dashboard';
+            
+            // Wait a bit longer to ensure session cookie is set and sent
+            // Use window.location.href instead of replace to ensure proper navigation
             setTimeout(() => {
-                window.location.href = 'dashboard';
-            }, 1000);
+                console.log('Redirecting to dashboard:', dashboardUrl);
+                // Force a full page reload to ensure session cookie is read
+                window.location.href = dashboardUrl;
+            }, 2000);
         } else {
             showToast(data.message || 'Login failed', 'error');
             loginBtn.disabled = false;
@@ -141,7 +215,9 @@ async function handleLogin(e) {
         }
     } catch (error) {
         console.error('Login error:', error);
-        showToast('An error occurred. Please try again.', 'error');
+        console.error('Error stack:', error.stack);
+        const errorMessage = error.message || 'An error occurred. Please try again.';
+        showToast(errorMessage, 'error');
         loginBtn.disabled = false;
         loginBtn.innerHTML = originalHTML;
     }
@@ -240,9 +316,61 @@ async function handleRegister(e) {
 // Initialize Forgot Password Page
 function initForgotPassword() {
     const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    const verifyCodeForm = document.getElementById('verifyCodeForm');
+    const resetPasswordForm = document.getElementById('resetPasswordForm');
     
     // Handle forgot password form submission
-    forgotPasswordForm.addEventListener('submit', handleForgotPassword);
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', handleForgotPassword);
+    }
+    
+    // Handle code verification form submission
+    if (verifyCodeForm) {
+        verifyCodeForm.addEventListener('submit', handleVerifyCode);
+        
+        // Handle resend code button
+        const resendBtn = document.getElementById('resendBtn');
+        if (resendBtn) {
+            resendBtn.addEventListener('click', handleResendCode);
+        }
+        
+        // Only allow numbers in verification code input
+        const codeInput = document.getElementById('verificationCode');
+        if (codeInput) {
+            codeInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            });
+        }
+    }
+    
+    // Handle reset password form submission
+    if (resetPasswordForm) {
+        resetPasswordForm.addEventListener('submit', handleResetPasswordWithCode);
+        
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const passwordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmNewPassword');
+        
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+        
+        if (toggleConfirmPassword && confirmPasswordInput) {
+            toggleConfirmPassword.addEventListener('click', function() {
+                const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmPasswordInput.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+    }
 }
 
 // Initialize Reset Password Page
@@ -346,22 +474,33 @@ async function handleForgotPassword(e) {
         }
         
         if (data.success) {
-            showToast('✓ ' + data.message + '\n\nCheck your email inbox for the reset link.', 'success');
+            showToast('✓ ' + data.message + '\n\nCheck your email inbox for the verification code.', 'success');
             
-            // Clear form
-            document.getElementById('email').value = '';
+            // Store email for later use
+            const email = document.getElementById('email').value.trim();
+            window.resetEmail = email;
+            
+            // Hide email form and show code verification form
+            const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+            const verifyCodeForm = document.getElementById('verifyCodeForm');
+            const infoBox = document.getElementById('infoBox');
+            
+            if (forgotPasswordForm) forgotPasswordForm.style.display = 'none';
+            if (verifyCodeForm) verifyCodeForm.style.display = 'block';
+            if (infoBox) {
+                infoBox.innerHTML = '<i class="fas fa-info-circle"></i><p>Enter the 6-digit verification code sent to <strong>' + email + '</strong></p>';
+            }
+            
+            // Focus on code input
+            const codeInput = document.getElementById('verificationCode');
+            if (codeInput) {
+                setTimeout(() => codeInput.focus(), 100);
+            }
+            
             resetBtn.disabled = false;
             resetBtn.innerHTML = originalHTML;
-            
-            // Optionally redirect to login after showing success
-            setTimeout(() => {
-                const goToLogin = confirm('Email sent successfully!\n\nClick OK to return to the login page.');
-                if (goToLogin) {
-                    window.location.href = 'login';
-                }
-            }, 3000);
         } else {
-            showToast(data.message || 'Failed to send reset link', 'error');
+            showToast(data.message || 'Failed to send verification code', 'error');
             resetBtn.disabled = false;
             resetBtn.innerHTML = originalHTML;
         }
@@ -374,7 +513,7 @@ async function handleForgotPassword(e) {
     }
 }
 
-// Verify Reset Token
+// Verify Reset Token (for backward compatibility with old links)
 async function verifyResetToken(token) {
     try {
         const response = await fetch(API_URL + '?action=verify_reset_token&token=' + encodeURIComponent(token), {
@@ -395,6 +534,208 @@ async function verifyResetToken(token) {
         setTimeout(() => {
             window.location.href = 'login';
         }, 2000);
+    }
+}
+
+// Handle Verify Code
+async function handleVerifyCode(e) {
+    e.preventDefault();
+    
+    const email = window.resetEmail || '';
+    const code = document.getElementById('verificationCode').value.trim();
+    const verifyBtn = document.getElementById('verifyBtn');
+    
+    // Validation
+    if (!email) {
+        showToast('Email not found. Please start over.', 'error');
+        return;
+    }
+    
+    if (!code || code.length !== 6) {
+        showToast('Please enter a valid 6-digit verification code', 'error');
+        return;
+    }
+    
+    // Disable button and show loading
+    verifyBtn.disabled = true;
+    const originalHTML = verifyBtn.innerHTML;
+    verifyBtn.innerHTML = '<span class="loading"></span> Verifying...';
+    
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'verify_code',
+                email: email,
+                code: code
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('✓ Code verified successfully!', 'success');
+            
+            // Store email and code for password reset
+            window.resetEmail = email;
+            window.resetCode = code;
+            
+            // Hide code form and show password reset form
+            const verifyCodeForm = document.getElementById('verifyCodeForm');
+            const resetPasswordForm = document.getElementById('resetPasswordForm');
+            const infoBox = document.getElementById('infoBox');
+            
+            if (verifyCodeForm) verifyCodeForm.style.display = 'none';
+            if (resetPasswordForm) resetPasswordForm.style.display = 'block';
+            if (infoBox) {
+                infoBox.innerHTML = '<i class="fas fa-info-circle"></i><p>Enter your new password below. Make sure it\'s at least 6 characters long.</p>';
+            }
+            
+            // Set hidden inputs
+            const resetEmailInput = document.getElementById('resetEmail');
+            const resetCodeInput = document.getElementById('resetCode');
+            if (resetEmailInput) resetEmailInput.value = email;
+            if (resetCodeInput) resetCodeInput.value = code;
+            
+            // Focus on password input
+            const passwordInput = document.getElementById('newPassword');
+            if (passwordInput) {
+                setTimeout(() => passwordInput.focus(), 100);
+            }
+            
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = originalHTML;
+        } else {
+            showToast(data.message || 'Invalid verification code', 'error');
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = originalHTML;
+            
+            // Clear code input on error
+            document.getElementById('verificationCode').value = '';
+        }
+    } catch (error) {
+        console.error('Verify code error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = originalHTML;
+    }
+}
+
+// Handle Resend Code
+async function handleResendCode() {
+    const email = window.resetEmail || '';
+    const resendBtn = document.getElementById('resendBtn');
+    
+    if (!email) {
+        showToast('Email not found. Please start over.', 'error');
+        return;
+    }
+    
+    // Disable button and show loading
+    resendBtn.disabled = true;
+    const originalHTML = resendBtn.innerHTML;
+    resendBtn.innerHTML = '<span class="loading"></span> Resending...';
+    
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'forgot_password',
+                email: email
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('✓ Verification code has been resent to your email', 'success');
+            
+            // Clear code input
+            document.getElementById('verificationCode').value = '';
+            setTimeout(() => document.getElementById('verificationCode').focus(), 100);
+        } else {
+            showToast(data.message || 'Failed to resend code', 'error');
+        }
+        
+        resendBtn.disabled = false;
+        resendBtn.innerHTML = originalHTML;
+    } catch (error) {
+        console.error('Resend code error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+        resendBtn.disabled = false;
+        resendBtn.innerHTML = originalHTML;
+    }
+}
+
+// Handle Reset Password with Code
+async function handleResetPasswordWithCode(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('resetEmail').value;
+    const code = document.getElementById('resetCode').value;
+    const password = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    const resetPasswordBtn = document.getElementById('resetPasswordBtn');
+    
+    // Validation
+    if (!password || !confirmPassword) {
+        showToast('Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+    }
+    
+    // Disable button and show loading
+    resetPasswordBtn.disabled = true;
+    const originalHTML = resetPasswordBtn.innerHTML;
+    resetPasswordBtn.innerHTML = '<span class="loading"></span> Resetting...';
+    
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'reset_password',
+                email: email,
+                code: code,
+                password: password,
+                confirm_password: confirmPassword
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('Password reset successful! Redirecting to login...', 'success');
+            setTimeout(() => {
+                window.location.href = 'login';
+            }, 2000);
+        } else {
+            showToast(data.message || 'Failed to reset password', 'error');
+            resetPasswordBtn.disabled = false;
+            resetPasswordBtn.innerHTML = originalHTML;
+        }
+    } catch (error) {
+        console.error('Reset password error:', error);
+        showToast('An error occurred. Please try again.', 'error');
+        resetPasswordBtn.disabled = false;
+        resetPasswordBtn.innerHTML = originalHTML;
     }
 }
 

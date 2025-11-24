@@ -59,11 +59,22 @@ define('DEV_MODE_DISABLE_EMAIL', false);
  *    SMTP_ENCRYPTION: tls
  */
 
-define('SMTP_HOST', 'smtp.hostinger.com');           // SMTP server address
-define('SMTP_PORT', 465);                            // Port (587=TLS, 465=SSL, 25=Standard)
-define('SMTP_USERNAME', 'tailorpro@happyeventsurat.com'); // Your email address
-define('SMTP_PASSWORD', 'Tailor@99');                // Your email password/app-password
-define('SMTP_ENCRYPTION', 'ssl');                    // Encryption: 'tls' or 'ssl' (465 uses SSL)
+// Only define if not already defined in config.php
+if (!defined('SMTP_HOST')) {
+    define('SMTP_HOST', 'smtp.hostinger.com');           // SMTP server address
+}
+if (!defined('SMTP_PORT')) {
+    define('SMTP_PORT', 465);                            // Port (587=TLS, 465=SSL, 25=Standard)
+}
+if (!defined('SMTP_USERNAME')) {
+    define('SMTP_USERNAME', 'tailorpro@happyeventsurat.com'); // Your email address
+}
+if (!defined('SMTP_PASSWORD')) {
+    define('SMTP_PASSWORD', 'Tailor@99');                // Your email password/app-password
+}
+if (!defined('SMTP_ENCRYPTION')) {
+    define('SMTP_ENCRYPTION', 'ssl');                    // Encryption: 'tls' or 'ssl' (465 uses SSL)
+}
 
 
 // ═══════════════════════════════════════════════════════════
@@ -73,8 +84,14 @@ define('SMTP_ENCRYPTION', 'ssl');                    // Encryption: 'tls' or 'ss
 /**
  * The "From" email and name that appears in user's inbox
  */
-define('FROM_EMAIL', 'tailorpro@happyeventsurat.com');    // Sender email address
-define('FROM_NAME', 'TailorPro');                       // Sender name
+if (!defined('FROM_EMAIL')) {
+    // Use SMTP_FROM_EMAIL from config.php if available, otherwise use default
+    define('FROM_EMAIL', defined('SMTP_FROM_EMAIL') ? SMTP_FROM_EMAIL : 'tailorpro@happyeventsurat.com');
+}
+if (!defined('FROM_NAME')) {
+    // Use SMTP_FROM_NAME from config.php if available, otherwise use default
+    define('FROM_NAME', defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : 'TailorPro');
+}
 
 
 // ═══════════════════════════════════════════════════════════
