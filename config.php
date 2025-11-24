@@ -123,20 +123,29 @@ if (!defined('SITE_URL')) {
 // 🔐 SESSION MANAGEMENT
 // ═══════════════════════════════════════════════════════════
 
-// Start session if not already started (with proper cookie params)
-if (session_status() === PHP_SESSION_NONE) {
-    // Use BASE_PATH constant for consistency (normalized to lowercase)
-    $cookiePath = BASE_PATH ? BASE_PATH : '/';
+// Get cookie parameters optimized for both regular browsers and WebView compatibility
+function getSessionCookieParams() {
+    $cookiePath = defined('BASE_PATH') && BASE_PATH ? BASE_PATH : '/';
+    $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
     
-    session_set_cookie_params([
+    // Use SameSite=None with Secure=true for HTTPS (works for BOTH regular browsers and WebView)
+    // Use SameSite=Lax for HTTP (works for regular browsers, WebView on HTTP has limitations)
+    // SameSite=None requires Secure=true, so only use it with HTTPS
+    $sameSite = $isSecure ? 'None' : 'Lax';
+    
+    return [
         'lifetime' => 604800, // 1 week
         'path' => $cookiePath,
-        'domain' => '',
-        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
-        'httponly' => true,
-        'samesite' => 'Lax'
-    ]);
-    
+        'domain' => '', // Empty domain allows subdomains and works better with WebView
+        'secure' => $isSecure, // Required when SameSite=None
+        'httponly' => true, // HttpOnly works fine for both browsers and WebView
+        'samesite' => $sameSite
+    ];
+}
+
+// Start session if not already started (with proper cookie params)
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params(getSessionCookieParams());
     session_start();
 }
 

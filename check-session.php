@@ -6,16 +6,21 @@
 if (session_status() === PHP_SESSION_NONE) {
     // Use BASE_PATH constant for consistency (normalized to lowercase)
     $cookiePath = defined('BASE_PATH') && BASE_PATH ? BASE_PATH : '/';
+    $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+    
+    // Use SameSite=None with Secure=true for HTTPS (works for BOTH regular browsers and WebView)
+    // Use SameSite=Lax for HTTP (works for regular browsers, WebView on HTTP has limitations)
+    $sameSite = $isSecure ? 'None' : 'Lax';
     
     // IMPORTANT: Set cookie params BEFORE starting session
     // This ensures the session can read existing cookies
     session_set_cookie_params([
         'lifetime' => 604800, // 1 week
         'path' => $cookiePath,
-        'domain' => '',
-        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'domain' => '', // Empty domain works better with WebView
+        'secure' => $isSecure, // Required when SameSite=None
         'httponly' => true,
-        'samesite' => 'Lax'
+        'samesite' => $sameSite
     ]);
     
     // Set session name explicitly

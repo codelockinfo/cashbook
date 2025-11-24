@@ -2,15 +2,20 @@
 // Configure session for subdirectory support
 if (session_status() === PHP_SESSION_NONE) {
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-    $cookiePath = $basePath ? $basePath : '/';
+    $cookiePath = $basePath ? strtolower($basePath) : '/';
+    $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+    
+    // Use SameSite=None with Secure=true for HTTPS (works for BOTH regular browsers and WebView)
+    // Use SameSite=Lax for HTTP (works for regular browsers, WebView on HTTP has limitations)
+    $sameSite = $isSecure ? 'None' : 'Lax';
     
     session_set_cookie_params([
         'lifetime' => 604800, // 1 week
         'path' => $cookiePath,
-        'domain' => '',
-        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'domain' => '', // Empty domain works better with WebView
+        'secure' => $isSecure,
         'httponly' => true,
-        'samesite' => 'Lax'
+        'samesite' => $sameSite
     ]);
     
     session_start();
@@ -18,8 +23,15 @@ if (session_status() === PHP_SESSION_NONE) {
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
+header('Access-Control-Allow-Credentials: true'); // Important for cookies in WebView
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 // Check if user is logged in
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {

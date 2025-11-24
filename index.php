@@ -4,14 +4,19 @@ if (session_status() === PHP_SESSION_NONE) {
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     // Normalize to lowercase for consistency with other files
     $cookiePath = $basePath ? strtolower($basePath) : '/';
+    $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+    
+    // Use SameSite=None with Secure=true for HTTPS (works for BOTH regular browsers and WebView)
+    // Use SameSite=Lax for HTTP (works for regular browsers, WebView on HTTP has limitations)
+    $sameSite = $isSecure ? 'None' : 'Lax';
     
     session_set_cookie_params([
         'lifetime' => 604800, // 1 week
         'path' => $cookiePath,
-        'domain' => '',
-        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'domain' => '', // Empty domain works better with WebView
+        'secure' => $isSecure, // Required when SameSite=None
         'httponly' => true,
-        'samesite' => 'Lax'
+        'samesite' => $sameSite
     ]);
     
     session_start();

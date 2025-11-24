@@ -8,15 +8,21 @@ if (session_status() === PHP_SESSION_NONE) {
     // Calculate path and normalize to lowercase for consistency
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     $cookiePath = $basePath ? strtolower($basePath) : '/';
+    $isSecure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+    
+    // Use SameSite=None with Secure=true for HTTPS (works for BOTH regular browsers and WebView)
+    // Use SameSite=Lax for HTTP (works for regular browsers, WebView on HTTP has limitations)
+    // SameSite=None requires Secure=true, so only use it with HTTPS
+    $sameSite = $isSecure ? 'None' : 'Lax';
     
     // IMPORTANT: Set cookie params BEFORE starting session
     session_set_cookie_params([
         'lifetime' => 604800, // 1 week
         'path' => $cookiePath,
-        'domain' => '',
-        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'domain' => '', // Empty domain works better with WebView
+        'secure' => $isSecure,
         'httponly' => true,
-        'samesite' => 'Lax'
+        'samesite' => $sameSite
     ]);
     
     // Set session name explicitly
@@ -27,13 +33,25 @@ if (session_status() === PHP_SESSION_NONE) {
     // Debug: Log session info
     error_log("auth-api.php - Session started - ID: " . session_id());
     error_log("auth-api.php - Cookie path: " . $cookiePath);
+    error_log("auth-api.php - SameSite: " . $sameSite . " (HTTPS: " . ($isSecure ? 'yes' : 'no') . ")");
     error_log("auth-api.php - Received cookies: " . print_r($_COOKIE, true));
 }
 
 // Clear any output before setting headers
 ob_clean();
 
+// Set headers for WebView compatibility (CORS and cookies)
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
+header('Access-Control-Allow-Credentials: true'); // Important for cookies in WebView
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 // Error handling to ensure valid JSON (only catch fatal errors, not warnings)
 set_error_handler(function($severity, $message, $file, $line) {
@@ -334,17 +352,22 @@ function login($conn) {
         $cookiePath = $basePath ? strtolower($basePath) : '/';
         $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
         
+        // Use SameSite=None with Secure=true for HTTPS (works for BOTH regular browsers and WebView)
+        // Use SameSite=Lax for HTTP (works for regular browsers, WebView on HTTP has limitations)
+        $sameSite = $secure ? 'None' : 'Lax';
+        
         // Explicitly set the session cookie to ensure it's sent
+        // This is especially important for WebView compatibility
         setcookie(
             session_name(),
             $sessionId,
             [
                 'expires' => time() + 604800, // 1 week
                 'path' => $cookiePath,
-                'domain' => '',
+                'domain' => '', // Empty domain works better with WebView
                 'secure' => $secure,
                 'httponly' => true,
-                'samesite' => 'Lax'
+                'samesite' => $sameSite
             ]
         );
         
