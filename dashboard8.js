@@ -829,20 +829,31 @@ function handleSearch() {
     }
 }
 
-// Clear all filters
+// Clear all filters (but preserve group filter)
 function clearFilters() {
+    // Save the current group filter value to preserve it
+    const defaultGroupSelector = document.getElementById('defaultGroupSelector');
+    const filterGroup = document.getElementById('filterGroup');
+    const preservedGroupValue = filterGroup.value || (defaultGroupSelector ? defaultGroupSelector.value : '');
+    
+    // Clear all other filters
     document.getElementById('searchInput').value = '';
     document.getElementById('filterDateFrom').value = '';
     document.getElementById('filterDateTo').value = '';
-    document.getElementById('filterGroup').value = '';
     document.getElementById('filterMember').value = '';
     document.getElementById('filterType').value = '';
     document.getElementById('sortBy').value = 'date_desc';
     
-    // Hide member filter
-    document.getElementById('memberFilterContainer').style.display = 'none';
-    
-    loadTransactions();
+    // Restore the group filter value (preserve it)
+    if (preservedGroupValue) {
+        filterGroup.value = preservedGroupValue;
+        // If a group is selected, trigger handleGroupChange to properly show/hide member filter
+        handleGroupChange();
+    } else {
+        // No group selected, hide member filter
+        document.getElementById('memberFilterContainer').style.display = 'none';
+        loadTransactions();
+    }
 }
 
 // Update pending requests badge
