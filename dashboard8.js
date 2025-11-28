@@ -278,11 +278,50 @@ async function loadGroups() {
                 defaultSelect.add(option3);
             });
             
-            // Auto-select first group by default
+            // Get most frequently accessed group
             if (data.groups.length > 0) {
-                defaultSelect.value = data.groups[0].id;
-                // Trigger the change event to hide/show appropriate fields
-                handleDefaultGroupChange();
+                try {
+                    const mostAccessedResponse = await fetch(`${API_URL}?action=getMostAccessedGroup`);
+                    const mostAccessedData = await mostAccessedResponse.json();
+                    
+                    let defaultGroupId = null;
+                    
+                    if (mostAccessedData.success && mostAccessedData.group_id) {
+                        // Check if the most accessed group is still in user's groups
+                        const groupExists = data.groups.some(g => g.id == mostAccessedData.group_id);
+                        if (groupExists) {
+                            defaultGroupId = mostAccessedData.group_id;
+                        }
+                    }
+                    
+                    // If no most accessed group or it doesn't exist anymore, use first group
+                    if (!defaultGroupId && data.groups.length > 0) {
+                        defaultGroupId = data.groups[0].id;
+                    }
+                    
+                    if (defaultGroupId) {
+                        defaultSelect.value = defaultGroupId;
+                        // Trigger the change event to hide/show appropriate fields
+                        // Note: handleDefaultGroupChange() will track the access, so we don't track here
+                        handleDefaultGroupChange();
+                    } else {
+                        // No groups - group filter will be visible, add class
+                        const filtersSection = document.querySelector('.filters-section');
+                        if (filtersSection) {
+                            filtersSection.classList.add('has-group-filter');
+                        }
+                        // Still load transactions (will show empty state)
+                        loadTransactions();
+                    }
+                } catch (error) {
+                    console.error('Error loading most accessed group:', error);
+                    // Fallback to first group if error
+                    if (data.groups.length > 0) {
+                        defaultSelect.value = data.groups[0].id;
+                        // Note: handleDefaultGroupChange() will track the access, so we don't track here
+                        handleDefaultGroupChange();
+                    }
+                }
             } else {
                 // No groups - group filter will be visible, add class
                 const filtersSection = document.querySelector('.filters-section');
@@ -308,6 +347,9 @@ function handleDefaultGroupChange() {
     const filtersSection = document.querySelector('.filters-section');
     
     if (defaultGroupId) {
+        // Track group access when a specific group is selected
+        trackGroupAccess(defaultGroupId);
+        
         // A specific group is selected
         // Hide the group selectors
         entryGroupContainer.style.display = 'none';
@@ -349,6 +391,25 @@ function handleDefaultGroupChange() {
         
         // Reload transactions without filter
         loadTransactions();
+    }
+}
+
+// Track group access (call API to increment access count)
+async function trackGroupAccess(groupId) {
+    try {
+        // Don't track if groupId is empty
+        if (!groupId) {
+            return;
+        }
+        
+        // Call API to track group access
+        await fetch(`${API_URL}?action=trackGroupAccess&group_id=${groupId}`, {
+            method: 'GET'
+        });
+        // Silently fail if tracking fails - don't show error to user
+    } catch (error) {
+        console.error('Error tracking group access:', error);
+        // Silently fail - don't interrupt user experience
     }
 }
 

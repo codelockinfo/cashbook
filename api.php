@@ -75,6 +75,12 @@ switch ($action) {
     case 'getEntryEditHistory':
         getEntryEditHistory($conn, $user_id);
         break;
+    case 'trackGroupAccess':
+        trackGroupAccess($conn, $user_id);
+        break;
+    case 'getMostAccessedGroup':
+        getMostAccessedGroup($conn, $user_id);
+        break;
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;
@@ -748,6 +754,137 @@ function getEntryEditHistory($conn, $user_id) {
         
         $stmt->close();
         $checkStmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Track group access (increment count when group is opened/selected)
+function trackGroupAccess($conn, $user_id) {
+    try {
+        $group_id = $_POST['group_id'] ?? $_GET['group_id'] ?? '';
+        
+        if (empty($group_id)) {
+            echo json_encode(['success' => false, 'message' => 'Group ID is required']);
+            return;
+        }
+        
+        // Check if user is member of this group
+        $checkStmt = $conn->prepare("SELECT id FROM group_members WHERE group_id = ? AND user_id = ?");
+        $checkStmt->bind_param("ii", $group_id, $user_id);
+        $checkStmt->execute();
+        
+        if ($checkStmt->get_result()->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'You are not a member of this group']);
+            $checkStmt->close();
+            return;
+        }
+        $checkStmt->close();
+        
+        // Create table if it doesn't exist
+        // Try with foreign keys first, if that fails, create without them
+        $createTableSql = "CREATE TABLE IF NOT EXISTS group_access_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            group_id INT NOT NULL,
+            access_count INT DEFAULT 1,
+            last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_user_group (user_id, group_id),
+            KEY idx_user_id (user_id),
+            KEY idx_group_id (group_id),
+            KEY idx_access_count (access_count)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        
+        $conn->query($createTableSql);
+        
+        // Try to add foreign keys if they don't exist (ignore error if they already exist)
+        try {
+            $conn->query("ALTER TABLE group_access_logs 
+                         ADD CONSTRAINT fk_gal_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE");
+        } catch (Exception $e) {
+            // Foreign key might already exist or table structure doesn't support it - ignore
+        }
+        
+        try {
+            $conn->query("ALTER TABLE group_access_logs 
+                         ADD CONSTRAINT fk_gal_group FOREIGN KEY (group_id) REFERENCES `groups`(id) ON DELETE CASCADE");
+        } catch (Exception $e) {
+            // Foreign key might already exist or table structure doesn't support it - ignore
+        }
+        
+        // Insert or update access count
+        $stmt = $conn->prepare("INSERT INTO group_access_logs (user_id, group_id, access_count, last_accessed) 
+                                VALUES (?, ?, 1, NOW())
+                                ON DUPLICATE KEY UPDATE 
+                                access_count = access_count + 1,
+                                last_accessed = NOW()");
+        $stmt->bind_param("ii", $user_id, $group_id);
+        
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Group access tracked']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error tracking group access: ' . $conn->error]);
+        }
+        
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+// Get most frequently accessed group for user
+function getMostAccessedGroup($conn, $user_id) {
+    try {
+        // Create table if it doesn't exist (in case it hasn't been created yet)
+        $createTableSql = "CREATE TABLE IF NOT EXISTS group_access_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            group_id INT NOT NULL,
+            access_count INT DEFAULT 1,
+            last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_user_group (user_id, group_id),
+            KEY idx_user_id (user_id),
+            KEY idx_group_id (group_id),
+            KEY idx_access_count (access_count)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        
+        $conn->query($createTableSql);
+        
+        // Get the group with highest access count for this user
+        $sql = "SELECT gal.group_id, gal.access_count, g.name as group_name
+                FROM group_access_logs gal
+                INNER JOIN `groups` g ON gal.group_id = g.id
+                INNER JOIN group_members gm ON g.id = gm.group_id
+                WHERE gal.user_id = ? AND gm.user_id = ?
+                ORDER BY gal.access_count DESC, gal.last_accessed DESC
+                LIMIT 1";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $user_id, $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            echo json_encode([
+                'success' => true,
+                'group_id' => $row['group_id'],
+                'group_name' => $row['group_name'],
+                'access_count' => $row['access_count']
+            ]);
+        } else {
+            // No access logs yet, return null
+            echo json_encode([
+                'success' => true,
+                'group_id' => null,
+                'group_name' => null,
+                'access_count' => 0
+            ]);
+        }
+        
+        $stmt->close();
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
