@@ -145,6 +145,10 @@ function getSessionCookieParams() {
 
 // Start session if not already started (with proper cookie params)
 if (session_status() === PHP_SESSION_NONE) {
+    // IMPORTANT: Set session lifetime to match cookie lifetime
+    // This ensures session data persists on server for the same duration as the cookie
+    ini_set('session.gc_maxlifetime', 604800); // 1 week (matches cookie lifetime)
+    
     session_set_cookie_params(getSessionCookieParams());
     session_start();
 }

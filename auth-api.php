@@ -15,6 +15,10 @@ if (session_status() === PHP_SESSION_NONE) {
     // SameSite=None requires Secure=true, so only use it with HTTPS
     $sameSite = $isSecure ? 'None' : 'Lax';
     
+    // IMPORTANT: Set session lifetime to match cookie lifetime
+    // This ensures session data persists on server for the same duration as the cookie
+    ini_set('session.gc_maxlifetime', 604800); // 1 week (matches cookie lifetime)
+    
     // IMPORTANT: Set cookie params BEFORE starting session
     session_set_cookie_params([
         'lifetime' => 604800, // 1 week
