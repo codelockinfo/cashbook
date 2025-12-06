@@ -129,6 +129,15 @@ $user = getCurrentUser();
 
             <!-- Statistics Cards -->
             <div class="stats-grid">
+                <div class="stat-card stat-balance">
+                    <div class="stat-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-label">Total Balance</span>
+                        <span class="stat-value" id="totalBalance">₹ 0</span>
+                    </div>
+                </div>
                 <div class="stat-card stat-in">
                     <div class="stat-icon">
                         <i class="fas fa-arrow-trend-up"></i>
@@ -147,15 +156,7 @@ $user = getCurrentUser();
                         <span class="stat-value" id="totalCashOut">₹ 0</span>
                     </div>
                 </div>
-                <div class="stat-card stat-balance">
-                    <div class="stat-icon">
-                        <i class="fas fa-wallet"></i>
-                    </div>
-                    <div class="stat-content">
-                        <span class="stat-label">Total Balance</span>
-                        <span class="stat-value" id="totalBalance">₹ 0</span>
-                    </div>
-                </div>
+                
             </div>
 
             <!-- Filters -->
