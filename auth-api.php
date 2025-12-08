@@ -366,7 +366,7 @@ function login($conn) {
             session_name(),
             $sessionId,
             [
-                'expires' => time() + 604800, // 1 week
+                'expires' => time() + 604800, // 7 days (604800 seconds = 7 * 24 * 60 * 60)
                 'path' => $cookiePath,
                 'domain' => '', // Empty domain works better with WebView
                 'secure' => $secure,
@@ -379,6 +379,7 @@ function login($conn) {
         error_log("Login - Session ID: " . session_id());
         error_log("Login - Session cookie path: " . ini_get('session.cookie_path'));
         error_log("Login - Session name: " . session_name());
+        error_log("Login - Cookie expires: " . date('Y-m-d H:i:s', time() + 604800) . " (7 days from now)");
         error_log("Login - All session vars: " . print_r($_SESSION, true));
         
         echo json_encode([
