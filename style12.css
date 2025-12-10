@@ -424,6 +424,15 @@ body {
     grid-column: 1 / -1;
 }
 
+/* Hide sticky mobile buttons on desktop */
+.button-group-sticky-mobile {
+    display: none;
+}
+
+.button-group .btn {
+    flex: 1;
+}
+
 .btn-cash-in {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
@@ -931,8 +940,9 @@ body {
 /* Toast Notification */
 .toast {
     position: fixed;
-    bottom: -100px;
-    right: 30px;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
     background: white;
     color: var(--text-primary);
     padding: 20px 25px;
@@ -941,14 +951,15 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
-    z-index: 1000;
-    transition: bottom 0.4s ease;
+    z-index: 10001;
+    transition: top 0.4s ease;
     border-left: 5px solid var(--primary-color);
     min-width: 300px;
+    max-width: 90%;
 }
 
 .toast.show {
-    bottom: 30px;
+    top: 30px;
 }
 
 .toast.success {
@@ -1150,8 +1161,65 @@ body {
         gap: 0;
     }
 
+    /* Hide original buttons on mobile */
     .button-group {
-        grid-template-columns: 1fr;
+        display: none;
+    }
+    
+    /* Sticky buttons for mobile - always visible */
+    .button-group-sticky-mobile {
+        display: flex;
+        flex-direction: row;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: transparent;
+        padding: 12px 15px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        gap: 10px;
+        z-index: 10000;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 0;
+        /* Ensure buttons stay visible above keyboard */
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        /* Force hardware acceleration */
+        will-change: transform;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    
+    .button-group-sticky-mobile .btn {
+        flex: 1;
+        font-size: 14px;
+        padding: 12px 8px;
+    }
+    
+    /* Toast notification - mobile adjustments */
+    .toast {
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: auto;
+        max-width: calc(100% - 30px);
+        width: 70%;
+        padding: 15px 20px;
+        font-size: 14px;
+    }
+    
+    .toast.show {
+        top: 20px;
+    }
+    
+    /* Add padding to container to prevent content from being hidden behind fixed buttons */
+    .container {
+        padding-bottom: 80px;
+    }
+    
+    .entry-card {
+        padding-bottom: 20px;
     }
 
     .header-content {

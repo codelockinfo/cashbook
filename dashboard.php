@@ -228,6 +228,16 @@ $user = getCurrentUser();
     <!-- Notification Toast -->
     <div id="toast" class="toast"></div>
 
+    <!-- Sticky Mobile Buttons (Always Visible) -->
+    <div class="button-group-sticky-mobile">
+        <button type="button" id="btnCashInSticky" class="btn btn-cash-in">
+            <i class="fas fa-arrow-down"></i> Cash In
+        </button>
+        <button type="button" id="btnCashOutSticky" class="btn btn-cash-out">
+            <i class="fas fa-arrow-up"></i> Cash Out
+        </button>
+    </div>
+
     <!-- Photo Viewer Modal -->
     <div id="photoModal" class="photo-modal" style="display: none;">
         <div class="photo-modal-content">

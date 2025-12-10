@@ -21,11 +21,213 @@ function initializeDateTimeInputs() {
     document.getElementById('entryDate').value = localDateTime;
 }
 
+// Scroll to form function (for mobile)
+function scrollToForm() {
+    const entrySection = document.querySelector('.entry-section');
+    if (entrySection) {
+        const offset = 20;
+        const elementPosition = entrySection.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        
+        window.scrollTo({
+            top: Math.max(0, offsetPosition),
+            behavior: 'smooth'
+        });
+        
+        // Focus on amount input after scrolling
+        setTimeout(() => {
+            const amountInput = document.getElementById('entryAmount');
+            if (amountInput) {
+                amountInput.focus();
+            }
+        }, 500);
+    }
+}
+
+// Scroll to latest entry function
+function scrollToLatestEntry(entryId) {
+    // Wait a bit for DOM to update after loadTransactions
+    setTimeout(() => {
+        const entryElement = document.querySelector(`[data-entry-id="${entryId}"]`);
+        if (entryElement) {
+            // Calculate offset considering fixed buttons at bottom
+            const buttonGroupHeight = isMobileView() ? 80 : 0;
+            const offset = 100 + buttonGroupHeight; // Offset from top + button height
+            
+            // Get element position
+            const elementPosition = entryElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            
+            // Scroll to entry
+            window.scrollTo({
+                top: Math.max(0, offsetPosition),
+                behavior: 'smooth'
+            });
+            
+            // Highlight the entry briefly
+            entryElement.style.transition = 'background-color 0.3s';
+            entryElement.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
+            setTimeout(() => {
+                entryElement.style.backgroundColor = '';
+            }, 2000);
+        } else {
+            // If entry not found by ID, try to scroll to first entry
+            setTimeout(() => {
+                const firstEntry = document.querySelector('.transaction-item[data-entry-id]');
+                if (firstEntry) {
+                    const buttonGroupHeight = isMobileView() ? 80 : 0;
+                    const offset = 100 + buttonGroupHeight;
+                    const elementPosition = firstEntry.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    
+                    window.scrollTo({
+                        top: Math.max(0, offsetPosition),
+                        behavior: 'smooth'
+                    });
+                }
+            }, 500);
+        }
+    }, 500); // Increased timeout to ensure DOM is fully updated
+}
+
+// Check if form has data (amount and message)
+function formHasData() {
+    const amount = document.getElementById('entryAmount').value.trim();
+    const message = document.getElementById('entryMessage').value.trim();
+    return amount !== '' && message !== '';
+}
+
+// Check if mobile view
+function isMobileView() {
+    return window.innerWidth <= 768;
+}
+
+// Check if user is near bottom of page
+function isUserNearBottom() {
+    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    // Consider user "near bottom" if within 200px of bottom
+    return (documentHeight - scrollPosition - windowHeight) < 200;
+}
+
+// Setup handlers to keep buttons visible when keyboard appears
+function setupKeyboardHandlers() {
+    const stickyButtonGroup = document.querySelector('.button-group-sticky-mobile');
+    if (!stickyButtonGroup) return;
+    
+    // Ensure sticky buttons are always fixed and visible
+    stickyButtonGroup.style.position = 'fixed';
+    stickyButtonGroup.style.bottom = '0';
+    stickyButtonGroup.style.zIndex = '10000';
+    
+    let initialViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    
+    // Handle viewport resize (keyboard appearing/disappearing)
+    function handleViewportResize() {
+        if (window.visualViewport) {
+            const currentHeight = window.visualViewport.height;
+            const heightDifference = initialViewportHeight - currentHeight;
+            
+            // Always ensure sticky buttons stay visible above keyboard
+            stickyButtonGroup.style.position = 'fixed';
+            stickyButtonGroup.style.bottom = '0';
+            stickyButtonGroup.style.zIndex = '10000';
+            
+            // If keyboard is visible, ensure buttons are above it
+            if (heightDifference > 150) {
+                // Keyboard is visible - buttons should stay at bottom of viewport
+                stickyButtonGroup.style.bottom = '0';
+            }
+        } else {
+            // Fallback - always keep buttons fixed
+            stickyButtonGroup.style.position = 'fixed';
+            stickyButtonGroup.style.bottom = '0';
+            stickyButtonGroup.style.zIndex = '10000';
+        }
+    }
+    
+    // Use visualViewport API if available (better for mobile keyboards)
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleViewportResize);
+        window.visualViewport.addEventListener('scroll', handleViewportResize);
+    } else {
+        // Fallback for browsers without visualViewport API
+        window.addEventListener('resize', handleViewportResize);
+    }
+    
+    // Handle input focus to ensure buttons stay visible
+    // Use event delegation to catch dynamically added inputs
+    document.addEventListener('focusin', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            // Ensure sticky buttons stay visible
+            if (stickyButtonGroup) {
+                stickyButtonGroup.style.position = 'fixed';
+                stickyButtonGroup.style.bottom = '0';
+                stickyButtonGroup.style.zIndex = '10000';
+            }
+        }
+    }, true);
+    
+    // Also handle existing inputs explicitly
+    const inputs = document.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            // Ensure sticky buttons stay visible
+            if (stickyButtonGroup) {
+                stickyButtonGroup.style.position = 'fixed';
+                stickyButtonGroup.style.bottom = '0';
+                stickyButtonGroup.style.zIndex = '10000';
+            }
+        });
+    });
+}
+
+// Button click handler (shared function)
+function handleButtonClick(type) {
+    if (formHasData()) {
+        // Form has data - save entry (will scroll to latest entry after save)
+        handleEntry(type);
+    } else {
+        // Form is empty - check if user is at bottom, then scroll to form
+        if (isUserNearBottom()) {
+            scrollToForm();
+        } else if (isMobileView()) {
+            scrollToForm();
+        }
+    }
+}
+
 // Setup all event listeners
 function setupEventListeners() {
-    // Button clicks
-    document.getElementById('btnCashIn').addEventListener('click', () => handleEntry('in'));
-    document.getElementById('btnCashOut').addEventListener('click', () => handleEntry('out'));
+    // Original button clicks with smart behavior
+    const btnCashIn = document.getElementById('btnCashIn');
+    const btnCashOut = document.getElementById('btnCashOut');
+    
+    if (btnCashIn) {
+        btnCashIn.addEventListener('click', () => handleButtonClick('in'));
+    }
+    
+    if (btnCashOut) {
+        btnCashOut.addEventListener('click', () => handleButtonClick('out'));
+    }
+    
+    // Sticky mobile button clicks (same functionality)
+    const btnCashInSticky = document.getElementById('btnCashInSticky');
+    const btnCashOutSticky = document.getElementById('btnCashOutSticky');
+    
+    if (btnCashInSticky) {
+        btnCashInSticky.addEventListener('click', () => handleButtonClick('in'));
+    }
+    
+    if (btnCashOutSticky) {
+        btnCashOutSticky.addEventListener('click', () => handleButtonClick('out'));
+    }
+    
+    // Keep buttons visible when keyboard appears (mobile)
+    if (isMobileView()) {
+        setupKeyboardHandlers();
+    }
     
     // Logout button
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
@@ -476,13 +678,18 @@ async function handleEntry(type) {
         return;
     }
     
+    // Update datetime to current time right before submitting to ensure accurate timestamp
+    const now = new Date();
+    const localDateTime = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('entryDate').value = localDateTime;
+    
     // Use FormData to handle file uploads
     const formData = new FormData();
     formData.append('action', 'addEntry');
     formData.append('type', type);
     formData.append('group_id', groupId);
     formData.append('amount', document.getElementById('entryAmount').value);
-    formData.append('datetime', document.getElementById('entryDate').value);
+    formData.append('datetime', localDateTime); // Use the updated datetime
     formData.append('message', document.getElementById('entryMessage').value);
     
     // Add attachment if selected
@@ -508,6 +715,9 @@ async function submitEntry(formData, form) {
             const typeText = formData.get('type') === 'in' ? 'In' : 'Out';
             showToast(`Cash ${typeText} entry added successfully!`, 'success');
             
+            // Get the entry ID from response for scrolling
+            const entryId = data.id || null;
+            
             // Get the default group value BEFORE resetting
             const defaultGroupId = document.getElementById('defaultGroupSelector').value;
             
@@ -526,7 +736,28 @@ async function submitEntry(formData, form) {
                 document.getElementById('entryGroup').value = '';
             }
             
-            loadTransactions();
+            // Ensure sort is set to newest first to show latest entry at top
+            const sortSelect = document.getElementById('sortBy');
+            if (sortSelect && sortSelect.value !== 'date_desc') {
+                sortSelect.value = 'date_desc';
+            }
+            
+            // Load transactions and scroll to latest entry
+            await loadTransactions();
+            
+            // Scroll to latest entry after transactions are loaded (mobile & desktop)
+            if (entryId) {
+                scrollToLatestEntry(entryId);
+            } else {
+                // If entry ID not available, scroll to first transaction item
+                setTimeout(() => {
+                    const firstEntry = document.querySelector('.transaction-item[data-entry-id]');
+                    if (firstEntry) {
+                        const entryId = firstEntry.getAttribute('data-entry-id');
+                        scrollToLatestEntry(entryId);
+                    }
+                }, 500);
+            }
         } else {
             showToast(data.message || 'Error adding entry', 'error');
         }
@@ -742,7 +973,7 @@ function displayTransactions(entries) {
         }
         
         return `
-            <div class="transaction-item ${typeClass} ${deletedClass}">
+            <div class="transaction-item ${typeClass} ${deletedClass}" data-entry-id="${entry.id}">
                 <!-- Blur overlay for deleted entries -->
                 ${isDeleted ? '<div class="deleted-overlay"></div>' : ''}
                 
