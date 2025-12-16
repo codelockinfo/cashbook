@@ -429,6 +429,50 @@ body {
     display: none;
 }
 
+/* Floating Help & Support button (Bottom Right - All Devices) */
+.help-support-floating-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.help-support-floating-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+.help-support-floating-btn:active {
+    transform: scale(0.95);
+}
+
+/* Mobile adjustments for floating button */
+@media (max-width: 768px) {
+    .help-support-floating-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        font-size: 22px;
+        /* Ensure it's above sticky buttons */
+        bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+}
+
 .button-group .btn {
     flex: 1;
 }
@@ -1180,8 +1224,8 @@ body {
         bottom: 0;
         left: 0;
         right: 0;
-        background: transparent;
-        padding: 12px 15px;
+        background: white;
+        padding: 12px;
         padding-bottom: calc(12px + env(safe-area-inset-bottom));
         gap: 10px;
         z-index: 10000;
@@ -1201,6 +1245,21 @@ body {
         flex: 1;
         font-size: 14px;
         padding: 12px 8px;
+        white-space: nowrap;
+    }
+    
+    /* Help & Support sticky button styling */
+    .button-group-sticky-mobile .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .button-group-sticky-mobile .btn-primary:active {
+        transform: scale(0.98);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     }
     
     /* Toast notification - mobile adjustments */

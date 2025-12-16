@@ -13,7 +13,7 @@ $user = getCurrentUser();
     <title>My Profile - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style12.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style13.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style8.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
 </head>
 <body>
@@ -202,6 +202,11 @@ $user = getCurrentUser();
             </div>
         </div>
     </div>
+
+    <!-- Floating Help & Support Button (Bottom Right - Icon Only) -->
+    <a href="help-support" class="help-support-floating-btn" title="Help & Support">
+        <i class="fas fa-headset"></i>
+    </a>
 
     <div id="toast" class="toast"></div>
     
