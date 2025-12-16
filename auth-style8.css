@@ -265,8 +265,11 @@ margin-bottom: 5px;
 /* Toast Notification */
 .toast {
     position: fixed;
-    bottom: -100px;
-    right: 30px;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    bottom: auto;
     background: white;
     color: var(--text-primary);
     padding: 20px 25px;
@@ -275,15 +278,19 @@ margin-bottom: 5px;
     display: flex;
     align-items: center;
     gap: 15px;
-    z-index: 1000;
-    transition: bottom 0.4s ease;
+    z-index: 10001;
+    transition: top 0.4s ease, opacity 0.4s ease;
     border-left: 5px solid var(--primary-color);
     min-width: 300px;
-    max-width: 400px;
+    max-width: 90%;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .toast.show {
-    bottom: 30px;
+    top: 30px;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .toast.success {
@@ -628,6 +635,26 @@ margin-bottom: 5px;
 
 /* Responsive */
 @media (max-width: 768px) {
+    /* Toast notification - mobile adjustments */
+    .toast {
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+        bottom: auto;
+        min-width: auto;
+        max-width: calc(100% - 30px);
+        width: auto;
+        padding: 15px 20px;
+        font-size: 14px;
+    }
+    
+    .toast.show {
+        top: 20px;
+        bottom: auto;
+        opacity: 1;
+    }
+    
     .confirm-modal-content {
         width: 95%;
         margin: 20px;

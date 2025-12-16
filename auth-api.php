@@ -329,6 +329,21 @@ function login($conn) {
         
         error_log("Login successful for user ID: " . $user['id'] . ", Email: " . $email);
         
+        // Generate API token for Flutter app (64-character hex string)
+        $token = bin2hex(random_bytes(32)); // 32 bytes = 64 hex characters
+        
+        // Store token in database
+        $updateStmt = $conn->prepare("UPDATE users SET api_token = ? WHERE id = ?");
+        if ($updateStmt) {
+            $updateStmt->bind_param("si", $token, $user['id']);
+            if (!$updateStmt->execute()) {
+                error_log("Failed to store API token: " . $updateStmt->error);
+            }
+            $updateStmt->close();
+        } else {
+            error_log("Failed to prepare token update statement: " . $conn->error);
+        }
+        
         // Session should already be started at the top of auth-api.php with proper cookie params
         // Just ensure it's active
         if (session_status() === PHP_SESSION_NONE) {
@@ -377,6 +392,7 @@ function login($conn) {
         
         error_log("Login - Session set - user_id: " . $_SESSION['user_id'] . ", logged_in: " . ($_SESSION['logged_in'] ? 'true' : 'false'));
         error_log("Login - Session ID: " . session_id());
+        error_log("Login - API Token generated: " . substr($token, 0, 8) . "...");
         error_log("Login - Session cookie path: " . ini_get('session.cookie_path'));
         error_log("Login - Session name: " . session_name());
         error_log("Login - Cookie expires: " . date('Y-m-d H:i:s', time() + 604800) . " (7 days from now)");
@@ -385,6 +401,7 @@ function login($conn) {
         echo json_encode([
             'success' => true,
             'message' => 'Login successful',
+            'token' => $token, // Return token for Flutter app
             'user' => [
                 'id' => $user['id'],
                 'name' => $user['name'],

@@ -199,15 +199,78 @@ async function handleLogin(e) {
             
             // Build dashboard URL with proper base path
             const basePath = (typeof BASE_PATH !== 'undefined' && BASE_PATH) ? BASE_PATH : '';
-            const dashboardUrl = basePath ? basePath + '/dashboard' : 'dashboard';
             
-            // Wait a bit longer to ensure session cookie is set and sent
-            // Use window.location.href instead of replace to ensure proper navigation
-            setTimeout(() => {
-                console.log('Redirecting to dashboard:', dashboardUrl);
-                // Force a full page reload to ensure session cookie is read
-                window.location.href = dashboardUrl;
-            }, 2000);
+            // Check if running in Flutter WebView
+            // Method 1: Check URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const isFlutterFromUrl = urlParams.get('flutter') === 'true';
+            
+            // Method 2: Check user agent
+            const isFlutterFromUA = window.navigator.userAgent.includes('Flutter') || 
+                                    window.navigator.userAgent.includes('wv');
+            
+            // Method 3: Check for FlutterApp channel
+            const isFlutterFromChannel = typeof window.FlutterApp !== 'undefined';
+            
+            const isFlutterApp = isFlutterFromUrl || isFlutterFromUA || isFlutterFromChannel;
+            
+            console.log('Flutter detection:', {
+                fromUrl: isFlutterFromUrl,
+                fromUA: isFlutterFromUA,
+                fromChannel: isFlutterFromChannel,
+                isFlutter: isFlutterApp,
+                hasToken: !!data.token
+            });
+            
+            // ALWAYS include token in URL if flutter=true parameter exists OR if token is present
+            // This ensures Flutter can capture the token
+            if ((isFlutterApp || isFlutterFromUrl) && data.token) {
+                // Option 1: Direct redirect to dashboard with token
+                const dashboardUrl = basePath ? basePath + '/dashboard?token=' + encodeURIComponent(data.token) : 'dashboard?token=' + encodeURIComponent(data.token);
+                
+                // Option 2: Use redirect endpoint (more reliable)
+                const redirectUrl = basePath ? basePath + '/login-redirect.php?token=' + encodeURIComponent(data.token) : 'login-redirect.php?token=' + encodeURIComponent(data.token);
+                
+                console.log('✅ Flutter app detected - Token:', data.token.substring(0, 20) + '...');
+                console.log('✅ Redirecting to dashboard with token');
+                console.log('Dashboard URL:', dashboardUrl);
+                console.log('Redirect URL:', redirectUrl);
+                
+                // Also send token to Flutter via JavaScript channel if available
+                if (typeof window.FlutterApp !== 'undefined' && window.FlutterApp.postMessage) {
+                    try {
+                        window.FlutterApp.postMessage(JSON.stringify({
+                            type: 'login_success',
+                            token: data.token
+                        }));
+                        console.log('✅ Token sent via JavaScript channel');
+                    } catch (e) {
+                        console.log('JavaScript channel not available:', e);
+                    }
+                }
+                
+                // Use direct redirect (more reliable than redirect endpoint)
+                setTimeout(() => {
+                    console.log('🔄 Final redirect to:', dashboardUrl);
+                    // Force redirect with token
+                    window.location.replace(dashboardUrl);
+                }, 500);
+            } else if (data.token && isFlutterFromUrl) {
+                // Fallback: If flutter=true but detection failed, still include token
+                const dashboardUrl = basePath ? basePath + '/dashboard?token=' + encodeURIComponent(data.token) : 'dashboard?token=' + encodeURIComponent(data.token);
+                console.log('✅ Fallback - Redirecting with token (flutter=true detected):', dashboardUrl);
+                setTimeout(() => {
+                    window.location.replace(dashboardUrl);
+                }, 500);
+            } else {
+                // For regular browser: Normal redirect without token
+                const dashboardUrl = basePath ? basePath + '/dashboard' : 'dashboard';
+                console.log('🌐 Regular browser - Redirecting to dashboard:', dashboardUrl);
+                
+                setTimeout(() => {
+                    window.location.href = dashboardUrl;
+                }, 2000);
+            }
         } else {
             showToast(data.message || 'Login failed', 'error');
             loginBtn.disabled = false;
