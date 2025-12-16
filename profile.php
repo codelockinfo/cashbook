@@ -208,7 +208,6 @@ $user = getCurrentUser();
         <i class="fas fa-headset"></i>
     </a>
 
-    <div id="toast" class="toast"></div>
     
     <script>
         // Pass PHP BASE_PATH to JavaScript
