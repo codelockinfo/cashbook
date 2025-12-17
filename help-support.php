@@ -62,6 +62,24 @@ $user = getCurrentUser();
                                     <i class="fas fa-chevron-down faq-arrow"></i>
                                 </div>
                                 <div class="faq-answer">
+                                    <!-- Video Example - Replace with your video URL -->
+                                    <div class="faq-video">
+                                        <iframe 
+                                        src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
+                                        frameborder="0" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                            allowfullscreen>
+                                        </iframe>
+                                    </div>
+                                    <!-- OR use local video file -->
+                                    <!-- 
+                                        <div class="faq-video">
+                                        <video controls>
+                                            <source src="videos/how-to-add-entry.mp4" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    </div>
+                                    -->
                                     <p>Go to Dashboard, fill in the entry form with date, amount, type (Cash In/Cash Out), and description. Click "Add Entry" to save.</p>
                                 </div>
                             </div>
@@ -74,6 +92,15 @@ $user = getCurrentUser();
                                     <i class="fas fa-chevron-down faq-arrow"></i>
                                 </div>
                                 <div class="faq-answer">
+                                    <!-- Video Example -->
+                                    <div class="faq-video">
+                                        <iframe 
+                                            src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
+                                            frameborder="0" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                            allowfullscreen>
+                                        </iframe>
+                                    </div>
                                     <p>Go to "My Groups" page. Click "Create Group" to create a new group, or accept invitations to join existing groups.</p>
                                 </div>
                             </div>
@@ -240,7 +267,7 @@ $user = getCurrentUser();
         }
 
         .faq-item.active .faq-answer {
-            max-height: 500px;
+            max-height: 1000px; /* Increased to accommodate videos */
             padding: 0 20px 20px 20px;
         }
 
@@ -249,6 +276,42 @@ $user = getCurrentUser();
             line-height: 1.6;
             margin: 0;
             padding-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Video Container Styles */
+        .faq-video {
+            margin-top: 20px;
+            width: 100%;
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        .faq-video iframe,
+        .faq-video video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .faq-video video {
+            object-fit: contain;
+        }
+
+        /* Responsive video on mobile */
+        @media (max-width: 768px) {
+            .faq-video {
+                padding-bottom: 56.25%;
+                margin-top: 15px;
+            }
         }
 
         .help-link:hover {
