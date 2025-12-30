@@ -1339,14 +1339,35 @@ function deleteEntry(entryId) {
     // Store entry ID for deletion
     window.pendingDeleteEntryId = entryId;
     
+    // Reset button states before showing modal
+    resetDeleteModalButtons();
+    
     // Show delete confirmation modal
     showDeleteEntryModal();
+}
+
+// Reset delete modal buttons to original state
+function resetDeleteModalButtons() {
+    const confirmBtn = document.getElementById('deleteEntryConfirmBtn');
+    const cancelBtn = document.getElementById('deleteEntryCancelBtn');
+    
+    if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-trash"></i> Delete';
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.disabled = false;
+        cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+    }
 }
 
 // Show delete entry confirmation modal
 function showDeleteEntryModal() {
     const modal = document.getElementById('deleteEntryModal');
     if (modal) {
+        // Ensure buttons are reset before showing
+        resetDeleteModalButtons();
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
@@ -1359,6 +1380,8 @@ function hideDeleteEntryModal() {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
+    // Reset buttons to original state
+    resetDeleteModalButtons();
     // Clear pending delete ID
     window.pendingDeleteEntryId = null;
 }
@@ -1376,8 +1399,10 @@ async function confirmDeleteEntry() {
     // Disable buttons during deletion
     const confirmBtn = document.getElementById('deleteEntryConfirmBtn');
     const cancelBtn = document.getElementById('deleteEntryCancelBtn');
-    const originalConfirmText = confirmBtn.innerHTML;
-    const originalCancelText = cancelBtn.innerHTML;
+    
+    // Store original button states (always use fresh state)
+    const originalConfirmText = '<i class="fas fa-trash"></i> Delete';
+    const originalCancelText = '<i class="fas fa-times"></i> Cancel';
     
     confirmBtn.disabled = true;
     cancelBtn.disabled = true;
