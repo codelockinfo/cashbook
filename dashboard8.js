@@ -18,7 +18,23 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeDateTimeInputs() {
     const now = new Date();
     const localDateTime = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    document.getElementById('entryDate').value = localDateTime;
+    const entryDateInput = document.getElementById('entryDate');
+    
+    if (entryDateInput) {
+        entryDateInput.value = localDateTime;
+        
+        // If picker is initialized, update it
+        if (window.dateTimePicker) {
+            window.dateTimePicker.setValue(localDateTime);
+        } else {
+            // Wait for picker to initialize
+            setTimeout(() => {
+                if (window.dateTimePicker) {
+                    window.dateTimePicker.setValue(localDateTime);
+                }
+            }, 100);
+        }
+    }
 }
 
 // Scroll to form function (for mobile)
@@ -271,6 +287,8 @@ function setupEventListeners() {
     
     // Search and filters
     document.getElementById('searchInput').addEventListener('input', debounce(handleSearch, 500));
+    // Date picker change listeners
+    // The date pickers will trigger change events on the hidden inputs
     document.getElementById('filterDateFrom').addEventListener('change', loadTransactions);
     document.getElementById('filterDateTo').addEventListener('change', loadTransactions);
     document.getElementById('filterGroup').addEventListener('change', handleGroupChange);
@@ -1069,8 +1087,24 @@ function clearFilters() {
     
     // Clear all other filters
     document.getElementById('searchInput').value = '';
-    document.getElementById('filterDateFrom').value = '';
-    document.getElementById('filterDateTo').value = '';
+    const filterDateFrom = document.getElementById('filterDateFrom');
+    const filterDateTo = document.getElementById('filterDateTo');
+    
+    if (filterDateFrom) {
+        filterDateFrom.value = '';
+        // Clear the date picker display if it exists
+        if (window.filterDateFromPicker) {
+            window.filterDateFromPicker.clearDate();
+        }
+    }
+    
+    if (filterDateTo) {
+        filterDateTo.value = '';
+        // Clear the date picker display if it exists
+        if (window.filterDateToPicker) {
+            window.filterDateToPicker.clearDate();
+        }
+    }
     document.getElementById('filterMember').value = '';
     document.getElementById('filterType').value = '';
     document.getElementById('sortBy').value = 'date_desc';

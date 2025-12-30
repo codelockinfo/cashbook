@@ -77,11 +77,11 @@ function displayMyGroups(groups) {
             </div>
             <div class="group-actions">
                 ${group.role === 'admin' ? `
-                    <button class="btn-small btn-invite" onclick="openInviteModal(${group.id})">
+                    <button class="btn-small btn-invite" onclick="openInviteModal(${group.id}, this)">
                         <i class="fas fa-user-plus"></i> Invite Users
                     </button>
                 ` : ''}
-                <button class="btn-small btn-view" onclick="viewGroup(${group.id})">
+                <button class="btn-small btn-view" onclick="viewGroup(${group.id}, this)">
                     <i class="fas fa-eye"></i> View Details
                 </button>
                 ${group.role === 'admin' ? `
@@ -188,11 +188,29 @@ async function handleCreateGroup(e) {
 }
 
 // Open Invite Modal
-async function openInviteModal(groupId) {
+async function openInviteModal(groupId, buttonElement) {
+    // Show loader on button
+    const button = buttonElement || event?.target?.closest('.btn-invite');
+    if (button) {
+        const originalContent = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        button.dataset.originalContent = originalContent;
+    }
+    
     currentGroupId = groupId;
     selectedUsers = [];
     openModal('inviteUsersModal');
-    await loadAvailableUsers(groupId);
+    
+    try {
+        await loadAvailableUsers(groupId);
+    } finally {
+        // Reset button after loading
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = button.dataset.originalContent || '<i class="fas fa-user-plus"></i> Invite Users';
+        }
+    }
 }
 
 // Load Available Users
@@ -353,7 +371,16 @@ async function respondToInvitation(invitationId, status) {
 }
 
 // View Group
-async function viewGroup(groupId) {
+async function viewGroup(groupId, buttonElement) {
+    // Show loader on button
+    const button = buttonElement || event?.target?.closest('.btn-view');
+    if (button) {
+        const originalContent = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        button.dataset.originalContent = originalContent;
+    }
+    
     try {
         const response = await fetch(`${API_URL}?action=getGroupDetails&group_id=${groupId}`);
         const data = await response.json();
@@ -367,6 +394,12 @@ async function viewGroup(groupId) {
     } catch (error) {
         console.error('Error:', error);
         showToast('Error loading group details', 'error');
+    } finally {
+        // Reset button after loading
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = button.dataset.originalContent || '<i class="fas fa-eye"></i> View Details';
+        }
     }
 }
 

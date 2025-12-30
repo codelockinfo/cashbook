@@ -12,6 +12,7 @@ $user = getCurrentUser();
     <title>Bookify Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style13.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/datetime-picker.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -69,7 +70,11 @@ $user = getCurrentUser();
                         <label for="entryDate">
                             <i class="fas fa-calendar"></i> Date & Time
                         </label>
-                        <input type="datetime-local" id="entryDate" required>
+                        <input type="datetime-local" id="entryDate" required style="display: none;">
+                        <div id="entryDateDisplay" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+                            <span id="entryDateText">Select Date & Time</span>
+                            <i class="fas fa-calendar-alt" style="color: #6b7280;"></i>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="entryAmount">
@@ -169,9 +174,9 @@ $user = getCurrentUser();
                     <div class="filter-item date-range">
                         <label><i class="fas fa-calendar"></i> Date Range</label>
                         <div class="date-inputs">
-                            <input type="date" id="filterDateFrom" placeholder="From">
+                            <input type="date" id="filterDateFrom" placeholder="dd-mm-yyyy" style="display: none;">
                             <span class="to-label">to</span>
-                            <input type="date" id="filterDateTo" placeholder="To">
+                            <input type="date" id="filterDateTo" placeholder="dd-mm-yyyy" style="display: none;">
                         </div>
                     </div>
                     <div class="filter-item" id="filterGroupContainer">
@@ -401,6 +406,8 @@ $user = getCurrentUser();
         // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>" onerror="console.error('❌ Failed to load pwa10.js from: <?php echo BASE_PATH; ?>/pwa10.js')"></script>
+    <script src="<?php echo BASE_PATH; ?>/datetime-picker.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/date-picker.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/dashboard8.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
