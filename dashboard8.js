@@ -642,6 +642,7 @@ async function handleGroupChange() {
     if (groupId) {
         // Show member filter and load members
         memberFilterContainer.style.display = 'flex';
+        memberFilterContainer.style.flexDirection = 'column';
         
         await loadGroupMembers(groupId);
     } else {

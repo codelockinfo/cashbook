@@ -643,11 +643,14 @@ body {
 }
 
 .filter-group {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 20px;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 15px;
     align-items: flex-end;
-    overflow-x: visible;
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    flex-direction: row !important;
 }
 
 .filter-item {
@@ -655,7 +658,22 @@ body {
     flex-direction: column;
     gap: 8px;
     flex: 0 0 auto;
+    min-width: 160px;
+    flex-shrink: 0;
+}
+
+.filter-item.date-range {
+    flex: 0 1 auto;
+    min-width: 300px;
+    max-width: none;
+}
+
+.filter-item#memberFilterContainer {
+    flex: 0 0 auto;
     min-width: 180px;
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .filter-item label {
@@ -701,12 +719,20 @@ body {
 .date-inputs {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+    flex-wrap: nowrap;
 }
 
-.date-inputs input {
+.date-inputs .date-picker-input {
     flex: 1;
-    min-width: 120px;
+    min-width: 130px;
+}
+
+.to-label {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
 }
 
 /* Transactions Section */
@@ -1029,12 +1055,16 @@ body {
     }
 
     .filter-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        flex-direction: row !important;
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
         scrollbar-color: var(--primary-color) var(--light-color);
         padding-bottom: 10px;
+        gap: 15px;
     }
 
     .filter-group::-webkit-scrollbar {
@@ -1056,12 +1086,12 @@ body {
     }
 
     .filter-item {
-        min-width: 180px;
+        min-width: 160px;
         flex-shrink: 0;
     }
 
     .filter-item.date-range {
-        min-width: 320px;
+        min-width: 280px;
     }
 
     .btn-clear {
@@ -1335,12 +1365,16 @@ body {
     }
 
     .filter-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        flex-direction: row !important;
         overflow-x: auto;
         overflow-y: hidden;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: thin;
         scrollbar-color: var(--primary-color) var(--light-color);
         padding-bottom: 10px;
+        gap: 12px;
     }
 
     .filter-group::-webkit-scrollbar {
