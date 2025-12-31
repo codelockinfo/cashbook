@@ -690,7 +690,7 @@
     }
 
     .date-inputs {
-        flex-direction: row;
+        flex-direction: row!important;
         gap: 8px;
     }
 
