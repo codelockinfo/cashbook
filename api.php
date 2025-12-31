@@ -551,6 +551,12 @@ function getEntries($conn, $user_id) {
                 break;
         }
         
+        // Add limit if provided (for pagination/quick load)
+        $limit = $_GET['limit'] ?? '';
+        if (!empty($limit) && is_numeric($limit) && $limit > 0) {
+            $sql .= " LIMIT " . intval($limit);
+        }
+        
         // Prepare and execute
         $stmt = $conn->prepare($sql);
         $stmt->bind_param($types, ...$params);

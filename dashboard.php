@@ -233,7 +233,13 @@ $user = getCurrentUser();
                 </div>
                 <div id="transactionsList" class="transactions-list">
                     <!-- Transactions will be loaded here dynamically -->
-                    <div class="empty-state">
+                    <div class="transactions-loader" id="transactionsLoader">
+                        <div class="wave-loader">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <p>Loading transactions...</p>
+                    </div>
+                    <div class="empty-state" id="emptyState" style="display: none;">
                         <i class="fas fa-inbox"></i>
                         <p>No transactions yet. Add your first entry!</p>
                     </div>

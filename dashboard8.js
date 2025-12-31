@@ -791,6 +791,9 @@ async function loadTransactions() {
         // Show loading state for statistics
         showStatisticsLoader();
         
+        // Show transactions loader
+        showTransactionsLoader();
+        
         const searchQuery = document.getElementById('searchInput').value;
         const dateFrom = document.getElementById('filterDateFrom').value;
         const dateTo = document.getElementById('filterDateTo').value;
@@ -799,7 +802,8 @@ async function loadTransactions() {
         const type = document.getElementById('filterType').value;
         const sortBy = document.getElementById('sortBy').value;
         
-        const params = new URLSearchParams({
+        // Build base params
+        const baseParams = new URLSearchParams({
             action: 'getEntries',
             search: searchQuery,
             date_from: dateFrom,
@@ -810,31 +814,82 @@ async function loadTransactions() {
             sort: sortBy
         });
         
-        const response = await fetch(`${API_URL}?${params}`);
-        const data = await response.json();
+        // Phase 1: Get first 10 entries quickly
+        const quickParams = new URLSearchParams(baseParams);
+        quickParams.set('limit', '10');
         
-        if (data.success) {
-            // Debug: Log entries to check deletion info
-            if (data.entries && data.entries.length > 0) {
-                const deletedEntries = data.entries.filter(e => e.status === 0 || e.status === '0');
-                if (deletedEntries.length > 0) {
-                    console.log('Deleted entries found:', deletedEntries);
-                    console.log('First deleted entry data:', deletedEntries[0]);
+        const quickResponse = await fetch(`${API_URL}?${quickParams}`);
+        const quickData = await quickResponse.json();
+        
+        if (quickData.success) {
+            // Display first 10 entries immediately
+            if (quickData.entries && quickData.entries.length > 0) {
+                displayTransactions(quickData.entries);
+            }
+            
+            // Update statistics from quick response (they should be the same)
+            if (quickData.statistics) {
+                updateStatistics(quickData.statistics);
+            }
+            
+            // Phase 2: Get all entries in background (without limit)
+            const allParams = new URLSearchParams(baseParams);
+            const allResponse = await fetch(`${API_URL}?${allParams}`);
+            const allData = await allResponse.json();
+            
+            if (allData.success) {
+                // Update with all entries
+                displayTransactions(allData.entries);
+                
+                // Update statistics with complete data
+                if (allData.statistics) {
+                    updateStatistics(allData.statistics);
                 }
             }
-            displayTransactions(data.entries);
-            if (data.statistics) {
-                updateStatistics(data.statistics);
-            }
         } else {
-            showToast(data.message || 'Error loading transactions', 'error');
+            hideTransactionsLoader();
+            showToast(quickData.message || 'Error loading transactions', 'error');
             // Show zero values on error
             updateStatistics({ total_in: 0, total_out: 0 });
         }
     } catch (error) {
+        hideTransactionsLoader();
         showToast('Error loading transactions', 'error');
         // Show zero values on error
         updateStatistics({ total_in: 0, total_out: 0 });
+    }
+}
+
+// Show transactions loader
+function showTransactionsLoader() {
+    const container = document.getElementById('transactionsList');
+    const loader = document.getElementById('transactionsLoader');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (container) {
+        if (loader) {
+            loader.style.display = 'flex';
+        } else {
+            container.innerHTML = `
+                <div class="transactions-loader" id="transactionsLoader">
+                    <div class="wave-loader">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <p>Loading transactions...</p>
+                </div>
+            `;
+        }
+        if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+    }
+}
+
+// Hide transactions loader
+function hideTransactionsLoader() {
+    const loader = document.getElementById('transactionsLoader');
+    if (loader) {
+        loader.style.display = 'none';
     }
 }
 
@@ -846,14 +901,32 @@ function displayTransactions(entries) {
         return;
     }
     
+    // Hide loader
+    hideTransactionsLoader();
+    
     if (!entries || entries.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
+        const emptyState = document.getElementById('emptyState');
+        if (emptyState) {
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = `
                 <i class="fas fa-inbox"></i>
                 <p>No transactions found. Try adjusting your filters or add a new entry!</p>
-            </div>
-        `;
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-inbox"></i>
+                    <p>No transactions found. Try adjusting your filters or add a new entry!</p>
+                </div>
+            `;
+        }
         return;
+    }
+    
+    // Hide empty state if it exists
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) {
+        emptyState.style.display = 'none';
     }
     
     container.innerHTML = entries.map(entry => {
