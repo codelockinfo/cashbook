@@ -140,7 +140,11 @@ $user = getCurrentUser();
                     </div>
                     <div class="stat-content">
                         <span class="stat-label">Total Balance</span>
-                        <span class="stat-value" id="totalBalance">₹ 0</span>
+                        <span class="stat-value" id="totalBalance">
+                            <span class="wave-loader">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </span>
+                        </span>
                     </div>
                 </div>
                 <div class="stat-card stat-in">
@@ -149,7 +153,11 @@ $user = getCurrentUser();
                     </div>
                     <div class="stat-content">
                         <span class="stat-label">Total Cash In</span>
-                        <span class="stat-value" id="totalCashIn">₹ 0</span>
+                        <span class="stat-value" id="totalCashIn">
+                            <span class="wave-loader">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </span>
+                        </span>
                     </div>
                 </div>
                 <div class="stat-card stat-out">
@@ -158,7 +166,11 @@ $user = getCurrentUser();
                     </div>
                     <div class="stat-content">
                         <span class="stat-label">Total Cash Out</span>
-                        <span class="stat-value" id="totalCashOut">₹ 0</span>
+                        <span class="stat-value" id="totalCashOut">
+                            <span class="wave-loader">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </span>
+                        </span>
                     </div>
                 </div>
                 

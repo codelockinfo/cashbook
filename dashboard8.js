@@ -788,6 +788,9 @@ async function submitEntry(formData, form) {
 // Load and display transactions
 async function loadTransactions() {
     try {
+        // Show loading state for statistics
+        showStatisticsLoader();
+        
         const searchQuery = document.getElementById('searchInput').value;
         const dateFrom = document.getElementById('filterDateFrom').value;
         const dateTo = document.getElementById('filterDateTo').value;
@@ -820,12 +823,18 @@ async function loadTransactions() {
                 }
             }
             displayTransactions(data.entries);
-            updateStatistics(data.statistics);
+            if (data.statistics) {
+                updateStatistics(data.statistics);
+            }
         } else {
             showToast(data.message || 'Error loading transactions', 'error');
+            // Show zero values on error
+            updateStatistics({ total_in: 0, total_out: 0 });
         }
     } catch (error) {
         showToast('Error loading transactions', 'error');
+        // Show zero values on error
+        updateStatistics({ total_in: 0, total_out: 0 });
     }
 }
 
@@ -1053,21 +1062,54 @@ function displayTransactions(entries) {
     }).join('');
 }
 
+// Show statistics loader
+function showStatisticsLoader() {
+    const totalCashInEl = document.getElementById('totalCashIn');
+    const totalCashOutEl = document.getElementById('totalCashOut');
+    const totalBalanceEl = document.getElementById('totalBalance');
+    
+    const loaderHTML = '<span class="wave-loader"><span></span><span></span><span></span><span></span><span></span></span>';
+    
+    if (totalCashInEl) {
+        totalCashInEl.innerHTML = loaderHTML;
+    }
+    if (totalCashOutEl) {
+        totalCashOutEl.innerHTML = loaderHTML;
+    }
+    if (totalBalanceEl) {
+        totalBalanceEl.innerHTML = loaderHTML;
+    }
+}
+
 // Update statistics
 function updateStatistics(stats) {
     const totalBalance = stats.total_in - stats.total_out;
     
-    // Update stat cards
-    document.getElementById('totalCashIn').textContent = `₹ ${parseFloat(stats.total_in).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    document.getElementById('totalCashOut').textContent = `₹ ${parseFloat(stats.total_out).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    // Update stat cards - remove loader and show actual values
+    const totalCashInEl = document.getElementById('totalCashIn');
+    const totalCashOutEl = document.getElementById('totalCashOut');
+    const totalBalanceEl = document.getElementById('totalBalance');
+    
+    // Remove loader and set actual values
+    if (totalCashInEl) {
+        totalCashInEl.innerHTML = `₹ ${parseFloat(stats.total_in).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+    
+    if (totalCashOutEl) {
+        totalCashOutEl.innerHTML = `₹ ${parseFloat(stats.total_out).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
     
     // Update balance in stats grid
     const statBalanceElements = document.querySelectorAll('.stat-balance .stat-value');
     if (statBalanceElements.length > 0) {
         statBalanceElements.forEach(element => {
-            element.textContent = `₹ ${totalBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            element.innerHTML = `₹ ${totalBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             element.className = `stat-value ${totalBalance < 0 ? 'negative' : ''}`;
         });
+    } else if (totalBalanceEl) {
+        // Fallback if querySelector doesn't find it
+        totalBalanceEl.innerHTML = `₹ ${totalBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        totalBalanceEl.className = `stat-value ${totalBalance < 0 ? 'negative' : ''}`;
     }
 }
 
