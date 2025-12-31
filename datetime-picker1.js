@@ -31,8 +31,29 @@ class DateTimePicker {
             this.displayElement = document.createElement('div');
             this.displayElement.id = 'entryDateDisplay';
             this.displayElement.className = 'datetime-picker-input';
-            this.displayElement.style.cssText = 'width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: space-between;';
+            this.displayElement.style.cssText = 'width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; position: relative; margin: 0;';
             this.input.parentNode.insertBefore(this.displayElement, this.input.nextSibling);
+        } else {
+            // Ensure existing element has proper styling and is in the correct position
+            this.displayElement.className = 'datetime-picker-input';
+            this.displayElement.style.cssText = 'width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; position: relative; margin: 0;';
+            
+            // Ensure the element is in the correct position (right after the input)
+            // Check if display element is already in the correct parent and position
+            const inputParent = this.input.parentNode;
+            const inputNextSibling = this.input.nextSibling;
+            
+            if (this.displayElement.parentNode !== inputParent) {
+                // If display element is in wrong parent, move it to correct parent
+                if (inputNextSibling) {
+                    inputParent.insertBefore(this.displayElement, inputNextSibling);
+                } else {
+                    inputParent.appendChild(this.displayElement);
+                }
+            } else if (this.displayElement !== inputNextSibling && inputNextSibling) {
+                // If display element exists but is not right after input, move it
+                inputParent.insertBefore(this.displayElement, inputNextSibling);
+            }
         }
 
         // Get or create text element
