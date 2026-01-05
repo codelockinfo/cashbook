@@ -25,8 +25,20 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookify - Smart Finance Management</title>
-    <meta name="description" content="Run Your Finance Business Smarter. Manage expenses, invoices, and more from one platform.">
+    <title>Bookify - Smart Finance Management System</title>
+    <meta name="description" content="Bookify is the ultimate financial management solution for small businesses and freelancers. Track expenses, manage invoices, and grow your business with our smart finance tools.">
+    <meta name="keywords" content="finance management, expense tracker, business finance, invoice app, bookkeeping software, small business tools, financial reports">
+    <meta name="author" content="Bookify">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Bookify - Smart Finance Management System">
+    <meta property="og:description" content="Run Your Business Finances Smarter. Manage income, expenses, invoices, assets, and more from one platform.">
+    <meta property="og:image" content="icons/bookify%20logo.png">
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="icons/bookify%20logo.png">
+    <link rel="apple-touch-icon" href="icons/bookify%20logo.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,7 +104,7 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
         }
 
         .btn {
-            padding: 12px 28px;
+            padding: 12px 25px;
             border-radius: 50px;
             font-weight: 600;
             text-decoration: none;
@@ -500,16 +512,102 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
         }
         .fab-get-started:hover { transform: translateY(-5px); }
         
+        /* --- Mobile Navigation --- */
+        .mobile-toggle {
+            display: none;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            z-index: 101;
+        }
+
         @media (max-width: 968px) {
-            .navbar { flex-direction: column; gap: 20px; }
-            .nav-links { display: none; } /* Simplified for mobile */
-            .hero { flex-direction: column; text-align: center; padding-top: 40px; }
+            .navbar { 
+                justify-content: space-between; 
+                padding: 15px 5%;
+            }
+
+            .mobile-toggle { display: block; }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 300px;
+                height: 100%;
+                background: rgba(26, 14, 75, 0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                justify-content: start;
+                align-items: center;
+                transition: right 0.4s ease;
+                z-index: 99;
+                box-shadow: -5px 0 30px rgba(0,0,0,0.5);
+                padding:80px 40px;
+            }
+
+            .nav-links.active { right: 0; }
+            
+            .nav-links a { font-size: 20px; color: white; margin: 5px 0; }
+            
+            .auth-buttons { display: none; } /* Hide desktop auth buttons on mobile */
+            .nav-links .mobile-auth { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; width: 100%; }
+            .nav-links .mobile-auth .btn { width: 100%; justify-content: center; }
+
+            .hero { 
+                flex-direction: column; 
+                text-align: center; 
+                padding-top: 40px; 
+                padding-bottom: 60px;
+                gap: 40px;
+            }
+            
             .hero-text { margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+            
+            .hero-text h1 { font-size: 42px; }
+            
             .stats { flex-wrap: wrap; justify-content: center; gap: 30px; }
-            .hero-image { width: 100%; height: 350px; margin-top: 40px; }
-            .footer-grid { grid-template-columns: 1fr; gap: 40px; text-align: center; }
-            .step-item { flex-direction: column !important; gap: 30px; text-align: center; }
+            
+            .hero-image { 
+                width: 100%; 
+                height: 350px; 
+                margin-top: 140px; /* Increased margin to prevent overlap */
+                transform: scale(0.8); /* Reduced scale */
+                margin-bottom: 80px;
+            }
+
+            .footer-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 30px 20px; 
+                text-align: left; 
+                padding-bottom: 20px;
+            }
+            .footer-col:first-child { 
+                grid-column: span 2; 
+                text-align: center; 
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                padding-bottom: 20px;
+                margin-bottom: 10px;
+            }
+            .footer-grid .logo-container { justify-content: center; }
+            .footer-col p { margin: 0 auto; }
+            .footer-col h4 { margin-bottom: 15px; } /* Compact header spacing */
+            
+            .step-item { flex-direction: column !important; gap: 30px; text-align: center; margin-bottom: 60px; }
             .step-num { left: 50%; transform: translateX(-50%); top: -50px; }
+            .step-visual { height: 400px; }
+            
+            .cta-band { padding: 40px 20px; }
+            .cta-band h2 { font-size: 28px; }
+        }
+
+        @media (max-width: 480px) {
+            .section { padding: 60px 5%; }
+            .hero-text h1 { font-size: 36px; }
+            .hero-subtitle { font-size: 20px; }
+            .section-title { font-size: 28px; }
+            .stat-item h3 { font-size: 24px; }
         }
     </style>
 </head>
@@ -529,11 +627,27 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
                 <span>Bookify</span>
             </a>
 
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How it Works</a>
-                <a href="#testimonials">Testimonials</a>
-                <a href="#faq">FAQ</a>
+            <div class="mobile-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <div class="nav-links" id="navLinks">
+                <a href="#features" onclick="toggleMenu()">Features</a>
+                <a href="#how-it-works" onclick="toggleMenu()">How it Works</a>
+                <a href="#testimonials" onclick="toggleMenu()">Testimonials</a>
+                <a href="#faq" onclick="toggleMenu()">FAQ</a>
+                
+                <div class="mobile-auth">
+                    <a href="register" class="btn btn-primary" onclick="toggleMenu()">
+                        <i class="fas fa-rocket"></i> Register
+                    </a>
+                    <a href="login" class="btn btn-outline" onclick="toggleMenu()">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="App/app-release.apk" class="btn btn-outline" download onclick="toggleMenu()">
+                        <i class="fab fa-android"></i> Download App
+                    </a>
+                </div>
             </div>
 
             <div class="auth-buttons">
@@ -808,9 +922,26 @@ Record income and expenses in real time, categorize transactions, and maintain a
         <i class="fab fa-whatsapp"></i>
     </div> -->
 
-    <a href="register" class="fab-get-started">
-        <i class="fas fa-rocket"></i> Get Started
-    </a>
+    
 
+    <!-- Mobile Menu Script -->
+    <script>
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const toggleIcon = document.querySelector('.mobile-toggle i');
+            
+            navLinks.classList.toggle('active');
+            
+            if (navLinks.classList.contains('active')) {
+                toggleIcon.classList.remove('fa-bars');
+                toggleIcon.classList.add('fa-times');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            } else {
+                toggleIcon.classList.remove('fa-times');
+                toggleIcon.classList.add('fa-bars');
+                document.body.style.overflow = 'auto'; // Enable scrolling
+            }
+        }
+    </script>
 </body>
 </html>
