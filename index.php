@@ -137,8 +137,8 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 
         .btn-outline:hover {
             background: white;
-            color: var(--primary-dark);
-            border-color: white;
+            color: var(--primary-dark)!important;
+            border-color: var(--primary-dark)!important;
         }
         
         .btn-white {
@@ -644,16 +644,10 @@ $isLoggedIn = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
                     <a href="login" class="btn btn-outline" onclick="toggleMenu()">
                         <i class="fas fa-sign-in-alt"></i> Login
                     </a>
-                    <a href="App/app-release.apk" class="btn btn-outline" download onclick="toggleMenu()">
+                    <a href="App/app-release.apk" class="btn btn-primary" download onclick="toggleMenu()">
                         <i class="fab fa-android"></i> Download App
                     </a>
                 </div>
-            </div>
-
-            <div class="auth-buttons">
-                <a href="App/app-release.apk" class="btn btn-primary" download>
-                    <i class="fab fa-android"></i> Download App
-                </a>
             </div>
         </nav>
 
