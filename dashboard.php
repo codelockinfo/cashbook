@@ -281,6 +281,17 @@ $user = getCurrentUser();
                 <input type="hidden" id="editEntryId">
                 
                 <div class="form-group">
+                    <label for="editEntryDate">
+                        <i class="fas fa-calendar"></i> Date & Time
+                    </label>
+                    <input type="datetime-local" id="editEntryDate" required style="display: none;">
+                    <div id="editEntryDateDisplay" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+                        <span id="editEntryDateText">Select Date & Time</span>
+                        <i class="fas fa-calendar-alt" style="color: #6b7280;"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
                     <label for="editEntryAmount">
                         <i class="fas fa-rupee-sign"></i> Amount
                     </label>

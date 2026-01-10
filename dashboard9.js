@@ -697,10 +697,14 @@ async function handleEntry(type) {
         return;
     }
     
-    // Update datetime to current time right before submitting to ensure accurate timestamp
-    const now = new Date();
-    const localDateTime = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    document.getElementById('entryDate').value = localDateTime;
+    // Get the selected datetime from the input field (user's selected value)
+    const entryDateInput = document.getElementById('entryDate');
+    const selectedDateTime = entryDateInput.value;
+    
+    if (!selectedDateTime) {
+        showToast('Please select a date and time', 'error');
+        return;
+    }
     
     // Use FormData to handle file uploads
     const formData = new FormData();
@@ -708,7 +712,7 @@ async function handleEntry(type) {
     formData.append('type', type);
     formData.append('group_id', groupId);
     formData.append('amount', document.getElementById('entryAmount').value);
-    formData.append('datetime', localDateTime); // Use the updated datetime
+    formData.append('datetime', selectedDateTime); // Use the selected datetime
     formData.append('message', document.getElementById('entryMessage').value);
     
     // Add attachment if selected
@@ -1341,11 +1345,29 @@ function populateEditForm(entry) {
     document.getElementById('editAttachmentFileName').textContent = 'No file chosen';
     document.getElementById('removeEditAttachment').style.display = 'none';
     
-    // Set values (datetime is not editable)
+    // Set values
     document.getElementById('editEntryId').value = entry.id;
     document.getElementById('editEntryAmount').value = entry.amount;
     document.getElementById('editEntryType').value = entry.type;
     document.getElementById('editEntryMessage').value = entry.message || '';
+    
+    // Set datetime value - convert from database format to datetime-local format
+    const editDateInput = document.getElementById('editEntryDate');
+    if (editDateInput && entry.datetime) {
+        // Convert database datetime (YYYY-MM-DD HH:MM:SS) to datetime-local format (YYYY-MM-DDTHH:MM)
+        const dbDateTime = new Date(entry.datetime);
+        const localDateTime = new Date(dbDateTime - dbDateTime.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        editDateInput.value = localDateTime;
+        
+        // Initialize or update datetime picker for edit modal
+        // The picker will read the value from the input if it's set before initialization
+        if (!window.editDateTimePicker) {
+            window.editDateTimePicker = new DateTimePicker('editEntryDate');
+        } else {
+            // Update the picker with the new value
+            window.editDateTimePicker.setValue(localDateTime);
+        }
+    }
     
     // Load groups and set current group
     loadGroupsForEdit(entry.group_id);
@@ -1607,11 +1629,17 @@ async function handleEditSubmit(e) {
     const type = document.getElementById('editEntryType').value;
     const groupId = document.getElementById('editEntryGroup').value;
     const message = document.getElementById('editEntryMessage').value;
+    const editDateInput = document.getElementById('editEntryDate');
     const attachmentInput = document.getElementById('editEntryAttachment');
     
-    // Validate (datetime is not editable)
+    // Validate
     if (!entryId || !amount || !type || !groupId) {
         showToast('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    if (!editDateInput || !editDateInput.value) {
+        showToast('Please select a date and time', 'error');
         return;
     }
     
@@ -1627,6 +1655,7 @@ async function handleEditSubmit(e) {
     formData.append('amount', amount);
     formData.append('type', type);
     formData.append('group_id', groupId);
+    formData.append('datetime', editDateInput.value);
     formData.append('message', message);
     formData.append('remove_attachment', shouldRemoveCurrentAttachment ? 'true' : 'false');
     

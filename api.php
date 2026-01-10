@@ -304,13 +304,23 @@ function updateEntry($conn, $user_id) {
         $group_id = $_POST['group_id'] ?? '';
         $amount = $_POST['amount'] ?? 0;
         $message = $_POST['message'] ?? '';
+        $datetime = $_POST['datetime'] ?? '';
         $remove_attachment = $_POST['remove_attachment'] ?? '';
         
-        // Validate inputs (datetime is not editable, so we don't need it from POST)
-        if (empty($entry_id) || empty($type) || empty($group_id) || empty($amount)) {
+        // Validate inputs
+        if (empty($entry_id) || empty($type) || empty($group_id) || empty($amount) || empty($datetime)) {
             echo json_encode(['success' => false, 'message' => 'All required fields must be filled']);
             return;
         }
+        
+        // Validate datetime format (YYYY-MM-DDTHH:MM)
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $datetime)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid datetime format']);
+            return;
+        }
+        
+        // Convert datetime-local format to database format (YYYY-MM-DD HH:MM:SS)
+        $datetime_db = str_replace('T', ' ', $datetime) . ':00';
         
         if (!in_array($type, ['in', 'out'])) {
             echo json_encode(['success' => false, 'message' => 'Invalid transaction type']);
@@ -388,20 +398,25 @@ function updateEntry($conn, $user_id) {
             }
         }
         
-        // Update entry (datetime is not editable, keep original value)
-        $stmt = $conn->prepare("UPDATE entries SET group_id = ?, type = ?, amount = ?, message = ?, attachment = ? WHERE id = ?");
-        $stmt->bind_param("isdssi", $group_id, $type, $amount, $message, $attachment, $entry_id);
+        // Update entry including datetime
+        // Parameters: group_id(i), type(s), amount(d), datetime(s), message(s), attachment(s), id(i)
+        $stmt = $conn->prepare("UPDATE entries SET group_id = ?, type = ?, amount = ?, datetime = ?, message = ?, attachment = ? WHERE id = ?");
+        // Format: i(group_id), s(type), d(amount), s(datetime), s(message), s(attachment), i(entry_id) = 7 parameters
+        // Fixed format: i(group_id), s(type), d(amount), s(datetime), s(message), s(attachment), i(entry_id) = 7 chars
+        $format = "i" . "s" . "d" . "s" . "s" . "s" . "i"; // 7 characters: isdsissi
+        $stmt->bind_param($format, $group_id, $type, $amount, $datetime_db, $message, $attachment, $entry_id);
         
         if ($stmt->execute()) {
             // Log edit history - track what fields were changed
             $now = date('Y-m-d H:i:s');
             $historyStmt = $conn->prepare("INSERT INTO entry_edit_history (entry_id, edited_by, edited_at, field_name, old_value, new_value) VALUES (?, ?, ?, ?, ?, ?)");
             
-            // Track changes for each field (datetime is not editable, so don't track it)
+            // Track changes for each field including datetime
             $fieldsToTrack = [
                 'group_id' => ['old' => $currentEntry['group_id'], 'new' => $group_id],
                 'type' => ['old' => $currentEntry['type'], 'new' => $type],
                 'amount' => ['old' => $currentEntry['amount'], 'new' => $amount],
+                'datetime' => ['old' => $currentEntry['datetime'], 'new' => $datetime_db],
                 'message' => ['old' => $currentEntry['message'] ?? '', 'new' => $message ?? ''],
                 'attachment' => ['old' => $currentEntry['attachment'] ?? '', 'new' => $attachment ?? '']
             ];

@@ -14,9 +14,21 @@ class DateTimePicker {
             ...options
         };
 
-        this.selectedDate = new Date();
-        this.selectedHour = new Date().getHours();
-        this.selectedMinute = new Date().getMinutes();
+        // Initialize with current date/time, but check if input has a value first
+        const now = new Date();
+        this.selectedDate = new Date(now);
+        this.selectedHour = now.getHours();
+        this.selectedMinute = now.getMinutes();
+        
+        // If input already has a value, use it instead
+        if (this.input.value) {
+            const inputDate = new Date(this.input.value);
+            if (!isNaN(inputDate.getTime())) {
+                this.selectedDate = inputDate;
+                this.selectedHour = inputDate.getHours();
+                this.selectedMinute = inputDate.getMinutes();
+            }
+        }
 
         this.init();
     }
@@ -25,11 +37,15 @@ class DateTimePicker {
         // Hide the original input
         this.input.style.display = 'none';
 
+        // Derive display element IDs from input ID or use provided options
+        const displayId = this.options.displayId || this.input.id + 'Display';
+        const textId = this.options.textId || this.input.id + 'Text';
+
         // Check if display element exists, if not create it
-        this.displayElement = document.getElementById('entryDateDisplay');
+        this.displayElement = document.getElementById(displayId);
         if (!this.displayElement) {
             this.displayElement = document.createElement('div');
-            this.displayElement.id = 'entryDateDisplay';
+            this.displayElement.id = displayId;
             this.displayElement.className = 'datetime-picker-input';
             this.displayElement.style.cssText = 'width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; position: relative; margin: 0;';
             this.input.parentNode.insertBefore(this.displayElement, this.input.nextSibling);
@@ -57,10 +73,10 @@ class DateTimePicker {
         }
 
         // Get or create text element
-        this.textElement = document.getElementById('entryDateText');
+        this.textElement = document.getElementById(textId);
         if (!this.textElement) {
             this.textElement = document.createElement('span');
-            this.textElement.id = 'entryDateText';
+            this.textElement.id = textId;
             this.displayElement.appendChild(this.textElement);
         }
 
@@ -182,13 +198,21 @@ class DateTimePicker {
     }
 
     renderCalendar() {
+        // Check if modal exists
+        if (!this.modal || !this.modal.parentNode) {
+            return;
+        }
+
         const year = this.selectedDate.getFullYear();
         const month = this.selectedDate.getMonth();
 
-        // Update month/year display
+        // Update month/year display - use modal-scoped query
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'];
-        document.getElementById('calendarMonthYear').textContent = `${monthNames[month]}, ${year}`;
+        const monthYearEl = this.modal.querySelector('#calendarMonthYear');
+        if (monthYearEl) {
+            monthYearEl.textContent = `${monthNames[month]}, ${year}`;
+        }
 
         // Get first day of month and number of days
         const firstDay = new Date(year, month, 1).getDay();
@@ -198,7 +222,11 @@ class DateTimePicker {
         // Adjust first day (Monday = 0)
         const adjustedFirstDay = (firstDay + 6) % 7;
 
-        const calendarDays = document.getElementById('calendarDays');
+        // Use modal-scoped query instead of global getElementById
+        const calendarDays = this.modal.querySelector('#calendarDays');
+        if (!calendarDays) {
+            return;
+        }
         calendarDays.innerHTML = '';
 
         // Previous month days
@@ -419,6 +447,13 @@ class DateTimePicker {
                 this.selectedHour = date.getHours();
                 this.selectedMinute = date.getMinutes();
                 this.updateInputValue();
+                
+                // Re-render calendar if modal already exists
+                if (this.modal && this.modal.parentNode) {
+                    this.renderCalendar();
+                    this.updateTimeSelection();
+                    this.scrollToSelectedTime();
+                }
             }
         }
     }
