@@ -3,7 +3,7 @@
         'name' => 'cashbook/password-reset',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'c81ac25928d8ea0d973c70fee143dbe03313f3a6',
+        'reference' => '569c1e10764cf6e9009e319f561fd73d89245939',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'cashbook/password-reset' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'c81ac25928d8ea0d973c70fee143dbe03313f3a6',
+            'reference' => '569c1e10764cf6e9009e319f561fd73d89245939',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
