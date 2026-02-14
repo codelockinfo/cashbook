@@ -5,15 +5,15 @@
 echo "Starting deployment..."
 
 # Remove vendor directory and composer.lock if they exist (from previous deployment)
-if [ -d "vendor" ]; then
-    echo "Removing existing vendor directory..."
-    rm -rf vendor
-fi
+# if [ -d "vendor" ]; then
+#     echo "Removing existing vendor directory..."
+#     rm -rf vendor
+# fi
 
-if [ -f "composer.lock" ]; then
-    echo "Removing existing composer.lock..."
-    rm -f composer.lock
-fi
+# if [ -f "composer.lock" ]; then
+#     echo "Removing existing composer.lock..."
+#     rm -f composer.lock
+# fi
 
 # Pull latest code from Git
 echo "Pulling latest code from Git..."
