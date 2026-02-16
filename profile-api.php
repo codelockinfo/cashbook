@@ -55,9 +55,70 @@ switch ($action) {
     case 'remove_photo':
         removePhoto($conn);
         break;
+    case 'delete_account':
+        deleteAccount($conn);
+        break;
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;
+}
+
+// Delete user account
+function deleteAccount($conn) {
+    try {
+        $userId = $_SESSION['user_id'];
+        $password = $_POST['password'] ?? '';
+        
+        if (empty($password)) {
+            echo json_encode(['success' => false, 'message' => 'Password is required']);
+            return;
+        }
+        
+        // Disable foreign key checks to allow deletion if needed (though cascading should handle it)
+        // But let's rely on cascading deletes defined in the schema
+        
+        // Get user data to verify password and get profile picture path
+        $stmt = $conn->prepare("SELECT password, profile_picture FROM users WHERE id = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        
+        if (!$user) {
+            echo json_encode(['success' => false, 'message' => 'User not found']);
+            return;
+        }
+        
+        // Verify password
+        if (!password_verify($password, $user['password'])) {
+            echo json_encode(['success' => false, 'message' => 'Incorrect password']);
+            return;
+        }
+        
+        // Delete profile picture file if exists
+        if ($user['profile_picture']) {
+            $filePath = __DIR__ . '/' . $user['profile_picture'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+        
+        // Delete user from database
+        $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+        $stmt->bind_param("i", $userId);
+        
+        if ($stmt->execute()) {
+            // Destroy session
+            session_destroy();
+            echo json_encode(['success' => true, 'message' => 'Account deleted successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to delete account: ' . $conn->error]);
+        }
+        
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
 }
 
 // Update user profile

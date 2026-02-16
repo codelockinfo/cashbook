@@ -154,6 +154,11 @@ $user = getCurrentUser();
                 <button type="submit" class="btn btn-primary" id="updateBtn">
                     <i class="fas fa-save"></i> Update Profile
                 </button>
+                <div id="deleteAccount" style="margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                    <button type="button" class="btn btn-danger" id="deleteAccountBtn" style="background-color: #ef4444; color: white; width: 100%;">
+                        <i class="fas fa-trash-alt"></i> Delete Account
+                    </button>
+                </div>
             </form>
         </div>
         </div>
@@ -203,10 +208,52 @@ $user = getCurrentUser();
         </div>
     </div>
 
-    <!-- Floating Help & Support Button (Bottom Right - Icon Only) -->
+    <!-- Delete Account Confirmation Modal -->
+    <div id="deleteAccountModal" class="confirm-modal" style="display: none;">
+        <div class="confirm-modal-overlay"></div>
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header confirm-modal-header-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Delete Account</h3>
+            </div>
+            <div class="confirm-modal-body">
+                <p style="margin-bottom: 20px;">Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data will be erased.</p>
+                
+                <form id="deleteAccountForm">
+                    <div class="form-group">
+                        <label for="deletePassword" style="color: #374151;">Password</label>
+                        <div class="password-input">
+                            <input type="password" id="deletePassword" placeholder="Enter your password" required>
+                            <button type="button" class="toggle-password" id="toggleDeletePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label for="deleteConfirmation" style="color: #374151;">To confirm, type "DELETE"</label>
+                        <input type="text" id="deleteConfirmation" placeholder="Type DELETE" required style="width: 100%; border: 1px solid #d1d5db; padding: 10px; border-radius: 6px;">
+                    </div>
+                </form>
+            </div>
+            <div class="confirm-modal-footer">
+                <button class="btn-cancel" id="deleteAccountCancelBtn">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn-confirm" id="deleteAccountConfirmBtn" disabled style="background-color: #ef4444; opacity: 0.5; cursor: not-allowed;">
+                    <i class="fas fa-trash-alt"></i> Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+
     <a href="help-support" class="help-support-floating-btn" title="Help & Support">
         <i class="fas fa-headset"></i>
     </a>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
 
     
     <script>
@@ -519,6 +566,128 @@ $user = getCurrentUser();
                 setTimeout(() => {
                     toast.classList.remove('show');
                 }, 3000);
+            }
+            // Delete Account Functionality
+            const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+            const deleteAccountModal = document.getElementById('deleteAccountModal');
+            const deleteAccountCancelBtn = document.getElementById('deleteAccountCancelBtn');
+            const deleteAccountConfirmBtn = document.getElementById('deleteAccountConfirmBtn');
+            const deletePasswordInput = document.getElementById('deletePassword');
+            const deleteConfirmationInput = document.getElementById('deleteConfirmation');
+            const deleteAccountForm = document.getElementById('deleteAccountForm');
+            const toggleDeletePasswordBtn = document.getElementById('toggleDeletePassword');
+
+            if (deleteAccountBtn) {
+                deleteAccountBtn.addEventListener('click', function() {
+                    deleteAccountModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    deletePasswordInput.value = '';
+                    deleteConfirmationInput.value = '';
+                    deleteAccountConfirmBtn.disabled = true;
+                    deleteAccountConfirmBtn.style.opacity = '0.5';
+                    deleteAccountConfirmBtn.style.cursor = 'not-allowed';
+                });
+            }
+
+            if (deleteAccountCancelBtn) {
+                deleteAccountCancelBtn.addEventListener('click', function() {
+                    deleteAccountModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                });
+            }
+            
+            // Close modal when clicking overlay
+            if (deleteAccountModal) {
+                 const overlay = deleteAccountModal.querySelector('.confirm-modal-overlay');
+                 if(overlay) {
+                     overlay.addEventListener('click', function() {
+                        deleteAccountModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                     });
+                 }
+            }
+
+            // Monitor inputs to enable/disable delete button
+            function checkDeleteInputs() {
+                const password = deletePasswordInput.value;
+                const confirmation = deleteConfirmationInput.value;
+                
+                if (password && confirmation === 'DELETE') {
+                    deleteAccountConfirmBtn.disabled = false;
+                    deleteAccountConfirmBtn.style.opacity = '1';
+                    deleteAccountConfirmBtn.style.cursor = 'pointer';
+                } else {
+                    deleteAccountConfirmBtn.disabled = true;
+                    deleteAccountConfirmBtn.style.opacity = '0.5';
+                    deleteAccountConfirmBtn.style.cursor = 'not-allowed';
+                }
+            }
+
+            if (deletePasswordInput) deletePasswordInput.addEventListener('input', checkDeleteInputs);
+            if (deleteConfirmationInput) deleteConfirmationInput.addEventListener('input', checkDeleteInputs);
+
+             // Toggle delete password visibility
+            if (toggleDeletePasswordBtn) {
+                // Remove any existing listener (just in case, though cloneNode is safer if we want to be sure)
+                const newBtn = toggleDeletePasswordBtn.cloneNode(true);
+                toggleDeletePasswordBtn.parentNode.replaceChild(newBtn, toggleDeletePasswordBtn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const type = deletePasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    console.log('Toggling password visibility to:', type);
+                    deletePasswordInput.setAttribute('type', type);
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            }
+
+
+
+            // Handle delete account confirmation
+            if (deleteAccountConfirmBtn) {
+                deleteAccountConfirmBtn.addEventListener('click', async function() {
+                   if (deleteAccountConfirmBtn.disabled) return;
+                   
+                   const password = deletePasswordInput.value;
+                   
+                    // Show loading state
+                    const originalHTML = deleteAccountConfirmBtn.innerHTML;
+                    deleteAccountConfirmBtn.disabled = true;
+                    deleteAccountConfirmBtn.innerHTML = '<span class="loading"></span> Deleting...';
+                    
+                    try {
+                        const response = await fetch(BASE_PATH + '/profile-api.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams({
+                                action: 'delete_account',
+                                password: password
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            showToast('Account deleted successfully', 'success');
+                            setTimeout(() => {
+                                window.location.href = BASE_PATH + '/register.php';
+                            }, 1000);
+                        } else {
+                            showToast(data.message || 'Failed to delete account', 'error');
+                            deleteAccountConfirmBtn.disabled = false;
+                            deleteAccountConfirmBtn.innerHTML = originalHTML;
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showToast('An error occurred', 'error');
+                        deleteAccountConfirmBtn.disabled = false;
+                        deleteAccountConfirmBtn.innerHTML = originalHTML;
+                    }
+                });
             }
         })(); // End of IIFE
     </script>
