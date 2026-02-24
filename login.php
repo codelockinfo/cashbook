@@ -80,6 +80,10 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
 
+                <button type="button" class="btn btn-secondary" id="demoBtn">
+                    <i class="fas fa-user-shield"></i> Demo Login
+                </button>
+
                 <div class="forgot-password-link">
                     <a href="forgot-password"><i class="fas fa-question-circle"></i> Forgot Password?</a>
                 </div>
@@ -115,6 +119,17 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
                 }
             });
         })();
+
+        // Demo Login functionality
+        document.getElementById('demoBtn').addEventListener('click', function() {
+            document.getElementById('email').value = 'codelock2021@gmail.com';
+            document.getElementById('password').value = 'Codelock@99';
+            
+            // Wait a tiny bit for UI update then click login
+            setTimeout(() => {
+                document.getElementById('loginBtn').click();
+            }, 100);
+        });
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo ASSET_VERSION; ?>"></script>
     <script src="<?php echo BASE_PATH; ?>/auth9.js?v=<?php echo ASSET_VERSION; ?>"></script>
