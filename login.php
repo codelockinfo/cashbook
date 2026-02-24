@@ -81,7 +81,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
                 </button>
 
                 <button type="button" class="btn btn-secondary" id="demoBtn">
-                    <i class="fas fa-user-shield"></i> Demo Login
+                    <i class="fas fa-user-shield"></i> Demo Account
                 </button>
 
                 <div class="forgot-password-link">
@@ -122,8 +122,8 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 
         // Demo Login functionality
         document.getElementById('demoBtn').addEventListener('click', function() {
-            document.getElementById('email').value = 'codelock2021@gmail.com';
-            document.getElementById('password').value = 'Codelock@99';
+            document.getElementById('email').value = 'demo@gmail.com';
+            document.getElementById('password').value = 'demo@123';
             
             // Wait a tiny bit for UI update then click login
             setTimeout(() => {
