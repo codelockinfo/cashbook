@@ -123,11 +123,12 @@ function createGroup($conn, $user_id) {
 // Get user's groups
 function getMyGroups($conn, $user_id) {
     try {
-        $sql = "SELECT g.id, g.name, g.description, g.created_by, gm.role,
+        $sql = "SELECT g.id, g.name, g.description, g.created_by, gm.role, u.name as created_by_name,
                 (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count,
                 (SELECT COUNT(*) FROM group_requests WHERE group_id = g.id AND status = 'pending') as pending_count
                 FROM `groups` g
                 INNER JOIN group_members gm ON g.id = gm.group_id
+                LEFT JOIN users u ON g.created_by = u.id
                 WHERE gm.user_id = ?
                 ORDER BY g.created_at DESC";
         

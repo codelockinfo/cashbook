@@ -12,7 +12,7 @@ $user = getCurrentUser();
     <title>My Groups - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style14.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style15.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <style>
         .groups-container {
             max-width: 1200px;
@@ -536,7 +536,12 @@ $user = getCurrentUser();
                 <button class="modal-close" onclick="closeModal('inviteUsersModal')">&times;</button>
             </div>
             <div class="form-group">
-                <label><i class="fas fa-search"></i> Search Users</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="margin-bottom: 0;"><i class="fas fa-search"></i> Search Users</label>
+                    <button type="button" onclick="shareApp(currentGroupName, currentGroupCreator)" style="background: none; border: none; color: var(--primary-color); cursor: pointer; font-size: 1.25rem; transition: transform 0.2s;" title="Share App" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <i class="fas fa-share-nodes"></i>
+                    </button>
+                </div>
                 <input type="text" id="searchUsers" placeholder="Search by name or email..." style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px;">
             </div>
             <div id="usersList" class="user-list">
@@ -598,7 +603,7 @@ $user = getCurrentUser();
         // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/groups4.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/groups5.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 

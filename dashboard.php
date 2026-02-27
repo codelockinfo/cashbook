@@ -11,7 +11,7 @@ $user = getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookify Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style14.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style15.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/datetime-picker1.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -40,10 +40,16 @@ $user = getCurrentUser();
                     <a href="profile" class="manage-users-link">
                         <i class="fas fa-circle-user"></i> My Profile
                     </a>
+                    <?php if (userHasCreatedGroup()): ?>
                     <a href="groups" class="manage-users-link" id="myGroupsLink">
                         <i class="fas fa-users"></i> My Groups
                         <span class="notification-badge" id="pendingRequestsBadge" style="display: none;">0</span>
                     </a>
+                    <?php else: ?>
+                    <button onclick="window.location.href='groups?action=create'" id="createGroupBtnHeader" class="manage-users-link">
+                        <i class="fas fa-plus-circle"></i> Create Group
+                    </button>
+                    <?php endif; ?>
                     <button id="logoutBtn" class="manage-users-link logout-btn">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>

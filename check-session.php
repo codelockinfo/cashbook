@@ -66,5 +66,31 @@ function getCurrentUser() {
     }
     return null;
 }
+
+// Check if user has created any groups globally
+function userHasCreatedGroup() {
+    $user = getCurrentUser();
+    if (!$user) return false;
+    
+    // Check if $conn is available from config.php or global scope
+    $conn = null;
+    if (function_exists('getDBConnection')) {
+        $conn = getDBConnection();
+    }
+    
+    if ($conn) {
+        $hasCreated = false;
+        if ($stmt = $conn->prepare("SELECT id FROM `groups` WHERE created_by = ? LIMIT 1")) {
+            $stmt->bind_param("i", $user['id']);
+            $stmt->execute();
+            $stmt->store_result();
+            $hasCreated = $stmt->num_rows > 0;
+            $stmt->close();
+        }
+        $conn->close();
+        return $hasCreated;
+    }
+    return false;
+}
 ?>
 

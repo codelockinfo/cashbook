@@ -1298,7 +1298,7 @@ body {
         padding: 20px 12px;
     }
     .header {
-        padding: 20px 12px;
+        padding: 12px 12px;
     }
 
     .stat-icon {
@@ -1425,6 +1425,7 @@ body {
     .header-content {
         flex-direction: column;
         text-align: center;
+        gap: 0px !important;
     }
 
     .header-actions {
@@ -1438,14 +1439,50 @@ body {
         justify-content: center;
     }
 
+    .header {
+        position: relative;
+    }
+
     .manage-users-link {
         width: 100%;
         justify-content: center;
     }
 
+    /* Mobile: Profile Icon at Left Top */
+    .header-actions a[href="profile"] {
+        position: absolute !important;
+        top: 20px;
+        left: 20px;
+        width: 35px !important;
+        height: 35px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        font-size: 0 !important; /* hide text */
+        gap: 0 !important;
+    }
+    
+    .header-actions a[href="profile"] i {
+        font-size: 1.2rem;
+        margin: 0 !important;
+    }
+
+    /* Mobile: Logout Icon at Right Top */
     .logout-btn {
-        width: 100%;
+        position: absolute !important;
+        top: 20px;
+        right: 20px;
+        width: 35px !important;
+        height: 35px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        font-size: 0 !important; /* hide text */
         justify-content: center;
+        gap: 0 !important;
+    }
+
+    .logout-btn i {
+        font-size: 1.2rem;
+        margin: 0 !important;
     }
 
     .total-balance {
@@ -1453,8 +1490,9 @@ body {
     }
 
     .logo {
-        flex-direction: column;
-        gap: 10px;
+        flex-direction: row;
+        gap: 1px;
+        margin-top: 15px;
     }
 
     .stats-grid {

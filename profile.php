@@ -13,7 +13,7 @@ $user = getCurrentUser();
     <title>My Profile - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style14.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style15.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style8.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
 </head>
 <body>
@@ -41,9 +41,15 @@ $user = getCurrentUser();
                     <a href="dashboard" class="manage-users-link">
                         <i class="fas fa-home"></i> Dashboard
                     </a>
+                    <?php if (userHasCreatedGroup()): ?>
                     <a href="groups" class="manage-users-link">
                         <i class="fas fa-users"></i> My Groups
                     </a>
+                    <?php else: ?>
+                    <button onclick="window.location.href='groups?action=create'" id="createGroupBtnHeader" class="manage-users-link">
+                        <i class="fas fa-plus-circle"></i> Create Group
+                    </button>
+                    <?php endif; ?>
                     <a href="profile" class="manage-users-link" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
                         <i class="fas fa-circle-user"></i> My Profile
                     </a>
@@ -117,7 +123,7 @@ $user = getCurrentUser();
                         <i class="fas fa-lock"></i> Current Password
                     </label>
                     <div class="password-input">
-                        <input type="password" id="currentPassword" placeholder="Enter current password">
+                        <input type="password" id="currentPassword" placeholder="Enter current password" autocomplete="new-password">
                         <button type="button" class="toggle-password" id="toggleCurrentPassword">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -130,7 +136,7 @@ $user = getCurrentUser();
                         <i class="fas fa-key"></i> New Password
                     </label>
                     <div class="password-input">
-                        <input type="password" id="newPassword" placeholder="Enter new password (min 6 characters)">
+                        <input type="password" id="newPassword" placeholder="Enter new password (min 6 characters)" autocomplete="new-password">
                         <button type="button" class="toggle-password" id="toggleNewPassword">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -143,7 +149,7 @@ $user = getCurrentUser();
                         <i class="fas fa-key"></i> Confirm New Password
                     </label>
                     <div class="password-input">
-                        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password" autocomplete="new-password">
                         <button type="button" class="toggle-password" id="toggleConfirmPassword">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -462,9 +468,9 @@ $user = getCurrentUser();
 
                     const name = document.getElementById('name').value.trim();
                     const email = document.getElementById('email').value.trim();
-                    const currentPassword = document.getElementById('currentPassword').value;
-                    const newPassword = document.getElementById('newPassword').value;
-                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    let currentPassword = document.getElementById('currentPassword').value.trim();
+                    const newPassword = document.getElementById('newPassword').value.trim();
+                    const confirmPassword = document.getElementById('confirmPassword').value.trim();
                     const profilePicture = profilePictureInput.files[0];
                     const updateBtn = document.getElementById('updateBtn');
 
@@ -475,13 +481,9 @@ $user = getCurrentUser();
                     }
 
                     // Password validation if changing password
-                    if (currentPassword || newPassword || confirmPassword) {
+                    if (newPassword || confirmPassword) {
                         if (!currentPassword) {
-                            showToast('Please enter your current password', 'error');
-                            return;
-                        }
-                        if (!newPassword || !confirmPassword) {
-                            showToast('Please enter and confirm your new password', 'error');
+                            showToast('Please enter your current password to change it', 'error');
                             return;
                         }
                         if (newPassword !== confirmPassword) {
@@ -492,6 +494,9 @@ $user = getCurrentUser();
                             showToast('New password must be at least 6 characters', 'error');
                             return;
                         }
+                    } else {
+                        // If no new password is provided, ignore the current password
+                        currentPassword = ''; 
                     }
 
                     // Profile picture validation
