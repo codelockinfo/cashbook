@@ -639,18 +639,36 @@ function showToast(message, type = "success") {
   }, 3000);
 }
 
+// Check for strict in-app browsers to prevent intent crashing
+function isInAppBrowser() {
+  const ua = navigator.userAgent || "";
+  // Check for common rigidly embedded WebViews
+  return /FBAN|FBAV|Instagram|Line|WhatsApp|wv/i.test(ua);
+}
+
 // Share App
 function shareApp(groupName, creatorName) {
   const shareUrl = "https://play.google.com/store/apps/details?id=com.codelock.bookifyapp";
   const shareTitle = "Bookify - Cashbook App";
   const displayName = creatorName ? creatorName : "Admin";
   const shareMessage = `${displayName} invites you in this group: "${groupName}". Download the app or login here:`;
+  const fullText = `${shareMessage} ${shareUrl}`;
 
-  // Fully Custom Share Bottom Sheet (Overrides Native Share API entirely)
-  const fullText = `${shareMessage} ${shareUrl}`; // Keep on one line for optimal URL parsing in some apps
-  
-  // Show modal immediately without auto-copying to clipboard
-  showCustomShareModal(shareTitle, fullText, shareUrl, shareMessage);
+  // Native mobile share (BEST practice for modern OS)
+  // High success rate on Android and iOS
+  if (navigator.share) {
+    navigator.share({
+      title: shareTitle,
+      text: fullText, // Pass full text as message
+      // Note: intentionally leaving 'url' out to ensure the link goes with the text block accurately on all platforms
+    }).catch((err) => {
+        // Fallback to our custom modal if the user cancels or the API fails
+        console.log("Native share failed or cancelled: ", err);
+    });
+  } else {
+    // If native sharing is not supported, completely fallback to our bottom sheet Custom Share Modal
+    showCustomShareModal(shareTitle, fullText, shareUrl, shareMessage);
+  }
 }
 
 // Custom Fallback Share Modal
@@ -739,13 +757,28 @@ function showCustomShareModal(title, fullText, url, originalMessage) {
 
 // Universal open app + fallback
 function openUniversalApp(appUrl, webUrl) {
-    // Try to open the native app scheme
-    window.location.href = appUrl;
-
-    // Set a timeout to navigate to the web URL if the app didn't open
-    setTimeout(() => {
+    // If inside in-app browser (e.g., rigid WebViews like Facebook/Instagram)
+    // -> directly open safe web version to prevent intent schema crash
+    if (isInAppBrowser()) {
         window.location.href = webUrl;
-    }, 900);
+        return;
+    }
+
+    // Try to open the native app silently using an invisible iframe
+    let iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = appUrl;
+    document.body.appendChild(iframe);
+
+    // Set an increased 1200ms timeout to gracefully fall back to web URLs
+    // if the native app doesn't grab focus or exist
+    setTimeout(() => {
+        // Clean up
+        if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+        }
+        window.location.href = webUrl;
+    }, 1200);
 }
 
 function closeCustomShareModal() {
