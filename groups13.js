@@ -655,8 +655,10 @@ function shareApp(groupName, creatorName) {
   const fullText = `${shareMessage} ${shareUrl}`;
 
   // Native mobile share (BEST practice for modern OS)
-  // High success rate on Android and iOS
-  if (navigator.share) {
+  // High success rate on Android and iOS (Chrome/Safari)
+  // Skip native share entirely if we detect we are in a WebView/App wrapper 
+  // because the Java hook is missing, which causes it to silently fail or 500 error.
+  if (navigator.share && !isInAppBrowser()) {
     navigator.share({
       title: shareTitle,
       text: fullText, // Pass full text as message
@@ -666,7 +668,8 @@ function shareApp(groupName, creatorName) {
         console.log("Native share failed or cancelled: ", err);
     });
   } else {
-    // If native sharing is not supported, completely fallback to our bottom sheet Custom Share Modal
+    // If native sharing is not supported or we are inside an Android App Wrapper (wv), 
+    // completely fallback to our bottom sheet Custom Share Modal
     showCustomShareModal(shareTitle, fullText, shareUrl, shareMessage);
   }
 }
@@ -757,29 +760,17 @@ function showCustomShareModal(title, fullText, url, originalMessage) {
 
 // Universal open app + fallback
 function openUniversalApp(appUrl, webUrl) {
-    // If inside in-app browser (e.g., rigid WebViews like Facebook/Instagram)
-    // -> directly open safe web version to prevent intent schema crash
-    if (isInAppBrowser()) {
-        window.location.href = webUrl;
-        return;
-    }
-
-    // Try to open the native app silently using an invisible iframe
-    let iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    iframe.src = appUrl;
-    document.body.appendChild(iframe);
-
-    // Set an increased 1200ms timeout to gracefully fall back to web URLs
-    // if the native app doesn't grab focus or exist
-    setTimeout(() => {
-        // Clean up
-        if (document.body.contains(iframe)) {
-            document.body.removeChild(iframe);
-        }
-        window.location.href = webUrl;
-    }, 1200);
+    // Due to rigid limitations in certain basic Android WebViews (App Wrappers), 
+    // any intent URI (whatsapp://, tg://) executed ANYWHERE in the DOM (even inside an invisible iframe)
+    // immediately crashes the top-level view to ERR_UNKNOWN_URL_SCHEME.
+    
+    // To completely prevent the "Web Page Not Available" crash screen inside app wrappers,
+    // we bypass custom intent schemas entirely and ALWAYS route through the standard secure web links 
+    // (https://wa.me, ttps://t.me) which use native OS App Links to hook WhatsApp directly.
+    
+    window.location.href = webUrl;
 }
+
 
 function closeCustomShareModal() {
     const overlay = document.getElementById('customShareOverlay');
