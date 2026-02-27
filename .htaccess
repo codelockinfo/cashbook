@@ -78,7 +78,9 @@ DirectoryIndex index.php index.html
     ExpiresDefault "access plus 1 month"
 </IfModule>
 
-# Custom Error Pages (optional)
+# Custom Error Pages
 # ErrorDocument 404 /cashbook/404.php
 # ErrorDocument 403 /cashbook/403.php
-# ErrorDocument 500 /cashbook/500.php
+
+# Custom Full-Page Loader for 500 Errors
+ErrorDocument 500 /500.php

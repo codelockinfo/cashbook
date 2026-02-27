@@ -1694,6 +1694,15 @@ body {
     .file-upload-wrapper {
         position: relative;
     }
+    .header{
+        margin-bottom: 10px !important;
+    }
+    .logo i {
+        font-size: 30px !important;
+    }
+    .logo h1 {
+        font-size: 25px !important;
+    }
 }
 
 .file-upload-name {

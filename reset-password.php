@@ -50,7 +50,7 @@ $token = htmlspecialchars($_GET['token']);
     include 'pwa-meta.php'; 
     ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style8.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/auth-style9.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body>
     <div class="auth-container">

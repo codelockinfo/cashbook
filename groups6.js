@@ -644,13 +644,14 @@ function shareApp(groupName, creatorName) {
   const shareUrl = "https://play.google.com/store/apps/details?id=com.codelock.bookifyapp";
   const shareTitle = "Bookify - Cashbook App";
   const displayName = creatorName ? creatorName : "Admin";
-  const shareText = `${displayName} invites you in this group: "${groupName}". Download the app or login here:\n\n${shareUrl}`;
+  const shareMessage = `${displayName} invites you in this group: "${groupName}". Download the app or login here:`;
 
   if (navigator.share) {
     navigator
       .share({
         title: shareTitle,
-        text: shareText
+        text: shareMessage,
+        url: shareUrl
       })
       .catch((error) => {
         console.log("Error sharing:", error);
@@ -662,7 +663,7 @@ function shareApp(groupName, creatorName) {
     // Fallback for browsers that do not support Web Share API
     const dummy = document.createElement("input");
     document.body.appendChild(dummy);
-    dummy.value = shareText;
+    dummy.value = `${shareMessage}\n\n${shareUrl}`;
     dummy.select();
     document.execCommand("copy");
     document.body.removeChild(dummy);
