@@ -649,24 +649,17 @@ function isInAppBrowser() {
 // Share App
 function shareApp(groupName, creatorName) {
   const shareUrl = "https://play.google.com/store/apps/details?id=com.codelock.bookifyapp";
-  const shareMessage = `Admin invites you in this group: "${groupName}". Download the app or login here:`;
-  const fullText = `${shareMessage}\n${shareUrl}`;
+  const displayName = creatorName ? creatorName : "Admin";
+  const shareMessage = `${displayName} invites you in this group: "${groupName}". Download the app or login here:`;
 
-  // Call Android native share
-  if (typeof Android !== "undefined" && Android.shareApp) {
-    try {
-      Android.shareApp(fullText);   // ✅ PASS TEXT HERE
-    } catch (e) {
-      console.error("Android Share trigger failed", e);
-    }
+  if (navigator.share) {
+    navigator.share({
+      title: "Bookify - Cashbook App",
+      text: shareMessage,
+      url: shareUrl
+    }).catch(err => console.log("Share error: ", err));
   } else {
-    // Web fallback
-    if (navigator.share) {
-      navigator.share({ title: "Bookify", text: fullText }).catch(err => console.log(err));
-    } else {
-      navigator.clipboard.writeText(fullText);
-      alert("Copied!");
-    }
+    alert("Share not supported on this device/browser");
   }
 }
 
