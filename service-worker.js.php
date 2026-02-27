@@ -28,7 +28,7 @@ const STATIC_CACHE_URLS = [
     BASE_PATH + '/auth-style8.css',
     BASE_PATH + '/dashboard9.js',
     BASE_PATH + '/auth9.js',
-    BASE_PATH + '/groups5   .js',
+    BASE_PATH + '/groups5.js',
     BASE_PATH + '/pwa10.js',
     BASE_PATH + '/icons/icon-192x192.png',
     BASE_PATH + '/icons/icon-512x512.png',
