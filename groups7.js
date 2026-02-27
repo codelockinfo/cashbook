@@ -650,8 +650,7 @@ function shareApp(groupName, creatorName) {
     navigator
       .share({
         title: shareTitle,
-        text: shareMessage,
-        url: shareUrl
+        text: `${shareMessage}\n\n${shareUrl}`
       })
       .catch((error) => {
         console.log("Error sharing:", error);
@@ -661,9 +660,12 @@ function shareApp(groupName, creatorName) {
       });
   } else {
     // Fallback for browsers that do not support Web Share API
+    const fullText = `${shareMessage}\n\n${shareUrl}`;
+    
+    // First safely save to clipboard as a backup
     const dummy = document.createElement("input");
     document.body.appendChild(dummy);
-    dummy.value = `${shareMessage}\n\n${shareUrl}`;
+    dummy.value = fullText;
     dummy.select();
     document.execCommand("copy");
     document.body.removeChild(dummy);
