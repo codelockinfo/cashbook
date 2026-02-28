@@ -11,7 +11,7 @@ $user = getCurrentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookify Dashboard</title>
     <?php include 'pwa-meta.php'; ?>
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style20.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style21.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/datetime-picker1.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -155,7 +155,7 @@ $user = getCurrentUser();
                 </div>
                 <div class="stat-card stat-in">
                     <div class="stat-icon">
-                        <i class="fas fa-arrow-trend-up"></i>
+                        <i class="fas fa-arrow-trend-down"></i>
                     </div>
                     <div class="stat-content">
                         <span class="stat-label"> Cash In</span>
@@ -168,7 +168,7 @@ $user = getCurrentUser();
                 </div>
                 <div class="stat-card stat-out">
                     <div class="stat-icon">
-                        <i class="fas fa-arrow-trend-down"></i>
+                        <i class="fas fa-arrow-trend-up"></i>
                     </div>
                     <div class="stat-content">
                         <span class="stat-label">Cash Out</span>

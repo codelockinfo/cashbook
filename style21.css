@@ -1645,16 +1645,18 @@ body {
         padding: 5px 12px;
     }
     
-    .btn-edit-entry {
-        width: 42px;
-        height: 42px;
-        min-width: 42px;
+    .btn-edit-entry ,
+    .btn-delete-entry{
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
         font-size: 16px;
     }
 
     .transactions-header {
         flex-direction: column;
         align-items: flex-start;
+            margin-bottom: 10px;
     }
 }
 
@@ -2045,6 +2047,10 @@ body {
     .pwa-install-banner {
         display: block !important; /* Always block on mobile */
     }
+    
+        .empty-state {
+            padding: 30px 20px;
+        }
 }
 
 .pwa-banner-content {
@@ -2829,10 +2835,10 @@ body {
     }
 
     .transaction-icon {
-        width: 46px;
-        height: 46px;
-        min-width: 46px;
-        min-height: 46px;
+        width: 35px;
+        height: 35px;
+        min-width: 35px;
+        min-height: 35px;
         font-size: 1.3rem;
     }
 
