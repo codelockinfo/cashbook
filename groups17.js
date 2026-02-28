@@ -749,16 +749,30 @@ function openWhatsApp(text) {
 
 }
 
+
 function openTelegram(text) {
-    const deepLink = "tg://msg?text=" + text;
-    const webLink = "https://t.me/share/url?url=" + encodeURIComponent("https://play.google.com/store/apps/details?id=com.codelock.bookifyapp") + "&text=" + text;
+    const message = encodeURIComponent(text);
+    const appUrl = encodeURIComponent(
+        "https://play.google.com/store/apps/details?id=com.codelock.bookifyapp"
+    );
 
-    window.location.href = deepLink;
+    const telegramUrl = `https://t.me/share/url?url=${appUrl}&text=${message}`;
 
-    setTimeout(() => {
-        window.location.href = webLink;
-    }, 1000);
+    
+    if (navigator.share) {
+        navigator.share({
+            text: text,
+            url: "https://play.google.com/store/apps/details?id=com.codelock.bookifyapp"
+        }).catch(() => {
+            window.open(telegramUrl, "_blank");
+        });
+    } 
+    
+    else {
+        window.open(telegramUrl, "_blank");
+    }
 }
+
 
 
 // Escape HTML
