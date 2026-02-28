@@ -1320,8 +1320,9 @@ body {
     .stat-icon {
         height: 30px;
             width: 30px;
-            padding: 5px;
-            padding-left: 8px;
+            display: flex;
+                align-items: center;
+                justify-content: center;
             font-size: 0.9rem;
     }
 
