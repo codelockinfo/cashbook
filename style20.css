@@ -1316,7 +1316,13 @@ body {
                 .transactions-section {
                     margin-top: 10px;
                 }
-
+                .filter-item label {
+                    display: none;
+                }
+        
+                .search-box {
+                    margin-bottom: 0;
+                }
     .stat-icon {
         height: 30px;
             width: 30px;
