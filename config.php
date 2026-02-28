@@ -1,7 +1,7 @@
 <?php
 // Detect environment (local vs live)
 function isLocalEnvironment() {
-    $local_hosts = ['localhost', '127.0.0.1', '::1', 'localhost:8080'];
+    $local_hosts = ['localhost', '192.168.29.56', '::1', 'localhost:8080'];
     $server_name = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost';
     
     // Check if it's a local environment

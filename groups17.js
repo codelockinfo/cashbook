@@ -104,27 +104,25 @@ function displayMyGroups(groups) {
                 ${group.pending_count > 0 ? `<span style="color: var(--warning-color);"> • ${group.pending_count} pending</span>` : ""}
             </div>
             <div class="group-actions">
-                ${
-                  group.role === "admin"
-                    ? `
+                ${group.role === "admin"
+          ? `
                     <button class="btn-small btn-invite" onclick="openInviteModal(${group.id}, '${escapeHtml(group.name).replace(/'/g, "\\'")}', '${escapeHtml(group.created_by_name || '').replace(/'/g, "\\'")}', this)">
                         <i class="fas fa-user-plus"></i> Invite Users
                     </button>
                 `
-                    : ""
-                }
+          : ""
+        }
                 <button class="btn-small btn-view" onclick="viewGroup(${group.id}, this)">
                     <i class="fas fa-eye"></i> View Details
                 </button>
-                ${
-                  group.role === "admin"
-                    ? `
+                ${group.role === "admin"
+          ? `
                     <button class="btn-small btn-delete" onclick="deleteGroup(${group.id}, '${escapeHtml(group.name).replace(/'/g, "\\'")}')">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 `
-                    : ""
-                }
+          : ""
+        }
             </div>
         </div>
     `,
@@ -484,8 +482,8 @@ function displayGroupDetails(group) {
             </h4>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 ${group.members
-                  .map(
-                    (member) => `
+      .map(
+        (member) => `
                     <div style="padding: 12px; background: var(--light-color); border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <div style="width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
@@ -499,22 +497,21 @@ function displayGroupDetails(group) {
                         <span class="group-role role-${member.role}">${member.role}</span>
                     </div>
                 `,
-                  )
-                  .join("")}
+      )
+      .join("")}
             </div>
         </div>
         
-        ${
-          group.pending_invitations && group.pending_invitations.length > 0
-            ? `
+        ${group.pending_invitations && group.pending_invitations.length > 0
+      ? `
             <div>
                 <h4 style="font-size: 1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--warning-color);">
                     <i class="fas fa-clock"></i> Pending Invitations (${group.pending_invitations.length})
                 </h4>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     ${group.pending_invitations
-                      .map(
-                        (inv) => `
+        .map(
+          (inv) => `
                         <div style="padding: 12px; background: rgba(245, 158, 11, 0.1); border-radius: 10px; display: flex; align-items: center; gap: 12px;">
                             <div style="width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg, var(--warning-color), #f97316); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                                 ${inv.name.charAt(0).toUpperCase()}
@@ -525,13 +522,13 @@ function displayGroupDetails(group) {
                             </div>
                         </div>
                     `,
-                      )
-                      .join("")}
+        )
+        .join("")}
                 </div>
             </div>
         `
-            : ""
-        }
+      : ""
+    }
     `;
 }
 
@@ -649,128 +646,122 @@ function isInAppBrowser() {
 // Share App
 function shareApp(groupName, creatorName) {
   const shareUrl = "https://play.google.com/store/apps/details?id=com.codelock.bookifyapp";
-  const shareTitle = "Bookify - Cashbook App";
   const displayName = creatorName ? creatorName : "Admin";
-  const shareMessage = `${displayName} invites you in this group: "${groupName}". Download the app or login here:`;
-  const fullText = `${shareMessage} ${shareUrl}`;
+  const message =
+    displayName +
+    ' invites you in this group: "' +
+    groupName +
+    '". Download the app or login here: ' +
+    shareUrl;
 
-  showCustomShareModal(shareTitle, fullText, shareUrl, shareMessage);
+  showCustomShareModal("Bookify - Cashbook App", message, shareUrl);
 }
-
 // Custom Fallback Share Modal
 function showCustomShareModal(title, fullText, url, originalMessage) {
-    const encodedText = encodeURIComponent(fullText);
-    const encodedTitle = encodeURIComponent(title);
-    const encodedUrl = encodeURIComponent(url);
+  const encodedText = encodeURIComponent(fullText);
+  const encodedTitle = encodeURIComponent(title);
+  const encodedUrl = encodeURIComponent(url);
 
-    let modal = document.getElementById('customShareModal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'customShareModal';
-        document.body.appendChild(modal);
-    }
+  let modal = document.getElementById('customShareModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'customShareModal';
+    document.body.appendChild(modal);
+  }
 
-    modal.innerHTML = `
-        <div id="customShareOverlay" onclick="closeCustomShareModal()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 9998; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s ease;"></div>
-        <div id="customShareContent" style="position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; border-radius: 20px 20px 0 0; z-index: 9999; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); font-family: 'Inter', system-ui, sans-serif;">
-            
-            <div onclick="closeCustomShareModal()" style="padding: 15px 20px 5px 20px; text-align: center; cursor: pointer;">
-                <div style="width: 40px; height: 5px; background: #e2e8f0; border-radius: 5px; margin: 0 auto 15px auto;"></div>
-                <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 600;"><i class="fas fa-share-nodes" style="color: #4f46e5; margin-right: 8px;"></i> Share Invitation</h3>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); padding: 25px 15px 35px 15px; background: #ffffff; gap: 20px 15px;">
-                
-                <!-- WhatsApp -->
-                <a href="#" onclick="openWhatsApp('${encodedText}'); return false;" style="text-decoration: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #25D366, #128C7E); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);">
-                        <i class="fab fa-whatsapp"></i>
-                    </div>
-                    <span style="font-size: 0.8rem; color: #475569; font-weight: 500;">WhatsApp</span>
-                </a>
+  modal.innerHTML = `
+    <div id="customShareOverlay" onclick="closeCustomShareModal()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 9998; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s ease;"></div>
+    <div id="customShareContent" style="position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; border-radius: 20px 20px 0 0; z-index: 9999; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); font-family: 'Inter', system-ui, sans-serif;">
+      <div onclick="closeCustomShareModal()" style="padding: 15px 20px 5px 20px; text-align: center; cursor: pointer;">
+        <div style="width: 40px; height: 5px; background: #e2e8f0; border-radius: 5px; margin: 0 auto 15px auto;"></div>
+        <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 600;"><i class="fas fa-share-nodes" style="color: #4f46e5; margin-right: 8px;"></i> Share Invitation</h3>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); padding: 25px 15px 35px 15px; background: #ffffff; gap: 20px 15px;">
+        <a href="#" onclick="openWhatsApp('${encodedText}'); return false;" style="text-decoration: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #25D366, #128C7E); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);"><i class="fab fa-whatsapp"></i></div>
+          <span style="font-size: 0.8rem; color: #475569; font-weight: 500;">WhatsApp</span>
+        </a>
+        <a href="#" onclick="openTelegram('${encodedText}'); return false;" style="text-decoration: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #0088cc, #004499); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.2);"><i class="fab fa-telegram-plane"></i></div>
+          <span style="font-size: 0.8rem; color: #475569; font-weight: 500;">Telegram</span>
+        </a>
+        <a href="#" onclick="openMessenger('${encodedUrl}'); return false;" style="text-decoration: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #00B2FF, #006AFF); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(0, 106, 255, 0.2);"><i class="fab fa-facebook-messenger"></i></div>
+          <span style="font-size: 0.8rem; color: #475569; font-weight: 500;">Messenger</span>
+        </a>
+        <a href="mailto:?subject=${encodedTitle}&body=${encodedText}" onclick="closeCustomShareModal()" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #ea4335, #c5221f); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.3rem; box-shadow: 0 4px 10px rgba(234, 67, 53, 0.2);"><i class="fas fa-envelope"></i></div>
+          <span style="font-size: 0.8rem; color: #475569; font-weight: 500;">Email</span>
+        </a>
+      </div>
+    </div>
+  `;
 
-                <!-- Telegram -->
-                <a href="#" onclick="openTelegram('${encodedText}'); return false;" style="text-decoration: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #0088cc, #004499); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.2);">
-                        <i class="fab fa-telegram-plane"></i>
-                    </div>
-                    <span style="font-size: 0.8rem; color: #475569; font-weight: 500;">Telegram</span>
-                </a>
-
-                <!-- Messenger -->
-                <a href="fb-messenger://share/?link=${encodedUrl}" onclick="closeCustomShareModal()" style="text-decoration: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #00B2FF, #006AFF); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(0, 106, 255, 0.2);">
-                        <i class="fab fa-facebook-messenger"></i>
-                    </div>
-                    <span style="font-size: 0.8rem; color: #475569; font-weight: 500;">Messenger</span>
-                </a>
-
-                <!-- Email -->
-                <a href="mailto:?subject=${encodedTitle}&body=${encodedText}" onclick="closeCustomShareModal()" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #ea4335, #c5221f); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.3rem; box-shadow: 0 4px 10px rgba(234, 67, 53, 0.2);">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <span style="font-size: 0.8rem; color: #475569; font-weight: 500;">Email</span>
-                </a>
-            </div>
-        </div>
-    `;
-
-    modal.style.display = 'block';
-
-    // Trigger animations right after display block
-    setTimeout(() => {
-        document.getElementById('customShareOverlay').style.opacity = '1';
-        document.getElementById('customShareContent').style.transform = 'translateY(0)';
-    }, 10);
+  modal.style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('customShareOverlay').style.opacity = '1';
+    document.getElementById('customShareContent').style.transform = 'translateY(0)';
+  }, 10);
 }
-
 function closeCustomShareModal() {
-    const overlay = document.getElementById('customShareOverlay');
-    const content = document.getElementById('customShareContent');
-    const modal = document.getElementById('customShareModal');
+  const overlay = document.getElementById('customShareOverlay');
+  const content = document.getElementById('customShareContent');
+  const modal = document.getElementById('customShareModal');
 
-    if (overlay && content) {
-        overlay.style.opacity = '0';
-        content.style.transform = 'translateY(100%)';
-        setTimeout(() => {
-            modal.style.display = 'none';
-        }, 300); // Matches transition duration
-    } else if (modal) {
-        modal.style.display = 'none';
-    }
+  if (overlay && content) {
+    overlay.style.opacity = '0';
+    content.style.transform = 'translateY(100%)';
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300); // Matches transition duration
+  } else if (modal) {
+    modal.style.display = 'none';
+  }
 }
 
 function openWhatsApp(text) {
-    const message = encodeURIComponent(text);
-    const link = "https://api.whatsapp.com/send?text=" + message;
-
-    window.open(link, "_blank");
-
+  const encodedText = encodeURIComponent(text);
+  const appLink = "whatsapp://send?text=" + encodedText;
+  const webLink = "https://api.whatsapp.com/send?text=" + encodedText;
+  openUniversalLink(appLink, webLink);
 }
 
-
 function openTelegram(text) {
-    const message = encodeURIComponent(text);
-    const appUrl = encodeURIComponent(
-        "https://play.google.com/store/apps/details?id=com.codelock.bookifyapp"
-    );
+  const encodedText = encodeURIComponent(text);
+  const appLink = "tg://msg?text=" + encodedText;
+  const webLink =
+    "https://t.me/share/url?url=" +
+    encodeURIComponent("https://play.google.com/store/apps/details?id=com.codelock.bookifyapp") +
+    "&text=" +
+    encodedText;
+  openUniversalLink(appLink, webLink);
+}
 
-    const telegramUrl = `https://t.me/share/url?url=${appUrl}&text=${message}`;
+function openMessenger(text) {
+  const encodedText = encodeURIComponent(text);
+  const appLink = "fb-messenger://share/?link=" + encodedText;
+  const webLink = "https://m.me/?link=" + encodedText;
+  openUniversalLink(appLink, webLink);
+}
 
-    
-    if (navigator.share) {
-        navigator.share({
-            text: text,
-            url: "https://play.google.com/store/apps/details?id=com.codelock.bookifyapp"
-        }).catch(() => {
-            window.open(telegramUrl, "_blank");
-        });
-    } 
-    
-    else {
-        window.open(telegramUrl, "_blank");
-    }
+function openUniversalLink(appUrl, webUrl) {
+  const ua = navigator.userAgent || "";
+  if (/Android/i.test(ua)) {
+    // On Android try app first, then fallback to web
+    const timeout = setTimeout(() => {
+      window.location.href = webUrl;
+    }, 700);
+
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = appUrl;
+    document.body.appendChild(iframe);
+
+    setTimeout(() => document.body.removeChild(iframe), 1000);
+  } else {
+    // Desktop / other browsers just open web link
+    window.open(webUrl, "_blank");
+  }
 }
 
 
