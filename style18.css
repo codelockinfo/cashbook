@@ -1285,7 +1285,15 @@ body {
         padding: 20px 12px 12px 12px;
     }
     .dashboard-header h2 {
-        font-size: 24px;
+        font-size: 20px;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 10px;
+        }
+        
+        .transactions-header h3 {
+            font-size: 20px;
     }
     .stat-value{
         font-size: 14px;
@@ -1305,11 +1313,14 @@ body {
     .header {
         padding: 12px 12px;
     }
+                .transactions-section {
+                    margin-top: 10px;
+                }
 
     .stat-icon {
         height: 30px;
             width: 30px;
-            padding: 3px;
+            padding: 5px;
             padding-left: 8px;
             font-size: 0.9rem;
     }
@@ -1520,6 +1531,7 @@ body {
 
     .filters-section {
         padding-bottom: 40px !important;
+        margin-bottom: 20px;
         padding: 15px;
     }
 
