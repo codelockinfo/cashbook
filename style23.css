@@ -1285,13 +1285,26 @@ body {
         padding: 20px 12px 12px 12px;
     }
     .dashboard-header h2 {
-        font-size: 24px;
+        font-size: 20px;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 10px;
+        }
+        
+        .transactions-header h3 {
+            font-size: 20px;
     }
     .stat-value{
         font-size: 14px;
     }
     .stat-card {
-        padding: 15px;
+        padding: 5px;
+            gap: 10px;
+        }
+        
+        .stat-content {
+            gap: 1px;
     }
     .entry-card {
         max-width: 100%;
@@ -1300,12 +1313,23 @@ body {
     .header {
         padding: 12px 12px;
     }
-
+                .transactions-section {
+                    margin-top: 10px;
+                }
+                .filter-item label {
+                    display: none;
+                }
+        
+                .search-box {
+                    margin-bottom: 0;
+                }
     .stat-icon {
-        height: 46px;
-        width: 46px;
-        padding: 6px;
-        padding-left: 10px;
+        height: 30px;
+            width: 30px;
+            display: flex;
+                align-items: center;
+                justify-content: center;
+            font-size: 0.9rem;
     }
 
     .card-header {
@@ -1324,12 +1348,12 @@ body {
     }
 
     .unified-entry-card .card-header i {
-        height: 45px;
-        width: 45px;
+        height: 35px;
+            width: 35px;
     }
     .card-header i {
-        font-size: 22px;
-        padding: 11px;
+        font-size: 1.2rem;
+            padding: 8px;
     }
 
     .default-group-selector {
@@ -1379,7 +1403,9 @@ body {
         padding: 12px 8px;
         white-space: nowrap;
     }
-    
+                .form-group {
+                    margin-bottom: 10px;
+                }
     /* Help & Support sticky button styling */
     .button-group-sticky-mobile .btn-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1425,9 +1451,15 @@ body {
     .header-content {
         flex-direction: column;
         text-align: center;
-        gap: 0px !important;
-    }
-
+        gap: 10px !important;
+        }
+        
+        .card-header h2 {
+            font-size: 1.3rem;
+        }
+                                .entry-section {
+                                    margin-bottom: 10px;
+                                }
     .header-actions {
         flex-direction: column;
         width: 100%;
@@ -1492,15 +1524,21 @@ body {
     .logo {
         flex-direction: row;
         gap: 1px;
-        margin-top: 15px;
     }
 
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card.stat-balance {
+            grid-column: span 2;
     }
 
     .filters-section {
         padding-bottom: 40px !important;
+        margin-bottom: 20px;
         padding: 15px;
     }
 
@@ -1607,16 +1645,18 @@ body {
         padding: 5px 12px;
     }
     
-    .btn-edit-entry {
-        width: 42px;
-        height: 42px;
-        min-width: 42px;
+    .btn-edit-entry ,
+    .btn-delete-entry{
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
         font-size: 16px;
     }
 
     .transactions-header {
         flex-direction: column;
         align-items: flex-start;
+            margin-bottom: 10px;
     }
 }
 
@@ -2007,6 +2047,10 @@ body {
     .pwa-install-banner {
         display: block !important; /* Always block on mobile */
     }
+    
+        .empty-state {
+            padding: 30px 20px;
+        }
 }
 
 .pwa-banner-content {
@@ -2791,10 +2835,10 @@ body {
     }
 
     .transaction-icon {
-        width: 46px;
-        height: 46px;
-        min-width: 46px;
-        min-height: 46px;
+        width: 35px;
+        height: 35px;
+        min-width: 35px;
+        min-height: 35px;
         font-size: 1.3rem;
     }
 
@@ -2833,10 +2877,11 @@ body {
         padding: 5px 12px;
     }
     
-    .btn-edit-entry {
-        width: 42px;
-        height: 42px;
-        min-width: 42px;
+                .btn-edit-entry,
+                .btn-delete-entry {
+                    width: 35px;
+                        height: 35px;
+                        min-width: 35px;
         font-size: 16px;
     }
 }

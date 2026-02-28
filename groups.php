@@ -12,7 +12,7 @@ $user = getCurrentUser();
     <title>My Groups - Bookify</title>
     <?php include 'pwa-meta.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style16.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
+    <link rel="stylesheet" href="<?php echo BASE_PATH; ?>/style23.css?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>">
     <style>
         .groups-container {
             max-width: 1200px;
@@ -603,7 +603,7 @@ $user = getCurrentUser();
         // PWA popup functionality removed
     </script>
     <script src="<?php echo BASE_PATH; ?>/pwa10.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
-    <script src="<?php echo BASE_PATH; ?>/groups17.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
+    <script src="<?php echo BASE_PATH; ?>/groups18.js?v=<?php echo defined('ASSET_VERSION') ? ASSET_VERSION : '1.0'; ?>"></script>
 </body>
 </html>
 
