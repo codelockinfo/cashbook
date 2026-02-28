@@ -158,7 +158,7 @@ $user = getCurrentUser();
                         <i class="fas fa-arrow-trend-up"></i>
                     </div>
                     <div class="stat-content">
-                        <span class="stat-label">Total Cash In</span>
+                        <span class="stat-label"> Cash In</span>
                         <span class="stat-value" id="totalCashIn">
                             <span class="wave-loader">
                                 <span></span><span></span><span></span><span></span><span></span>
@@ -171,7 +171,7 @@ $user = getCurrentUser();
                         <i class="fas fa-arrow-trend-down"></i>
                     </div>
                     <div class="stat-content">
-                        <span class="stat-label">Total Cash Out</span>
+                        <span class="stat-label">Cash Out</span>
                         <span class="stat-value" id="totalCashOut">
                             <span class="wave-loader">
                                 <span></span><span></span><span></span><span></span><span></span>

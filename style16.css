@@ -1291,7 +1291,12 @@ body {
         font-size: 14px;
     }
     .stat-card {
-        padding: 15px;
+        padding: 5px;
+            gap: 10px;
+        }
+        
+        .stat-content {
+            gap: 1px;
     }
     .entry-card {
         max-width: 100%;
@@ -1302,10 +1307,11 @@ body {
     }
 
     .stat-icon {
-        height: 46px;
-        width: 46px;
-        padding: 6px;
-        padding-left: 10px;
+        height: 30px;
+            width: 30px;
+            padding: 3px;
+            padding-left: 8px;
+            font-size: 0.9rem;
     }
 
     .card-header {
@@ -1324,12 +1330,12 @@ body {
     }
 
     .unified-entry-card .card-header i {
-        height: 45px;
-        width: 45px;
+        height: 35px;
+            width: 35px;
     }
     .card-header i {
-        font-size: 22px;
-        padding: 11px;
+        font-size: 1.2rem;
+            padding: 8px;
     }
 
     .default-group-selector {
@@ -1379,7 +1385,9 @@ body {
         padding: 12px 8px;
         white-space: nowrap;
     }
-    
+                .form-group {
+                    margin-bottom: 10px;
+                }
     /* Help & Support sticky button styling */
     .button-group-sticky-mobile .btn-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1425,9 +1433,15 @@ body {
     .header-content {
         flex-direction: column;
         text-align: center;
-        gap: 0px !important;
-    }
-
+        gap: 10px !important;
+        }
+        
+        .card-header h2 {
+            font-size: 1.3rem;
+        }
+                                .entry-section {
+                                    margin-bottom: 10px;
+                                }
     .header-actions {
         flex-direction: column;
         width: 100%;
@@ -1492,11 +1506,16 @@ body {
     .logo {
         flex-direction: row;
         gap: 1px;
-        margin-top: 15px;
     }
 
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card.stat-balance {
+            grid-column: span 2;
     }
 
     .filters-section {
