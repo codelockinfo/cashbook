@@ -742,16 +742,11 @@ function closeCustomShareModal() {
 }
 
 function openWhatsApp(text) {
-    const deepLink = "whatsapp://send?text=" + text;
-    const webLink = "https://wa.me/?text=" + text;
+    const message = encodeURIComponent(text);
+    const link = "https://api.whatsapp.com/send?text=" + message;
 
-    // Try native app
-    window.location.href = deepLink;
+    window.open(link, "_blank");
 
-    // Fallback after delay
-    setTimeout(() => {
-        window.location.href = webLink;
-    }, 1000);
 }
 
 function openTelegram(text) {
